@@ -1,0 +1,40 @@
+build-essential
+mesa-common-dev
+cmake           # 3.9 or higher
+nasm            # for jpeg-turbo
+libssl-dev      # for libcurl
+pkg-config      # for gdal
+freeglut3-dev   # for OSG
+libxmu-dev      # for tiff
+libxi-dev       # for tiff
+libsqlite3-dev  # for proj
+sqlite3         # for proj
+
+
+
+Ubuntu-like command:
+sudo apt-get install -f build-essential mesa-common-dev nasm libssl-dev pkg-config freeglut3-dev libxmu-dev libxi-dev libsqlite3-dev sqlite3
+
+If system CMake version is 3.9 or higher, than:
+sudo apt-get install cmake
+
+
+
+On Astra Linux you need newer version of CMake from cmake.org:
+  - Download .sh installer.
+  - chmod +x cmake-3.15.0-Linux-x86_64.sh
+  - sudo -s (to run as root)
+  - ./cmake-3.15.0-Linux-x86_64.sh --prefix=/opt
+  - Accept the license and save the default install path - "/opt/cmake-3.15.0-rc3-Linux-x86_64"
+  - Edit .bashrc for user: juffed /home/nikita/.bashrc (for Astra 1.5):
+  - - - Add in the end of file: export PATH="/opt/cmake-3.15.0-Linux-x86_64/bin/:$PATH"
+  - Edit .bashrc for root: sudo juffed /root/.bashrc (for Astra 1.5):
+  - - - Add in the end of file: export PATH="/opt/cmake-3.15.0-Linux-x86_64/bin/:$PATH"
+  
+
+Install qt-opensource-linux-x64-5.13.0.run to /opt/Qt5.13.0/ or change QTDIR variable in BUILD_LIBS.sh:
+  - Download .run installer.
+  - chmod +x qt-opensource-linux-x64-5.13.0.run
+  - sudo -s (to run as root)
+  - ./qt-opensource-linux-x64-5.13.0.run
+  

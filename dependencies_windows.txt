@@ -1,0 +1,20 @@
+- Install latest CMake and add it to PATH system variable
+- Install NASM for libjpeg-turbo building. https://www.nasm.us
+
+
+PROBLEM: 
+      OpenSceneGraph not build, but it took some time building.
+POSSIBLE SOLUTION:
+      Sometimes OSG building is dropped by msvc with no heap space.
+      Just try to rerun build proccess (you can skip other built libs like GDAL in the script) several times. It will build OSG libs one by one and eventually succeed.
+
+PROBLEM: 
+      osgQt Release version is not build.
+POSSIBLE SOLUTION:
+      If you have message "Active code page: 437" while openning cmd, then check this file: build\osgQt\build\Release\src\osgQt\osgQt5.vcxproj
+
+      If in the beggining of the file you have the same message (twice), then you have to edit registry:
+      Go to HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Command Processor\Autorun
+      and remove "chcp 437" value.
+      
+      Try to rerun BUILD_LIBS.bat script.

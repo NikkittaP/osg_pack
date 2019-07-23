@@ -1,0 +1,30 @@
+Name            Source                                                2019-07-23      2019-MM-DD
+
+pnageo          Custom handcrafted lib                                1.0
+geos            https://trac.osgeo.org/geos/                          3.7.2
+zlib            https://zlib.net                                      1.2.11
+protobuf        https://github.com/protocolbuffers/protobuf           3.9.0
+libpng          http://www.libpng.org/pub/png/libpng.html             1.6.36
+libjpeg-turbo   https://libjpeg-turbo.org                             2.0.2
+libtiff         https://gitlab.com/libtiff/libtiff                    4.0.10
+libcurl         https://curl.haxx.se/download.html                    7.65.3
+freetype        https://download.savannah.gnu.org/releases/freetype/  2.10.1
+proj.4          https://proj.org/download.html                        6.1.1
+libgeotiff      https://github.com/OSGeo/libgeotiff                   1.5.1
+expat           https://libexpat.github.io                            2.2.7
+gdal            https://gdal.org/download.html#current-release-s      3.0.1
+OpenSceneGraph  https://github.com/openscenegraph/OpenSceneGraph      3.6.4rc8
+osgQt           https://github.com/openscenegraph/osgQt               3.5.7
+leveldb         https://github.com/google/leveldb                     1.22
+osgearth        https://github.com/gwaldron/osgearth.git              2.10.2
+
+
+General changes:
+ 
+  libgeotiff:
+    Lines 179-189 in the main CMakeLists were commented out to allow building on Linux (https://github.com/OSGeo/libgeotiff/issues/20)
+
+
+Changes for Windows:
+	
+    gdal    Create nmake_release.opt, nmake_debug.opt
