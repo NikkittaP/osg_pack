@@ -337,12 +337,12 @@ GEOTIFF_LIB =   $(GDAL_DEPENDENCIES)\libgeotiff\release\lib\geotiff.lib
 # also need some adjustment. 
 
 # Uncomment the following and update to enable ECW read support with the 5.0 SDK
-#ECWDIR  =  "c:\Intergraph\ecwsdk5"
-#ECWFLAGS = -DECWSDK_VERSION=50 \
-#       -I$(ECWDIR)\include \
-#       -I$(ECWDIR)\include/NCSECW/api -I$(ECWDIR)\include/NCSECW/jp2 \
-#       -I$(ECWDIR)\include/NCSECW/ecw
-#ECWLIB  =  $(ECWDIR)\lib\vc90\win32\NCSEcw.lib
+ECWDIR  =  "$(ERDAS_ECW_INSTALL_DIR)"
+ECWFLAGS = -DECWSDK_VERSION=54 \
+       -I$(ECWDIR)\include \
+       -I$(ECWDIR)\include/NCSECW/api -I$(ECWDIR)\include/NCSECW/jp2 \
+       -I$(ECWDIR)\include/NCSECW/ecw
+ECWLIB  =  $(ECWDIR)\lib\vc140\x64\NCSEcw.lib
 
 # To build ECW support as a plugin uncomment the following, and make sure
 # to do "nmake /f makefile.vc plugin" in gdal/frmts/ecw and copy the two
