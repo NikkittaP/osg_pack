@@ -1,23 +1,21 @@
 # osg_pack
 
-Исходники библиотек и скрипты для построения библиотек для Windows (MSVC2015) и Linux
+Sources and scripts for building OSG, osgearth libraries for Windows (MSVC2015, MSVC2019) and Linux
 
 ## Построение библиотек
 
-Базовые зависимости:
+Basic dependencies:
 
-* Компилятор MSVC 2015/GCC
+* Compiler MSVC 2015/MSVC 2019/GCC
 * CMake
-* Qt 5.10.1 и выше
+* Qt 5.10.1 or higher
+* ERDAS ECW/JP2 SDK v5.4:
+  * https://download.hexagongeospatial.com/downloads/ecw/erdas-ecwjp2-sdk-v54-update-1-for-windows
+  * https://download.hexagongeospatial.com/downloads/ecw/erdas-ecw-jp2-sdk-v54-update-1-for-linux
 
-Для построения библиотек на Windows и Linux подготовлены специальные скрипты *BUILD_LIBS*.
+To build libraries on Windows and Linux, special scripts *BUILD_LIBS* were prepared.
 
 Версии используемых библиотек, даты их обновления и внесенные изменения перечислены в файле **sources/versions.txt**.
-
-Для добавления новых библиотек или обновления версий библиотек большая просьба обратиться к создателю скриптов - @NikkittaP.
-
-
-В папке sources хранятся только исходные файлы библиотек.
 
 При запуске скрипта сборки создаются папки:
 
