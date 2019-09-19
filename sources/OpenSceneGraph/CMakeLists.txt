@@ -9,7 +9,7 @@ SET(OPENSCENEGRAPH_SOVERSION 160)
 
 # set to 0 when not a release candidate, non zero means that any generated
 # git tags will be treated as release candidates of given number
-SET(OPENSCENEGRAPH_RELEASE_CANDIDATE 8)
+SET(OPENSCENEGRAPH_RELEASE_CANDIDATE 9)
 set(CMAKE_ALLOW_LOOSE_LOOP_CONSTRUCTS TRUE)
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
@@ -500,6 +500,12 @@ ENDIF()
 
 
 OPTION(OSG_GL_LIBRARY_STATIC "Set to ON to statically link with OpenGL/GLES library." OFF)
+
+IF (OSG_BUILD_PLATFORM_IPHONE OR ANDROID)
+    OPTION(OSG_TEXT_USE_FONTCONFIG "Set to ON to enable attempt to use FontConfig in osgText." OFF)
+ELSE ()
+    OPTION(OSG_TEXT_USE_FONTCONFIG "Set to OFF to disable attempt to use FontConfig in osgText." ON)
+ENDIF ()
 
 # Map the OSG_GL*_AVAILABLE settings to OSG_GL_* settings
 IF (OSG_GLES2_AVAILABLE OR OSG_GLES3_AVAILABLE OR OSG_GL3_AVAILABLE)

@@ -4,3 +4,11 @@ build/
 install/
 !sources/
 !prebuilt/
+build_2019/
+build_2015/
+install_2019/
+install_2015/
+bin_2015/
+bin_2019/
+bin_debug_2015/
+bin_debug_2019/

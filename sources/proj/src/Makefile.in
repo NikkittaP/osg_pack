@@ -211,7 +211,7 @@ am_libproj_la_OBJECTS = iso19111/static.lo iso19111/util.lo \
 	apply_vgridshift.lo geodesic.lo strtod.lo math.lo 4D_api.lo \
 	pipeline.lo internal.lo wkt_parser.lo wkt1_parser.lo \
 	wkt1_generated_parser.lo wkt2_parser.lo \
-	wkt2_generated_parser.lo
+	wkt2_generated_parser.lo proj_json_streaming_writer.lo
 libproj_la_OBJECTS = $(am_libproj_la_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
@@ -286,12 +286,14 @@ am__depfiles_remade = ./$(DEPDIR)/4D_api.Plo ./$(DEPDIR)/aasincos.Plo \
 	./$(DEPDIR)/nad_init.Plo ./$(DEPDIR)/nad_intr.Plo \
 	./$(DEPDIR)/open_lib.Plo ./$(DEPDIR)/param.Plo \
 	./$(DEPDIR)/phi2.Plo ./$(DEPDIR)/pipeline.Plo \
-	./$(DEPDIR)/pr_list.Plo ./$(DEPDIR)/proj_mdist.Plo \
-	./$(DEPDIR)/qsfn.Plo ./$(DEPDIR)/release.Plo \
-	./$(DEPDIR)/rtodms.Plo ./$(DEPDIR)/strerrno.Plo \
-	./$(DEPDIR)/strtod.Plo ./$(DEPDIR)/transform.Plo \
-	./$(DEPDIR)/tsfn.Plo ./$(DEPDIR)/units.Plo \
-	./$(DEPDIR)/utils.Plo ./$(DEPDIR)/wkt1_generated_parser.Plo \
+	./$(DEPDIR)/pr_list.Plo \
+	./$(DEPDIR)/proj_json_streaming_writer.Plo \
+	./$(DEPDIR)/proj_mdist.Plo ./$(DEPDIR)/qsfn.Plo \
+	./$(DEPDIR)/release.Plo ./$(DEPDIR)/rtodms.Plo \
+	./$(DEPDIR)/strerrno.Plo ./$(DEPDIR)/strtod.Plo \
+	./$(DEPDIR)/transform.Plo ./$(DEPDIR)/tsfn.Plo \
+	./$(DEPDIR)/units.Plo ./$(DEPDIR)/utils.Plo \
+	./$(DEPDIR)/wkt1_generated_parser.Plo \
 	./$(DEPDIR)/wkt1_parser.Plo \
 	./$(DEPDIR)/wkt2_generated_parser.Plo \
 	./$(DEPDIR)/wkt2_parser.Plo ./$(DEPDIR)/wkt_parser.Plo \
@@ -793,7 +795,7 @@ AM_CPPFLAGS = -DPROJ_LIB=\"$(pkgdatadir)\" \
 
 AM_CXXFLAGS = @CXX_WFLAGS@ @FLTO_FLAG@
 include_HEADERS = proj.h proj_experimental.h proj_constants.h proj_api.h geodesic.h \
-	org_proj4_PJ.h proj_symbol_rename.h
+	org_proj4_PJ.h proj_symbol_rename.h proj_json_streaming_writer.hpp
 
 EXTRA_DIST = bin_cct.cmake bin_gie.cmake bin_cs2cs.cmake \
 	bin_geod.cmake bin_proj.cmake bin_projinfo.cmake \
@@ -819,7 +821,7 @@ multistresstest_LDADD = libproj.la @THREAD_LIB@
 test228_LDADD = libproj.la @THREAD_LIB@
 geodtest_LDADD = libproj.la
 lib_LTLIBRARIES = libproj.la
-libproj_la_LDFLAGS = -no-undefined -version-info 16:1:1
+libproj_la_LDFLAGS = -no-undefined -version-info 17:0:2
 libproj_la_LIBADD = @SQLITE3_LIBS@
 libproj_la_SOURCES = \
 	pj_list.h proj_internal.h proj_math.h \
@@ -984,7 +986,9 @@ libproj_la_SOURCES = \
 	wkt1_parser.h wkt1_parser.cpp \
 	wkt1_generated_parser.h wkt1_generated_parser.c \
 	wkt2_parser.h wkt2_parser.cpp \
-	wkt2_generated_parser.h wkt2_generated_parser.c
+	wkt2_generated_parser.h wkt2_generated_parser.c \
+	\
+	proj_json_streaming_writer.cpp
 
 all: proj_config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-am
@@ -1556,6 +1560,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/phi2.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pipeline.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pr_list.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/proj_json_streaming_writer.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/proj_mdist.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/qsfn.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/release.Plo@am__quote@ # am--include-marker
@@ -2158,6 +2163,7 @@ distclean: distclean-am
 	-rm -f ./$(DEPDIR)/phi2.Plo
 	-rm -f ./$(DEPDIR)/pipeline.Plo
 	-rm -f ./$(DEPDIR)/pr_list.Plo
+	-rm -f ./$(DEPDIR)/proj_json_streaming_writer.Plo
 	-rm -f ./$(DEPDIR)/proj_mdist.Plo
 	-rm -f ./$(DEPDIR)/qsfn.Plo
 	-rm -f ./$(DEPDIR)/release.Plo
@@ -2410,6 +2416,7 @@ maintainer-clean: maintainer-clean-am
 	-rm -f ./$(DEPDIR)/phi2.Plo
 	-rm -f ./$(DEPDIR)/pipeline.Plo
 	-rm -f ./$(DEPDIR)/pr_list.Plo
+	-rm -f ./$(DEPDIR)/proj_json_streaming_writer.Plo
 	-rm -f ./$(DEPDIR)/proj_mdist.Plo
 	-rm -f ./$(DEPDIR)/qsfn.Plo
 	-rm -f ./$(DEPDIR)/release.Plo

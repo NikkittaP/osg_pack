@@ -28,6 +28,7 @@
 
 #include "gtest_include.h"
 
+#include <cstdio>
 #include <limits>
 
 #include "proj.h"
@@ -42,6 +43,8 @@
 #include "proj/io.hpp"
 #include "proj/metadata.hpp"
 #include "proj/util.hpp"
+
+#include <sqlite3.h>
 
 using namespace osgeo::proj::common;
 using namespace osgeo::proj::crs;
@@ -64,7 +67,10 @@ class CApi : public ::testing::Test {
         proj_log_func(m_ctxt, nullptr, DummyLogFunction);
     }
 
-    void TearDown() override { proj_context_destroy(m_ctxt); }
+    void TearDown() override {
+        if (m_ctxt)
+            proj_context_destroy(m_ctxt);
+    }
 
     static BoundCRSNNPtr createBoundCRS() {
         return BoundCRS::create(
@@ -1348,6 +1354,70 @@ TEST_F(CApi, proj_create_operations) {
     EXPECT_FALSE(proj_coordoperation_has_ballpark_transformation(m_ctxt, op));
 
     EXPECT_EQ(proj_get_name(op), std::string("NAD27 to NAD83 (3)"));
+}
+
+// ---------------------------------------------------------------------------
+
+TEST_F(CApi, proj_create_operations_discard_superseded) {
+    auto ctxt = proj_create_operation_factory_context(m_ctxt, nullptr);
+    ASSERT_NE(ctxt, nullptr);
+    ContextKeeper keeper_ctxt(ctxt);
+
+    auto source_crs = proj_create_from_database(
+        m_ctxt, "EPSG", "4203", PJ_CATEGORY_CRS, false, nullptr); // AGD84
+    ASSERT_NE(source_crs, nullptr);
+    ObjectKeeper keeper_source_crs(source_crs);
+
+    auto target_crs = proj_create_from_database(
+        m_ctxt, "EPSG", "4326", PJ_CATEGORY_CRS, false, nullptr); // WGS84
+    ASSERT_NE(target_crs, nullptr);
+    ObjectKeeper keeper_target_crs(target_crs);
+
+    proj_operation_factory_context_set_spatial_criterion(
+        m_ctxt, ctxt, PROJ_SPATIAL_CRITERION_PARTIAL_INTERSECTION);
+
+    proj_operation_factory_context_set_grid_availability_use(
+        m_ctxt, ctxt, PROJ_GRID_AVAILABILITY_IGNORED);
+
+    proj_operation_factory_context_set_discard_superseded(m_ctxt, ctxt, true);
+
+    auto res = proj_create_operations(m_ctxt, source_crs, target_crs, ctxt);
+    ASSERT_NE(res, nullptr);
+    ObjListKeeper keeper_res(res);
+
+    EXPECT_EQ(proj_list_get_count(res), 2);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST_F(CApi, proj_create_operations_dont_discard_superseded) {
+    auto ctxt = proj_create_operation_factory_context(m_ctxt, nullptr);
+    ASSERT_NE(ctxt, nullptr);
+    ContextKeeper keeper_ctxt(ctxt);
+
+    auto source_crs = proj_create_from_database(
+        m_ctxt, "EPSG", "4203", PJ_CATEGORY_CRS, false, nullptr); // AGD84
+    ASSERT_NE(source_crs, nullptr);
+    ObjectKeeper keeper_source_crs(source_crs);
+
+    auto target_crs = proj_create_from_database(
+        m_ctxt, "EPSG", "4326", PJ_CATEGORY_CRS, false, nullptr); // WGS84
+    ASSERT_NE(target_crs, nullptr);
+    ObjectKeeper keeper_target_crs(target_crs);
+
+    proj_operation_factory_context_set_spatial_criterion(
+        m_ctxt, ctxt, PROJ_SPATIAL_CRITERION_PARTIAL_INTERSECTION);
+
+    proj_operation_factory_context_set_grid_availability_use(
+        m_ctxt, ctxt, PROJ_GRID_AVAILABILITY_IGNORED);
+
+    proj_operation_factory_context_set_discard_superseded(m_ctxt, ctxt, false);
+
+    auto res = proj_create_operations(m_ctxt, source_crs, target_crs, ctxt);
+    ASSERT_NE(res, nullptr);
+    ObjListKeeper keeper_res(res);
+
+    EXPECT_EQ(proj_list_get_count(res), 5);
 }
 
 // ---------------------------------------------------------------------------
@@ -3011,6 +3081,37 @@ TEST_F(CApi, proj_uom_get_info_from_database) {
 
 // ---------------------------------------------------------------------------
 
+TEST_F(CApi, proj_grid_get_info_from_database) {
+    {
+        EXPECT_FALSE(proj_grid_get_info_from_database(m_ctxt, "xxx", nullptr,
+                                                      nullptr, nullptr, nullptr,
+                                                      nullptr, nullptr));
+    }
+    {
+        EXPECT_TRUE(proj_grid_get_info_from_database(
+            m_ctxt, "GDA94_GDA2020_conformal.gsb", nullptr, nullptr, nullptr,
+            nullptr, nullptr, nullptr));
+    }
+    {
+        const char *name = nullptr;
+        const char *package_name = nullptr;
+        const char *url = nullptr;
+        int direct_download = 0;
+        int open_license = 0;
+        int available = 0;
+        EXPECT_TRUE(proj_grid_get_info_from_database(
+            m_ctxt, "GDA94_GDA2020_conformal.gsb", &name, &package_name, &url,
+            &direct_download, &open_license, &available));
+        ASSERT_NE(name, nullptr);
+        ASSERT_NE(package_name, nullptr);
+        ASSERT_NE(url, nullptr);
+        EXPECT_EQ(direct_download, 1);
+        EXPECT_EQ(open_license, 1);
+    }
+}
+
+// ---------------------------------------------------------------------------
+
 TEST_F(CApi, proj_create_cartesian_2D_cs) {
     {
         auto cs = proj_create_cartesian_2D_cs(
@@ -3342,6 +3443,298 @@ TEST_F(CApi, proj_normalize_for_visualization_with_alternatives_reverse) {
     c = proj_trans(Pnormalized, PJ_FWD, c);
     EXPECT_NEAR(c.lp.lam, 12.5, 1e-8);
     EXPECT_NEAR(c.lp.phi, 42, 1e-8);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST_F(CApi, proj_get_remarks) {
+    auto co = proj_create_from_database(m_ctxt, "EPSG", "8048",
+                                        PJ_CATEGORY_COORDINATE_OPERATION, false,
+                                        nullptr);
+    ObjectKeeper keeper(co);
+    ASSERT_NE(co, nullptr);
+
+    auto remarks = proj_get_remarks(co);
+    ASSERT_NE(remarks, nullptr);
+    EXPECT_EQ(
+        remarks,
+        std::string("Scale difference in ppb where 1/billion = 1E-9. "
+                    "Derivation excluded Cocos, Christmas and Macquarie "
+                    "Islands but is applied there. See codes 8444-46 for "
+                    "equivalents using NTv2 method. See code 8447 for "
+                    "alternative including distortion model for Aus only."));
+}
+
+// ---------------------------------------------------------------------------
+
+TEST_F(CApi, proj_get_scope) {
+    {
+        auto co = proj_create_from_database(m_ctxt, "EPSG", "8048",
+                                            PJ_CATEGORY_COORDINATE_OPERATION,
+                                            false, nullptr);
+        ObjectKeeper keeper(co);
+        ASSERT_NE(co, nullptr);
+
+        auto scope = proj_get_scope(co);
+        ASSERT_NE(scope, nullptr);
+        EXPECT_EQ(scope,
+                  std::string("Conformal transformation of GDA94 coordinates "
+                              "that have been derived through GNSS CORS."));
+    }
+    {
+        auto P = proj_create(m_ctxt, "+proj=noop");
+        ObjectKeeper keeper(P);
+        ASSERT_NE(P, nullptr);
+        auto scope = proj_get_scope(P);
+        ASSERT_EQ(scope, nullptr);
+    }
+}
+
+// ---------------------------------------------------------------------------
+
+TEST_F(CApi, proj_concatoperation_get_step) {
+    // Test on a non concatenated operation
+    {
+        auto co = proj_create_from_database(m_ctxt, "EPSG", "8048",
+                                            PJ_CATEGORY_COORDINATE_OPERATION,
+                                            false, nullptr);
+        ObjectKeeper keeper(co);
+        ASSERT_NE(co, nullptr);
+        ASSERT_NE(proj_get_type(co), PJ_TYPE_CONCATENATED_OPERATION);
+
+        ASSERT_EQ(proj_concatoperation_get_step_count(m_ctxt, co), 0);
+        ASSERT_EQ(proj_concatoperation_get_step(m_ctxt, co, 0), nullptr);
+    }
+    // Test on a concatenated operation
+    {
+        auto ctxt = proj_create_operation_factory_context(m_ctxt, nullptr);
+        ASSERT_NE(ctxt, nullptr);
+        ContextKeeper keeper_ctxt(ctxt);
+
+        // GDA94 / MGA zone 56
+        auto source_crs = proj_create_from_database(
+            m_ctxt, "EPSG", "28356", PJ_CATEGORY_CRS, false, nullptr);
+        ASSERT_NE(source_crs, nullptr);
+        ObjectKeeper keeper_source_crs(source_crs);
+
+        // GDA2020 / MGA zone 56
+        auto target_crs = proj_create_from_database(
+            m_ctxt, "EPSG", "7856", PJ_CATEGORY_CRS, false, nullptr);
+        ASSERT_NE(target_crs, nullptr);
+        ObjectKeeper keeper_target_crs(target_crs);
+
+        proj_operation_factory_context_set_spatial_criterion(
+            m_ctxt, ctxt, PROJ_SPATIAL_CRITERION_PARTIAL_INTERSECTION);
+
+        proj_operation_factory_context_set_grid_availability_use(
+            m_ctxt, ctxt, PROJ_GRID_AVAILABILITY_IGNORED);
+
+        auto res = proj_create_operations(m_ctxt, source_crs, target_crs, ctxt);
+        ASSERT_NE(res, nullptr);
+        ObjListKeeper keeper_res(res);
+
+        ASSERT_GT(proj_list_get_count(res), 0);
+
+        auto op = proj_list_get(m_ctxt, res, 0);
+        ASSERT_NE(op, nullptr);
+        ObjectKeeper keeper_op(op);
+
+        ASSERT_EQ(proj_get_type(op), PJ_TYPE_CONCATENATED_OPERATION);
+        ASSERT_EQ(proj_concatoperation_get_step_count(m_ctxt, op), 3);
+
+        EXPECT_EQ(proj_concatoperation_get_step(m_ctxt, op, -1), nullptr);
+        EXPECT_EQ(proj_concatoperation_get_step(m_ctxt, op, 3), nullptr);
+
+        auto step = proj_concatoperation_get_step(m_ctxt, op, 1);
+        ASSERT_NE(step, nullptr);
+        ObjectKeeper keeper_step(step);
+
+        const char *scope = proj_get_scope(step);
+        EXPECT_NE(scope, nullptr);
+        EXPECT_NE(std::string(scope), std::string());
+
+        const char *remarks = proj_get_remarks(step);
+        EXPECT_NE(remarks, nullptr);
+        EXPECT_NE(std::string(remarks), std::string());
+    }
+}
+
+// ---------------------------------------------------------------------------
+
+TEST_F(CApi, proj_as_projjson) {
+    auto obj = proj_create(
+        m_ctxt,
+        Ellipsoid::WGS84->exportToJSON(JSONFormatter::create().get()).c_str());
+    ObjectKeeper keeper(obj);
+    ASSERT_NE(obj, nullptr);
+
+    {
+        auto projjson = proj_as_projjson(m_ctxt, obj, nullptr);
+        ASSERT_NE(projjson, nullptr);
+        EXPECT_EQ(std::string(projjson),
+                  "{\n"
+                  "  \"$schema\": "
+                  "\"https://proj.org/schemas/v0.1/projjson.schema.json\",\n"
+                  "  \"type\": \"Ellipsoid\",\n"
+                  "  \"name\": \"WGS 84\",\n"
+                  "  \"semi_major_axis\": 6378137,\n"
+                  "  \"inverse_flattening\": 298.257223563,\n"
+                  "  \"id\": {\n"
+                  "    \"authority\": \"EPSG\",\n"
+                  "    \"code\": 7030\n"
+                  "  }\n"
+                  "}");
+    }
+    {
+        const char *const options[] = {"INDENTATION_WIDTH=4", "SCHEMA=",
+                                       nullptr};
+        auto projjson = proj_as_projjson(m_ctxt, obj, options);
+        ASSERT_NE(projjson, nullptr);
+        EXPECT_EQ(std::string(projjson),
+                  "{\n"
+                  "    \"type\": \"Ellipsoid\",\n"
+                  "    \"name\": \"WGS 84\",\n"
+                  "    \"semi_major_axis\": 6378137,\n"
+                  "    \"inverse_flattening\": 298.257223563,\n"
+                  "    \"id\": {\n"
+                  "        \"authority\": \"EPSG\",\n"
+                  "        \"code\": 7030\n"
+                  "    }\n"
+                  "}");
+    }
+    {
+        const char *const options[] = {"MULTILINE=NO", "SCHEMA=", nullptr};
+        auto projjson = proj_as_projjson(m_ctxt, obj, options);
+        ASSERT_NE(projjson, nullptr);
+        EXPECT_EQ(std::string(projjson),
+                  "{\"type\":\"Ellipsoid\",\"name\":\"WGS 84\","
+                  "\"semi_major_axis\":6378137,"
+                  "\"inverse_flattening\":298.257223563,"
+                  "\"id\":{\"authority\":\"EPSG\",\"code\":7030}}");
+    }
+}
+
+// ---------------------------------------------------------------------------
+
+struct Fixture_proj_context_set_autoclose_database : public CApi {
+    void test(bool autoclose) {
+        proj_context_set_autoclose_database(m_ctxt, autoclose);
+
+        auto c_path = proj_context_get_database_path(m_ctxt);
+        ASSERT_TRUE(c_path != nullptr);
+        std::string path(c_path);
+
+        FILE *f = fopen(path.c_str(), "rb");
+        ASSERT_NE(f, nullptr);
+        fseek(f, 0, SEEK_END);
+        auto length = ftell(f);
+        std::string content;
+        content.resize(static_cast<size_t>(length));
+        fseek(f, 0, SEEK_SET);
+        auto read_bytes = fread(&content[0], 1, content.size(), f);
+        ASSERT_EQ(read_bytes, content.size());
+        fclose(f);
+        const char *tempdir = getenv("TEMP");
+        if (!tempdir) {
+            tempdir = getenv("TMP");
+        }
+        if (!tempdir) {
+            tempdir = "/tmp";
+        }
+        std::string tmp_filename(
+            std::string(tempdir) +
+            "/test_proj_context_set_autoclose_database.db");
+        f = fopen(tmp_filename.c_str(), "wb");
+        if (!f) {
+            std::cerr << "Cannot create " << tmp_filename << std::endl;
+            return;
+        }
+        fwrite(content.data(), 1, content.size(), f);
+        fclose(f);
+
+        {
+            sqlite3 *db = nullptr;
+            sqlite3_open_v2(tmp_filename.c_str(), &db, SQLITE_OPEN_READWRITE,
+                            nullptr);
+            ASSERT_NE(db, nullptr);
+            ASSERT_TRUE(sqlite3_exec(db, "UPDATE geodetic_crs SET name = 'foo' "
+                                         "WHERE auth_name = 'EPSG' and code = "
+                                         "'4326'",
+                                     nullptr, nullptr, nullptr) == SQLITE_OK);
+            sqlite3_close(db);
+        }
+
+        EXPECT_TRUE(proj_context_set_database_path(m_ctxt, tmp_filename.c_str(),
+                                                   nullptr, nullptr));
+        {
+            auto crs = proj_create_from_database(
+                m_ctxt, "EPSG", "4326", PJ_CATEGORY_CRS, false, nullptr);
+            ObjectKeeper keeper(crs);
+            ASSERT_NE(crs, nullptr);
+            EXPECT_EQ(proj_get_name(crs), std::string("foo"));
+        }
+
+        {
+            sqlite3 *db = nullptr;
+            sqlite3_open_v2(tmp_filename.c_str(), &db, SQLITE_OPEN_READWRITE,
+                            nullptr);
+            ASSERT_NE(db, nullptr);
+            ASSERT_TRUE(sqlite3_exec(db, "UPDATE geodetic_crs SET name = 'bar' "
+                                         "WHERE auth_name = 'EPSG' and code = "
+                                         "'4326'",
+                                     nullptr, nullptr, nullptr) == SQLITE_OK);
+            sqlite3_close(db);
+        }
+        {
+            auto crs = proj_create_from_database(
+                m_ctxt, "EPSG", "4326", PJ_CATEGORY_CRS, false, nullptr);
+            ObjectKeeper keeper(crs);
+            ASSERT_NE(crs, nullptr);
+            EXPECT_EQ(proj_get_name(crs),
+                      std::string(autoclose ? "bar" : "foo"));
+        }
+
+        if (!autoclose) {
+            proj_context_destroy(m_ctxt);
+            m_ctxt = nullptr;
+        }
+        std::remove(tmp_filename.c_str());
+    }
+};
+
+TEST_F(Fixture_proj_context_set_autoclose_database,
+       proj_context_set_autoclose_database_true) {
+    test(true);
+}
+
+TEST_F(Fixture_proj_context_set_autoclose_database,
+       proj_context_set_autoclose_database_false) {
+    test(false);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST_F(CApi, proj_create_crs_to_crs_from_pj) {
+
+    auto src = proj_create(m_ctxt, "EPSG:4326");
+    ObjectKeeper keeper_src(src);
+    ASSERT_NE(src, nullptr);
+
+    auto dst = proj_create(m_ctxt, "EPSG:32631");
+    ObjectKeeper keeper_dst(dst);
+    ASSERT_NE(dst, nullptr);
+
+    auto P = proj_create_crs_to_crs_from_pj(m_ctxt, src, dst, nullptr, nullptr);
+    ObjectKeeper keeper_P(P);
+    ASSERT_NE(P, nullptr);
+    auto Pnormalized = proj_normalize_for_visualization(m_ctxt, P);
+    ObjectKeeper keeper_Pnormalized(Pnormalized);
+    ASSERT_NE(Pnormalized, nullptr);
+    auto projstr = proj_as_proj_string(m_ctxt, Pnormalized, PJ_PROJ_5, nullptr);
+    ASSERT_NE(projstr, nullptr);
+    EXPECT_EQ(std::string(projstr),
+              "+proj=pipeline +step +proj=unitconvert +xy_in=deg +xy_out=rad "
+              "+step +proj=utm +zone=31 +ellps=WGS84");
 }
 
 } // namespace

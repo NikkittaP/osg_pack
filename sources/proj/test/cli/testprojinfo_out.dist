@@ -135,6 +135,50 @@ WKT1_ESRI:
 GEOGCS["GCS_WGS_1984",DATUM["D_WGS_1984",SPHEROID["WGS_1984",6378137.0,298.257223563]],PRIMEM["Greenwich",0.0],UNIT["Degree",0.0174532925199433]]
 
 
+PROJJSON:
+{
+  "$schema": "https://proj.org/schemas/v0.1/projjson.schema.json",
+  "type": "GeographicCRS",
+  "name": "WGS 84",
+  "datum": {
+    "type": "GeodeticReferenceFrame",
+    "name": "World Geodetic System 1984",
+    "ellipsoid": {
+      "name": "WGS 84",
+      "semi_major_axis": 6378137,
+      "inverse_flattening": 298.257223563
+    }
+  },
+  "coordinate_system": {
+    "subtype": "ellipsoidal",
+    "axis": [
+      {
+        "name": "Geodetic latitude",
+        "abbreviation": "Lat",
+        "direction": "north",
+        "unit": "degree"
+      },
+      {
+        "name": "Geodetic longitude",
+        "abbreviation": "Lon",
+        "direction": "east",
+        "unit": "degree"
+      }
+    ]
+  },
+  "area": "World",
+  "bbox": {
+    "south_latitude": -90,
+    "west_longitude": -180,
+    "north_latitude": 90,
+    "east_longitude": 180
+  },
+  "id": {
+    "authority": "EPSG",
+    "code": 4326
+  }
+}
+
 Testing projinfo -s EPSG:4326 -t EPSG:32631
 Candidate operations found: 1
 -------------------------------------
@@ -279,7 +323,7 @@ COORDINATEOPERATION["NAD27 to NAD83 (3)",
     PARAMETERFILE["Latitude and longitude difference file","ntv1_can.dat"],
     OPERATIONACCURACY[1.0],
     USAGE[
-        SCOPE["unknown"],
+        SCOPE["Historic record only - now superseded - see remarks."],
         AREA["Canada"],
         BBOX[40.04,-141.01,86.46,-47.74]],
     ID["DERIVED_FROM(EPSG)",1312]]
@@ -329,7 +373,7 @@ COORDINATEOPERATION["NAD27 to NAD83 (4)",
     PARAMETERFILE["Latitude and longitude difference file","ntv2_0.gsb"],
     OPERATIONACCURACY[1.5],
     USAGE[
-        SCOPE["unknown"],
+        SCOPE["Accuracy 1-2 metres."],
         AREA["Canada - NAD27"],
         BBOX[40.04,-141.01,83.17,-47.74]],
     ID["DERIVED_FROM(EPSG)",1313]]
@@ -378,7 +422,7 @@ COORDINATEOPERATION["NAD27 to NAD83 (1)",
     PARAMETERFILE["Latitude and longitude difference file","conus"],
     OPERATIONACCURACY[0.15],
     USAGE[
-        SCOPE["unknown"],
+        SCOPE["Accuracy at 67% confidence level is 0.15m onshore, 5m nearshore and undetermined farther offshore."],
         AREA["USA - CONUS including EEZ"],
         BBOX[23.81,-129.17,49.38,-65.69]],
     ID["DERIVED_FROM(EPSG)",1241]]
@@ -427,7 +471,7 @@ COORDINATEOPERATION["NAD27 to NAD83 (2)",
     PARAMETERFILE["Latitude and longitude difference file","alaska"],
     OPERATIONACCURACY[0.5],
     USAGE[
-        SCOPE["unknown"],
+        SCOPE["Accuracy at 67% confidence level is 0.5m onshore, 5m nearshore and undetermined farther offshore."],
         AREA["USA - Alaska including EEZ"],
         BBOX[47.88,167.65,74.71,-129.99]],
     ID["DERIVED_FROM(EPSG)",1243]]
@@ -478,10 +522,11 @@ COORDINATEOPERATION["NAD27 to NAD83 (5)",
     PARAMETERFILE["Latitude and longitude difference file","GS2783v1.QUE"],
     OPERATIONACCURACY[1.0],
     USAGE[
-        SCOPE["unknown"],
+        SCOPE["Historic record only - now superseded - see remarks."],
         AREA["Canada - Quebec"],
         BBOX[44.99,-79.85,62.62,-57.1]],
-    ID["EPSG",1462]]
+    ID["EPSG",1462],
+    REMARK["Densification for Quebec of code 1312. Replaced by NAD27 to NAD83 (6) (code 1573). Uses NT method which expects longitudes positive west; EPSG GeogCRSs NAD27 (code 4267) and NAD83 (code 4269) have longitudes positive east."]]
 
 -------------------------------------
 Operation n°6:
@@ -529,10 +574,11 @@ COORDINATEOPERATION["NAD27 to NAD83 (6)",
     PARAMETERFILE["Latitude and longitude difference file","QUE27-83.gsb"],
     OPERATIONACCURACY[1.5],
     USAGE[
-        SCOPE["unknown"],
+        SCOPE["Accuracy 1-2 metres."],
         AREA["Canada - Quebec"],
         BBOX[44.99,-79.85,62.62,-57.1]],
-    ID["EPSG",1573]]
+    ID["EPSG",1573],
+    REMARK["Replaces NAD27 to NAD83 (5) (code 1462). Uses NT method which expects longitudes positive west; EPSG GeogCRSs NAD27 (code 4267) and NAD83 (code 4269) have longitudes positive east."]]
 
 -------------------------------------
 Operation n°7:
@@ -758,7 +804,7 @@ PROJ string:
 +proj=pipeline +step +proj=axisswap +order=2,1 +step +proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=vgridshift +grids=g2012ba0.gtx +multiplier=1 +step +proj=unitconvert +xy_in=rad +xy_out=deg +step +proj=axisswap +order=2,1
 
 Testing NGF IGN69 height to RGF93: projinfo -s EPSG:5720 -t EPSG:4965 -o PROJ
-Candidate operations found: 3
+Candidate operations found: 2
 -------------------------------------
 Operation n°1:
 
@@ -769,14 +815,6 @@ PROJ string:
 
 -------------------------------------
 Operation n°2:
-
-INVERSE(DERIVED_FROM(EPSG)):8371, Inverse of RGF93 to NGF IGN69 height (2), 0.02 m, France - mainland onshore
-
-PROJ string:
-+proj=vgridshift +grids=RAF09.gtx +multiplier=1
-
--------------------------------------
-Operation n°3:
 
 INVERSE(EPSG):10000, Inverse of RGF93 to NGF IGN69 height (1), 0.5 m, France - mainland onshore
 

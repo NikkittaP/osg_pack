@@ -95,14 +95,13 @@ colormsg(_HIBLUE_ "Configuring PROJ:")
 #PROJ version information
 ################################################################################
 include(ProjVersion)
-proj_version(MAJOR 6 MINOR 1 PATCH 1)
-set(PROJ_API_VERSION "16")
-set(PROJ_BUILD_VERSION "16.1.1")
+proj_version(MAJOR 6 MINOR 2 PATCH 0)
+set(PROJ_API_VERSION "17")
+set(PROJ_BUILD_VERSION "17.0.2")
 
 ################################################################################
 # Build features and variants
 ################################################################################
-include(ProjSystemInfo)
 include(ProjConfig)
 include(ProjMac)
 include(policies)
@@ -169,9 +168,6 @@ int main(int argc, char* argv[]) {
     add_definitions(-DHAVE_PTHREAD_MUTEX_RECURSIVE=1)
   endif()
 endif()
-
-boost_report_value(PROJ_PLATFORM_NAME)
-boost_report_value(PROJ_COMPILER_NAME)
 
 # Set a default build type for single-configuration cmake generators if
 # no build type is set.

@@ -11,7 +11,7 @@ NUM_THREADS=4       # How many cores to use for building. For 6 core Intel CPU w
 #   Ubuntu 18.04
 CURRENT_OS="Ubuntu 18.04"
 
-QTDIR=/opt/Qt5.13.0/5.13.0/gcc_64   # Path to Qt installation
+QTDIR=/opt/Qt5.13.1/5.13.1/gcc_64   # Path to Qt installation
 CMAKE_CMD=cmake
 
 IS_CMAKE_CMD_WORKING=1    # Define by hand whether cmake command could be executed in shell (defined in "PATH")
@@ -54,7 +54,7 @@ IS_OSGEARTH_BUILD=$IS_GLOBAL_BUILD
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
 BASE_3RDPARTY_DIR=$SCRIPT_DIR
-PREBUILT_3RDPARTY_DIR=$BASE_3RDPARTY_DIR/prebuilt
+PREBUILT_3RDPARTY_DIR=$BASE_3RDPARTY_DIR/prebuilt/linux
 BUILD_3RDPARTY_DIR=$BASE_3RDPARTY_DIR/build
 LOG_BUILD_3RDPARTY_DIR=$BUILD_3RDPARTY_DIR/_build_log
 INSTALL_3RDPARTY_DIR=$BASE_3RDPARTY_DIR/install
@@ -1235,12 +1235,12 @@ cd build
             chmod +x ./configure
             cmd=./configure
         
-            export LD_LIBRARY_PATH=$GEOS_INSTALL_RELEASE_DIR/lib:$ZLIB_INSTALL_RELEASE_DIR/lib:$LIBPNG_INSTALL_RELEASE_DIR/lib:$LIBJPEG_INSTALL_RELEASE_DIR/lib:$LIBTIFF_INSTALL_RELEASE_DIR/lib:$LIBCURL_INSTALL_RELEASE_DIR/lib:$PROJ4_INSTALL_RELEASE_DIR/lib:$LIBGEOTIFF_INSTALL_RELEASE_DIR/lib:$EXPAT_INSTALL_RELEASE_DIR/lib env
+            export LD_LIBRARY_PATH=$GEOS_INSTALL_RELEASE_DIR/lib:$ZLIB_INSTALL_RELEASE_DIR/lib:$LIBPNG_INSTALL_RELEASE_DIR/lib:$LIBJPEG_INSTALL_RELEASE_DIR/lib:$LIBTIFF_INSTALL_RELEASE_DIR/lib:$LIBCURL_INSTALL_RELEASE_DIR/lib:$PROJ4_INSTALL_RELEASE_DIR/lib:$LIBGEOTIFF_INSTALL_RELEASE_DIR/lib:$EXPAT_INSTALL_RELEASE_DIR/lib:$PREBUILT_3RDPARTY_DIR/ecw/lib/newabi/x64/release env
             ldconfig
             
-            export LDFLAGS="-Wl,-rpath,$GEOS_INSTALL_RELEASE_DIR/lib,-rpath,$ZLIB_INSTALL_RELEASE_DIR/lib,-rpath,$LIBPNG_INSTALL_RELEASE_DIR/lib,-rpath,$LIBJPEG_INSTALL_RELEASE_DIR/lib,-rpath,$LIBTIFF_INSTALL_RELEASE_DIR/lib,-rpath,$LIBCURL_INSTALL_RELEASE_DIR/lib,-rpath,$PROJ4_INSTALL_RELEASE_DIR/lib,-rpath,$LIBGEOTIFF_INSTALL_RELEASE_DIR/lib,-rpath,$EXPAT_INSTALL_RELEASE_DIR/lib"
+            export LDFLAGS="-Wl,-rpath,$GEOS_INSTALL_RELEASE_DIR/lib,-rpath,$ZLIB_INSTALL_RELEASE_DIR/lib,-rpath,$LIBPNG_INSTALL_RELEASE_DIR/lib,-rpath,$LIBJPEG_INSTALL_RELEASE_DIR/lib,-rpath,$LIBTIFF_INSTALL_RELEASE_DIR/lib,-rpath,$LIBCURL_INSTALL_RELEASE_DIR/lib,-rpath,$PROJ4_INSTALL_RELEASE_DIR/lib,-rpath,$LIBGEOTIFF_INSTALL_RELEASE_DIR/lib,-rpath,$EXPAT_INSTALL_RELEASE_DIR/lib,-rpath,$PREBUILT_3RDPARTY_DIR/ecw/lib/newabi/x64/release"
             
-            arg="--prefix=$GDAL_INSTALL_RELEASE_DIR --with-geos=$GEOS_INSTALL_RELEASE_DIR --with-libz=$ZLIB_INSTALL_RELEASE_DIR --with-png=$LIBPNG_INSTALL_RELEASE_DIR --with-jpeg=$LIBJPEG_INSTALL_RELEASE_DIR --with-libtiff=$LIBTIFF_INSTALL_RELEASE_DIR --with-curl=$LIBCURL_INSTALL_RELEASE_DIR/bin/curl-config --with-proj=$PROJ4_INSTALL_RELEASE_DIR --with-geotiff=$LIBGEOTIFF_INSTALL_RELEASE_DIR --with-expat=$EXPAT_INSTALL_RELEASE_DIR"
+            arg="--prefix=$GDAL_INSTALL_RELEASE_DIR --with-geos=$GEOS_INSTALL_RELEASE_DIR --with-libz=$ZLIB_INSTALL_RELEASE_DIR --with-png=$LIBPNG_INSTALL_RELEASE_DIR --with-jpeg=$LIBJPEG_INSTALL_RELEASE_DIR --with-libtiff=$LIBTIFF_INSTALL_RELEASE_DIR --with-curl=$LIBCURL_INSTALL_RELEASE_DIR/bin/curl-config --with-proj=$PROJ4_INSTALL_RELEASE_DIR --with-geotiff=$LIBGEOTIFF_INSTALL_RELEASE_DIR --with-expat=$EXPAT_INSTALL_RELEASE_DIR --with-ecw=$PREBUILT_3RDPARTY_DIR/ecw"
             
             sh $cmd $arg > $LOG_BUILD_3RDPARTY_DIR/gdal/[configure][Release][stdout].log 2> $LOG_BUILD_3RDPARTY_DIR/gdal/[configure][Release][stderr].log
             make -j$NUM_THREADS > $LOG_BUILD_3RDPARTY_DIR/gdal/[make][build][Release][stdout].log 2> $LOG_BUILD_3RDPARTY_DIR/gdal/[make][build][Release][stderr].log
@@ -1248,6 +1248,8 @@ cd build
             
             strip -s $GDAL_INSTALL_RELEASE_DIR/lib/libgdal.a
             strip -s $GDAL_INSTALL_RELEASE_DIR/lib/libgdal.so
+            
+            cp -au $PREBUILT_3RDPARTY_DIR/ecw/lib/newabi/x64/release/libNCSEcw.so.5.4.0 $GDAL_INSTALL_RELEASE_DIR/lib/
             
             printf "... Release built successfully\n"
             cd ..
@@ -1262,16 +1264,19 @@ cd build
             chmod +x ./configure
             cmd=./configure
         
-            export LD_LIBRARY_PATH=$GEOS_INSTALL_DEBUG_DIR/lib:$ZLIB_INSTALL_DEBUG_DIR/lib:$LIBPNG_INSTALL_DEBUG_DIR/lib:$LIBJPEG_INSTALL_DEBUG_DIR/lib:$LIBTIFF_INSTALL_DEBUG_DIR/lib:$LIBCURL_INSTALL_DEBUG_DIR/lib:$PROJ4_INSTALL_DEBUG_DIR/lib:$LIBGEOTIFF_INSTALL_DEBUG_DIR/lib:$EXPAT_INSTALL_DEBUG_DIR/lib env
+            export LD_LIBRARY_PATH=$GEOS_INSTALL_DEBUG_DIR/lib:$ZLIB_INSTALL_DEBUG_DIR/lib:$LIBPNG_INSTALL_DEBUG_DIR/lib:$LIBJPEG_INSTALL_DEBUG_DIR/lib:$LIBTIFF_INSTALL_DEBUG_DIR/lib:$LIBCURL_INSTALL_DEBUG_DIR/lib:$PROJ4_INSTALL_DEBUG_DIR/lib:$LIBGEOTIFF_INSTALL_DEBUG_DIR/lib:$EXPAT_INSTALL_DEBUG_DIR/lib:$PREBUILT_3RDPARTY_DIR/ecw/lib/newabi/x64/release env
             ldconfig
             
-            export LDFLAGS="-Wl,-rpath,$GEOS_INSTALL_DEBUG_DIR/lib,-rpath,$ZLIB_INSTALL_DEBUG_DIR/lib,-rpath,$LIBPNG_INSTALL_DEBUG_DIR/lib,-rpath,$LIBJPEG_INSTALL_DEBUG_DIR/lib,-rpath,$LIBTIFF_INSTALL_DEBUG_DIR/lib,-rpath,$LIBCURL_INSTALL_DEBUG_DIR/lib,-rpath,$PROJ4_INSTALL_DEBUG_DIR/lib,-rpath,$LIBGEOTIFF_INSTALL_DEBUG_DIR/lib,-rpath,$EXPAT_INSTALL_DEBUG_DIR/lib"
+            export LDFLAGS="-Wl,-rpath,$GEOS_INSTALL_DEBUG_DIR/lib,-rpath,$ZLIB_INSTALL_DEBUG_DIR/lib,-rpath,$LIBPNG_INSTALL_DEBUG_DIR/lib,-rpath,$LIBJPEG_INSTALL_DEBUG_DIR/lib,-rpath,$LIBTIFF_INSTALL_DEBUG_DIR/lib,-rpath,$LIBCURL_INSTALL_DEBUG_DIR/lib,-rpath,$PROJ4_INSTALL_DEBUG_DIR/lib,-rpath,$LIBGEOTIFF_INSTALL_DEBUG_DIR/lib,-rpath,$EXPAT_INSTALL_DEBUG_DIR/lib,-rpath,$PREBUILT_3RDPARTY_DIR/ecw/lib/newabi/x64/release"
             
-            arg="--prefix=$GDAL_INSTALL_DEBUG_DIR --with-geos=$GEOS_INSTALL_DEBUG_DIR --with-libz=$ZLIB_INSTALL_DEBUG_DIR --with-png=$LIBPNG_INSTALL_DEBUG_DIR --with-jpeg=$LIBJPEG_INSTALL_DEBUG_DIR --with-libtiff=$LIBTIFF_INSTALL_DEBUG_DIR --with-curl=$LIBCURL_INSTALL_DEBUG_DIR/bin/curl-config --with-proj=$PROJ4_INSTALL_DEBUG_DIR --with-geotiff=$LIBGEOTIFF_INSTALL_DEBUG_DIR --with-expat=$EXPAT_INSTALL_DEBUG_DIR --enable-debug"
+            arg="--prefix=$GDAL_INSTALL_DEBUG_DIR --with-geos=$GEOS_INSTALL_DEBUG_DIR --with-libz=$ZLIB_INSTALL_DEBUG_DIR --with-png=$LIBPNG_INSTALL_DEBUG_DIR --with-jpeg=$LIBJPEG_INSTALL_DEBUG_DIR --with-libtiff=$LIBTIFF_INSTALL_DEBUG_DIR --with-curl=$LIBCURL_INSTALL_DEBUG_DIR/bin/curl-config --with-proj=$PROJ4_INSTALL_DEBUG_DIR --with-geotiff=$LIBGEOTIFF_INSTALL_DEBUG_DIR --with-expat=$EXPAT_INSTALL_DEBUG_DIR --with-ecw=$PREBUILT_3RDPARTY_DIR/ecw --enable-debug"
 
             sh $cmd $arg > $LOG_BUILD_3RDPARTY_DIR/gdal/[configure][Debug][stdout].log 2> $LOG_BUILD_3RDPARTY_DIR/gdal/[configure][Debug][stderr].log
             make -j$NUM_THREADS > $LOG_BUILD_3RDPARTY_DIR/gdal/[make][build][Debug][stdout].log 2> $LOG_BUILD_3RDPARTY_DIR/gdal/[make][build][Debug][stderr].log
             make install > $LOG_BUILD_3RDPARTY_DIR/gdal/[make][install][Debug][stdout].log 2> $LOG_BUILD_3RDPARTY_DIR/gdal/[make][install][Debug][stderr].log
+            
+            cp -au $PREBUILT_3RDPARTY_DIR/ecw/lib/newabi/x64/release/libNCSEcw.so.5.4.0 $GDAL_INSTALL_DEBUG_DIR/lib/
+            
             printf "... Debug built successfully\n"
             cd ..
         fi
@@ -1282,7 +1287,7 @@ cd build
         if [ $IS_BUILD_RELEASE -eq 1 ]; then
             printf "Testing GDAL Release ...\n"
             printf "... calling $GDAL_INSTALL_RELEASE_DIR/bin/gdalinfo ...\n"
-            export LD_LIBRARY_PATH=$ZLIB_INSTALL_RELEASE_DIR/lib:$LIBPNG_INSTALL_RELEASE_DIR/lib:$LIBJPEG_INSTALL_RELEASE_DIR/lib:$LIBTIFF_INSTALL_RELEASE_DIR/lib:$LIBCURL_INSTALL_RELEASE_DIR/lib:$PROJ4_INSTALL_RELEASE_DIR/lib env
+            export LD_LIBRARY_PATH=$ZLIB_INSTALL_RELEASE_DIR/lib:$LIBPNG_INSTALL_RELEASE_DIR/lib:$LIBJPEG_INSTALL_RELEASE_DIR/lib:$LIBTIFF_INSTALL_RELEASE_DIR/lib:$LIBCURL_INSTALL_RELEASE_DIR/lib:$PROJ4_INSTALL_RELEASE_DIR/lib:$LIBGEOTIFF_INSTALL_RELEASE_DIR/lib:$EXPAT_INSTALL_RELEASE_DIR/lib env
             ldconfig
             $GDAL_INSTALL_RELEASE_DIR/bin/gdalinfo --version
             printf "... testing finished\n"
@@ -1291,7 +1296,7 @@ cd build
         if [ $IS_BUILD_DEBUG -eq 1 ]; then
             printf "Testing GDAL Debug ...\n"
             printf "... calling $GDAL_INSTALL_DEBUG_DIR/bin/gdalinfo ...\n"
-            export LD_LIBRARY_PATH=$ZLIB_INSTALL_DEBUG_DIR/lib:$LIBPNG_INSTALL_DEBUG_DIR/lib:$LIBJPEG_INSTALL_DEBUG_DIR/lib:$LIBTIFF_INSTALL_DEBUG_DIR/lib:$LIBCURL_INSTALL_DEBUG_DIR/lib:$PROJ4_INSTALL_DEBUG_DIR/lib env
+            export LD_LIBRARY_PATH=$ZLIB_INSTALL_DEBUG_DIR/lib:$LIBPNG_INSTALL_DEBUG_DIR/lib:$LIBJPEG_INSTALL_DEBUG_DIR/lib:$LIBTIFF_INSTALL_DEBUG_DIR/lib:$LIBCURL_INSTALL_DEBUG_DIR/lib:$PROJ4_INSTALL_DEBUG_DIR/lib:$LIBGEOTIFF_INSTALL_DEBUG_DIR/lib:$EXPAT_INSTALL_DEBUG_DIR/lib env
             ldconfig
             $GDAL_INSTALL_DEBUG_DIR/bin/gdalinfo --version
             printf "... testing finished\n"

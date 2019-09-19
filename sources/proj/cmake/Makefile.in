@@ -262,7 +262,6 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 EXTRA_DIST = CMakeLists.txt \
 			ProjInstallPath.cmake \
-			ProjSystemInfo.cmake \
 			ProjUtilities.cmake   \
 			proj_config.cmake.in \
 			ProjConfig.cmake \
