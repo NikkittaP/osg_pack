@@ -337,7 +337,7 @@ GEOTIFF_LIB =   $(GDAL_DEPENDENCIES)\libgeotiff\release\lib\geotiff.lib
 # also need some adjustment. 
 
 # Uncomment the following and update to enable ECW read support with the 5.0 SDK
-ECWDIR  =  "$(GDAL_DEPENDENCIES)\..\prebuilt\windows\ecw"
+ECWDIR  =  "$(ERDAS_ECW_INSTALL_DIR)"
 ECWFLAGS = -DECWSDK_VERSION=54 \
        -I$(ECWDIR)\include \
        -I$(ECWDIR)\include/NCSECW/api -I$(ECWDIR)\include/NCSECW/jp2 \

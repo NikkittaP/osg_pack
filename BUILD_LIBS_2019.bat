@@ -46,6 +46,7 @@ set MS_BUILD_OPTIONS_PARALLEL=/t:Build /nologo /noconsolelogger /m:%NUM_THREADS%
 set CMAKE_BASE_COMMAND=cmake -G "Visual Studio 16 2019" -A x64
 set VS_DEV_CMD="C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvarsall.bat" amd64
 set QTDIR="C:\Qt\Qt5.13.1\5.13.1\msvc2017_64"
+set ERDAS_ECW_INSTALL_DIR="C:\ERDAS ECW JPEG 2000 SDK 5.4.0"
 
 :: Path and directory structure settings
 set BASE_3RDPARTY_DIR=%cd%
@@ -1479,15 +1480,15 @@ cd %BUILD_3RDPARTY_DIR%
             
             CALL %VS_DEV_CMD% > nul 2> nul
             cd %BUILD_3RDPARTY_DIR%\gdal
-            nmake /f makefile.vc GDAL_HOME=%GDAL_INSTALL_RELEASE_DIR% GDAL_DEPENDENCIES=%INSTALL_3RDPARTY_DIR% > %LOG_BUILD_3RDPARTY_DIR%\gdal\[NMake][build][release].log 2> %LOG_BUILD_3RDPARTY_DIR%\gdal\[NMake][messages][release].log
+            nmake /f makefile.vc GDAL_HOME=%GDAL_INSTALL_RELEASE_DIR% GDAL_DEPENDENCIES=%INSTALL_3RDPARTY_DIR% ERDAS_ECW_INSTALL_DIR=%ERDAS_ECW_INSTALL_DIR% > %LOG_BUILD_3RDPARTY_DIR%\gdal\[NMake][build][release].log 2> %LOG_BUILD_3RDPARTY_DIR%\gdal\[NMake][messages][release].log
             if not %ERRORLEVEL%==0 (
                 echo [!] ... error building Release. See build log for info: %LOG_BUILD_3RDPARTY_DIR%\gdal\[NMake][build][release].log
                 goto error
             ) else (
                 echo ... Release built successfully
             )
-            nmake /f makefile.vc install GDAL_HOME=%GDAL_INSTALL_RELEASE_DIR% GDAL_DEPENDENCIES=%INSTALL_3RDPARTY_DIR% > %LOG_BUILD_3RDPARTY_DIR%\gdal\[NMake][install][release].log 2> nul
-            nmake /f makefile.vc devinstall GDAL_HOME=%GDAL_INSTALL_RELEASE_DIR% GDAL_DEPENDENCIES=%INSTALL_3RDPARTY_DIR% > %LOG_BUILD_3RDPARTY_DIR%\gdal\[NMake][devinstall][release].log 2> nul
+            nmake /f makefile.vc install GDAL_HOME=%GDAL_INSTALL_RELEASE_DIR% GDAL_DEPENDENCIES=%INSTALL_3RDPARTY_DIR% ERDAS_ECW_INSTALL_DIR=%ERDAS_ECW_INSTALL_DIR% > %LOG_BUILD_3RDPARTY_DIR%\gdal\[NMake][install][release].log 2> nul
+            nmake /f makefile.vc devinstall GDAL_HOME=%GDAL_INSTALL_RELEASE_DIR% GDAL_DEPENDENCIES=%INSTALL_3RDPARTY_DIR% ERDAS_ECW_INSTALL_DIR=%ERDAS_ECW_INSTALL_DIR% > %LOG_BUILD_3RDPARTY_DIR%\gdal\[NMake][devinstall][release].log 2> nul
             if not %ERRORLEVEL%==0 (
                 echo [!] ... error installing Release. See build log for info: %LOG_BUILD_3RDPARTY_DIR%\gdal\[NMake][install][release].log
                 echo ... continuing to build
@@ -1505,15 +1506,15 @@ cd %BUILD_3RDPARTY_DIR%
             
             CALL %VS_DEV_CMD% > nul 2> nul
             cd %BUILD_3RDPARTY_DIR%\gdal_debug
-            nmake /f makefile.vc GDAL_HOME=%GDAL_INSTALL_DEBUG_DIR% GDAL_DEPENDENCIES=%INSTALL_3RDPARTY_DIR% > %LOG_BUILD_3RDPARTY_DIR%\gdal\[NMake][build][Debug].log 2> %LOG_BUILD_3RDPARTY_DIR%\gdal\[NMake][messages][Debug].log
+            nmake /f makefile.vc GDAL_HOME=%GDAL_INSTALL_DEBUG_DIR% GDAL_DEPENDENCIES=%INSTALL_3RDPARTY_DIR% ERDAS_ECW_INSTALL_DIR=%ERDAS_ECW_INSTALL_DIR% > %LOG_BUILD_3RDPARTY_DIR%\gdal\[NMake][build][Debug].log 2> %LOG_BUILD_3RDPARTY_DIR%\gdal\[NMake][messages][Debug].log
             if not %ERRORLEVEL%==0 (
                 echo [!] ... error building Debug. See build log for info: %LOG_BUILD_3RDPARTY_DIR%\gdal\[NMake][build][Debug].log
                 goto error
             ) else (
                 echo ... Debug built successfully
             )
-            nmake /f makefile.vc install GDAL_HOME=%GDAL_INSTALL_DEBUG_DIR% GDAL_DEPENDENCIES=%INSTALL_3RDPARTY_DIR% > %LOG_BUILD_3RDPARTY_DIR%\gdal\[NMake][install][Debug].log 2> nul
-            nmake /f makefile.vc devinstall GDAL_HOME=%GDAL_INSTALL_DEBUG_DIR% GDAL_DEPENDENCIES=%INSTALL_3RDPARTY_DIR% > %LOG_BUILD_3RDPARTY_DIR%\gdal\[NMake][devinstall][Debug].log 2> nul
+            nmake /f makefile.vc install GDAL_HOME=%GDAL_INSTALL_DEBUG_DIR% GDAL_DEPENDENCIES=%INSTALL_3RDPARTY_DIR% ERDAS_ECW_INSTALL_DIR=%ERDAS_ECW_INSTALL_DIR% > %LOG_BUILD_3RDPARTY_DIR%\gdal\[NMake][install][Debug].log 2> nul
+            nmake /f makefile.vc devinstall GDAL_HOME=%GDAL_INSTALL_DEBUG_DIR% GDAL_DEPENDENCIES=%INSTALL_3RDPARTY_DIR% ERDAS_ECW_INSTALL_DIR=%ERDAS_ECW_INSTALL_DIR% > %LOG_BUILD_3RDPARTY_DIR%\gdal\[NMake][devinstall][Debug].log 2> nul
             if not %ERRORLEVEL%==0 (
                 echo [!] ... error installing Debug. See build log for info: %LOG_BUILD_3RDPARTY_DIR%\gdal\[NMake][install][Debug].log
                 echo ... continuing to build
@@ -1969,8 +1970,13 @@ cd %BUILD_3RDPARTY_DIR%
     cd ..
     cd %PREBUILT_3RDPARTY_DIR%
     xcopy /D /S /Y /Q sqlite3 %INSTALL_3RDPARTY_DIR%\sqlite3\
-    xcopy /D /S /Y /Q ecw %INSTALL_3RDPARTY_DIR%\ecw\
     cd ..
+    xcopy /D /S /Y /Q %ERDAS_ECW_INSTALL_DIR%\bin\vc141\x64\NCSEcw.dll %INSTALL_3RDPARTY_DIR%\ecw\release\bin\
+    xcopy /D /S /Y /Q %ERDAS_ECW_INSTALL_DIR%\bin\vc141\x64\NCSEcwJNI.dll %INSTALL_3RDPARTY_DIR%\ecw\release\bin\
+    xcopy /D /S /Y /Q %ERDAS_ECW_INSTALL_DIR%\bin\vc141\x64\NCSEcwJNI_MT.dll %INSTALL_3RDPARTY_DIR%\ecw\release\bin\
+    xcopy /D /S /Y /Q %ERDAS_ECW_INSTALL_DIR%\bin\vc141\x64\NCSEcwd.dll %INSTALL_3RDPARTY_DIR%\ecw\debug\bin\
+    xcopy /D /S /Y /Q %ERDAS_ECW_INSTALL_DIR%\bin\vc141\x64\NCSEcwJNId.dll %INSTALL_3RDPARTY_DIR%\ecw\debug\bin\
+    xcopy /D /S /Y /Q %ERDAS_ECW_INSTALL_DIR%\bin\vc141\x64\NCSEcwJNI_MTd.dll %INSTALL_3RDPARTY_DIR%\ecw\debug\bin\
     echo.
     echo --------------------------------------------------
     echo.

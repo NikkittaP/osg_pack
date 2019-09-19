@@ -31,7 +31,7 @@ if not exist "%BIN_DEBUG_DIR%" mkdir %BIN_DEBUG_DIR%
     :: No LevelDB dll
 
     xcopy /D /S /Y /Q install_2015\sqlite3\release\bin\*.dll %BIN_RELEASE_DIR%
-    xcopy /D /S /Y /Q install_2015\ecw\bin\vc140\x64\NCSEcw.dll %BIN_RELEASE_DIR%
+    xcopy /D /S /Y /Q install_2015\ecw\release\bin\*.dll %BIN_RELEASE_DIR%
 
 
 :: --------------------------------------------------
