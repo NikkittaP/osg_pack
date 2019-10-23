@@ -31,7 +31,7 @@ IS_SOURCES_COPY_NEEDED=1
 # 1 - means that lib was build and script can skip it
 IS_GLOBAL_BUILD=0
 
-IS_PNAGEO_BUILD=$IS_GLOBAL_BUILD
+IS_GCSFUNC_BUILD=$IS_GLOBAL_BUILD
 IS_GEOS_BUILD=$IS_GLOBAL_BUILD
 IS_ZLIB_BUILD=$IS_GLOBAL_BUILD
 IS_PROTOBUF_BUILD=$IS_GLOBAL_BUILD
@@ -62,7 +62,7 @@ INSTALL_3RDPARTY_DIR=$BASE_3RDPARTY_DIR/install
 
 # Steps numbering
 STEP_NUM_TOTAL=17
-STEP_NUM_PNAGEO=1
+STEP_NUM_GCSFUNC=1
 STEP_NUM_GEOS=2
 STEP_NUM_ZLIB=3
 STEP_NUM_PROTOBUF=4
@@ -81,7 +81,7 @@ STEP_NUM_LEVELDB=16
 STEP_NUM_OSGEARTH=17
 
 # Were libraries built for summary output
-SUCCESS_BUILD_PNAGEO_RELEASE=0
+SUCCESS_BUILD_GCSFUNC_RELEASE=0
 SUCCESS_BUILD_GEOS_RELEASE=0
 SUCCESS_BUILD_ZLIB_RELEASE=0
 SUCCESS_BUILD_PROTOBUF_RELEASE=0
@@ -99,7 +99,7 @@ SUCCESS_BUILD_OSGQT_RELEASE=0
 SUCCESS_BUILD_LEVELDB_RELEASE=0
 SUCCESS_BUILD_OSGEARTH_RELEASE=0
 
-SUCCESS_BUILD_PNAGEO_DEBUG=0
+SUCCESS_BUILD_GCSFUNC_DEBUG=0
 SUCCESS_BUILD_GEOS_DEBUG=0
 SUCCESS_BUILD_ZLIB_DEBUG=0
 SUCCESS_BUILD_PROTOBUF_DEBUG=0
@@ -160,9 +160,9 @@ start_time="$(date -u +%s)"
 #        BUILD_3RDPARTY_DIR     = /home/nikita/OSG/3rdparty/build
 #        INSTALL_3RDPARTY_DIR   = /home/nikita/OSG/3rdparty/install
 
-#        PNAGEO_INCLUDE_DIR     = /home/nikita/OSG/3rdparty/install/pnageo/release/include/
-#        PNAGEO_LIBRARY_RELEASE = /home/nikita/OSG/3rdparty/install/pnageo/release/lib/libpnageo.so
-#        PNAGEO_LIBRARY_DEBUG   = /home/nikita/OSG/3rdparty/install/pnageo/debug/lib/libpnageo.so
+#        GCSFUNC_INCLUDE_DIR     = /home/nikita/OSG/3rdparty/install/gcsfunc/release/include/
+#        GCSFUNC_LIBRARY_RELEASE = /home/nikita/OSG/3rdparty/install/gcsfunc/release/lib/libgcsfunc.so
+#        GCSFUNC_LIBRARY_DEBUG   = /home/nikita/OSG/3rdparty/install/gcsfunc/debug/lib/libgcsfunc.so
 
 #        GEOS_INCLUDE_DIR     = /home/nikita/OSG/3rdparty/install/geos/release/include/
 #        GEOS_LIBRARY_RELEASE = /home/nikita/OSG/3rdparty/install/geos/release/lib/libgeos.so
@@ -278,7 +278,7 @@ if [ $IS_SOURCES_COPY_NEEDED -eq 1 ]; then
 fi
 
 # Creating log folders
-mkdir -p $LOG_BUILD_3RDPARTY_DIR/pnageo
+mkdir -p $LOG_BUILD_3RDPARTY_DIR/gcsfunc
 mkdir -p $LOG_BUILD_3RDPARTY_DIR/geos
 mkdir -p $LOG_BUILD_3RDPARTY_DIR/protobuf
 mkdir -p $LOG_BUILD_3RDPARTY_DIR/zlib
@@ -299,16 +299,16 @@ mkdir -p $LOG_BUILD_3RDPARTY_DIR/osgearth
 cd build
 
 # **************************************************
-# pnageo
+# gcsfunc
 
-    printf "[$STEP_NUM_PNAGEO of $STEP_NUM_TOTAL] Building pnageo ...\n"
-    PNAGEO_INSTALL_DIR=$INSTALL_3RDPARTY_DIR/pnageo
-    PNAGEO_INSTALL_RELEASE_DIR=$PNAGEO_INSTALL_DIR/release
-    PNAGEO_INSTALL_DEBUG_DIR=$PNAGEO_INSTALL_DIR/debug
-    PNAGEO_INCLUDE_DIR=$PNAGEO_INSTALL_RELEASE_DIR/include/
+    printf "[$STEP_NUM_GCSFUNC of $STEP_NUM_TOTAL] Building gcsfunc ...\n"
+    GCSFUNC_INSTALL_DIR=$INSTALL_3RDPARTY_DIR/gcsfunc
+    GCSFUNC_INSTALL_RELEASE_DIR=$GCSFUNC_INSTALL_DIR/release
+    GCSFUNC_INSTALL_DEBUG_DIR=$GCSFUNC_INSTALL_DIR/debug
+    GCSFUNC_INCLUDE_DIR=$GCSFUNC_INSTALL_RELEASE_DIR/include/
     
-    if [ $IS_PNAGEO_BUILD -eq 0 ]; then
-        cd pnageo
+    if [ $IS_GCSFUNC_BUILD -eq 0 ]; then
+        cd gcsfunc
         
         mkdir -p build;
         cd build
@@ -316,9 +316,9 @@ cd build
         if [ $IS_BUILD_RELEASE -eq 1 ]; then
             mkdir -p release;
             cd release
-            $CMAKE_CMD -G "Unix Makefiles" ../../ -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=$PNAGEO_INSTALL_RELEASE_DIR > $LOG_BUILD_3RDPARTY_DIR/pnageo/[CMake][configure][Release].log 2> $LOG_BUILD_3RDPARTY_DIR/pnageo/[CMake][messages][Release].log
-            make -j$NUM_THREADS > $LOG_BUILD_3RDPARTY_DIR/pnageo/[make][build][Release][stdout].log 2> $LOG_BUILD_3RDPARTY_DIR/pnageo/[make][build][Release][stderr].log
-            make install > $LOG_BUILD_3RDPARTY_DIR/pnageo/[make][install][Release][stdout].log 2> $LOG_BUILD_3RDPARTY_DIR/pnageo/[make][install][Release][stderr].log
+            $CMAKE_CMD -G "Unix Makefiles" ../../ -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=$GCSFUNC_INSTALL_RELEASE_DIR > $LOG_BUILD_3RDPARTY_DIR/gcsfunc/[CMake][configure][release].log 2> $LOG_BUILD_3RDPARTY_DIR/gcsfunc/[CMake][messages][release].log
+            make -j$NUM_THREADS > $LOG_BUILD_3RDPARTY_DIR/gcsfunc/[make][build][release][stdout].log 2> $LOG_BUILD_3RDPARTY_DIR/gcsfunc/[make][build][release][stderr].log
+            make install > $LOG_BUILD_3RDPARTY_DIR/gcsfunc/[make][install][release][stdout].log 2> $LOG_BUILD_3RDPARTY_DIR/gcsfunc/[make][install][release][stderr].log
             
             printf "... Release built successfully\n"
             
@@ -328,44 +328,44 @@ cd build
         if [ $IS_BUILD_DEBUG -eq 1 ]; then
             mkdir -p debug;
             cd debug
-            $CMAKE_CMD -G "Unix Makefiles" ../../ -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=$PNAGEO_INSTALL_DEBUG_DIR > $LOG_BUILD_3RDPARTY_DIR/pnageo/[CMake][configure][Debug].log 2> $LOG_BUILD_3RDPARTY_DIR/pnageo/[CMake][messages][Debug].log
-            make -j$NUM_THREADS > $LOG_BUILD_3RDPARTY_DIR/pnageo/[make][build][Debug][stdout].log 2> $LOG_BUILD_3RDPARTY_DIR/pnageo/[make][build][Debug][stderr].log
-            make install > $LOG_BUILD_3RDPARTY_DIR/pnageo/[make][install][Debug][stdout].log 2> $LOG_BUILD_3RDPARTY_DIR/pnageo/[make][install][Debug][stderr].log
+            $CMAKE_CMD -G "Unix Makefiles" ../../ -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=$GCSFUNC_INSTALL_DEBUG_DIR > $LOG_BUILD_3RDPARTY_DIR/gcsfunc/[CMake][configure][debug].log 2> $LOG_BUILD_3RDPARTY_DIR/gcsfunc/[CMake][messages][debug].log
+            make -j$NUM_THREADS > $LOG_BUILD_3RDPARTY_DIR/gcsfunc/[make][build][debug][stdout].log 2> $LOG_BUILD_3RDPARTY_DIR/gcsfunc/[make][build][debug][stderr].log
+            make install > $LOG_BUILD_3RDPARTY_DIR/gcsfunc/[make][install][debug][stdout].log 2> $LOG_BUILD_3RDPARTY_DIR/gcsfunc/[make][install][debug][stderr].log
             
             printf "... Debug built successfully\n"
             
             cd ..
         fi
         
-        printf "... pnageo build finished.\n"
+        printf "... gcsfunc build finished.\n"
         
         cd ../../
     else
-        printf "... pnageo is marked as built.\n"
+        printf "... gcsfunc is marked as built.\n"
     fi
     
     printf "\n"
-    printf "PNAGEO_INCLUDE_DIR     = $PNAGEO_INCLUDE_DIR\n"
-    PNAGEO_LIBRARY_RELEASE=$PNAGEO_INSTALL_RELEASE_DIR/lib/libpnageo.so
-    PNAGEO_LIBRARY_DEBUG=$PNAGEO_INSTALL_DEBUG_DIR/lib/libpnageo.so
+    printf "GCSFUNC_INCLUDE_DIR     = $GCSFUNC_INCLUDE_DIR\n"
+    GCSFUNC_LIBRARY_RELEASE=$GCSFUNC_INSTALL_RELEASE_DIR/lib/libgcsfunc.so
+    GCSFUNC_LIBRARY_DEBUG=$GCSFUNC_INSTALL_DEBUG_DIR/lib/libgcsfunc.so
     
     if [ $IS_BUILD_RELEASE -eq 1 ]; then
-        if [ -e $PNAGEO_LIBRARY_RELEASE ]; then
-            printf "PNAGEO_LIBRARY_RELEASE = $PNAGEO_LIBRARY_RELEASE\n"
-            SUCCESS_BUILD_PNAGEO_RELEASE=1
+        if [ -e $GCSFUNC_LIBRARY_RELEASE ]; then
+            printf "GCSFUNC_LIBRARY_RELEASE = $GCSFUNC_LIBRARY_RELEASE\n"
+            SUCCESS_BUILD_GCSFUNC_RELEASE=1
         else
-            PNAGEO_LIBRARY_RELEASE=
-            printf "PNAGEO_LIBRARY_RELEASE not found [not built?]\n"
+            GCSFUNC_LIBRARY_RELEASE=
+            printf "GCSFUNC_LIBRARY_RELEASE not found [not built?]\n"
         fi
     fi
     
     if [ $IS_BUILD_DEBUG -eq 1 ]; then
-        if [ -e $PNAGEO_LIBRARY_DEBUG ]; then
-            printf "PNAGEO_LIBRARY_DEBUG   = $PNAGEO_LIBRARY_DEBUG\n"
-            SUCCESS_BUILD_PNAGEO_DEBUG=1
+        if [ -e $GCSFUNC_LIBRARY_DEBUG ]; then
+            printf "GCSFUNC_LIBRARY_DEBUG   = $GCSFUNC_LIBRARY_DEBUG\n"
+            SUCCESS_BUILD_GCSFUNC_DEBUG=1
         else
-            PNAGEO_LIBRARY_DEBUG=
-            printf "PNAGEO_LIBRARY_DEBUG not found [not built?]\n"
+            GCSFUNC_LIBRARY_DEBUG=
+            printf "GCSFUNC_LIBRARY_DEBUG not found [not built?]\n"
         fi
     fi
     
@@ -391,9 +391,9 @@ cd build
         if [ $IS_BUILD_RELEASE -eq 1 ]; then
             mkdir -p release;
             cd release
-            $CMAKE_CMD -G "Unix Makefiles" ../../ -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=$GEOS_INSTALL_RELEASE_DIR -DGEOS_BUILD_SHARED=ON -DGEOS_BUILD_STATIC=OFF -DGEOS_ENABLE_TESTS=OFF > $LOG_BUILD_3RDPARTY_DIR/geos/[CMake][configure][Release].log 2> $LOG_BUILD_3RDPARTY_DIR/geos/[CMake][messages][Release].log
-            make -j$NUM_THREADS > $LOG_BUILD_3RDPARTY_DIR/geos/[make][build][Release][stdout].log 2> $LOG_BUILD_3RDPARTY_DIR/geos/[make][build][Release][stderr].log
-            make install > $LOG_BUILD_3RDPARTY_DIR/geos/[make][install][Release][stdout].log 2> $LOG_BUILD_3RDPARTY_DIR/geos/[make][install][Release][stderr].log
+            $CMAKE_CMD -G "Unix Makefiles" ../../ -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=$GEOS_INSTALL_RELEASE_DIR -DGEOS_BUILD_SHARED=ON -DGEOS_BUILD_STATIC=OFF -DGEOS_ENABLE_TESTS=OFF > $LOG_BUILD_3RDPARTY_DIR/geos/[CMake][configure][release].log 2> $LOG_BUILD_3RDPARTY_DIR/geos/[CMake][messages][release].log
+            make -j$NUM_THREADS > $LOG_BUILD_3RDPARTY_DIR/geos/[make][build][release][stdout].log 2> $LOG_BUILD_3RDPARTY_DIR/geos/[make][build][release][stderr].log
+            make install > $LOG_BUILD_3RDPARTY_DIR/geos/[make][install][release][stdout].log 2> $LOG_BUILD_3RDPARTY_DIR/geos/[make][install][release][stderr].log
             
             printf "... Release built successfully\n"
             
@@ -403,9 +403,9 @@ cd build
         if [ $IS_BUILD_DEBUG -eq 1 ]; then
             mkdir -p debug;
             cd debug
-            $CMAKE_CMD -G "Unix Makefiles" ../../ -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=$GEOS_INSTALL_DEBUG_DIR -DGEOS_BUILD_SHARED=ON -DGEOS_BUILD_STATIC=OFF -DGEOS_ENABLE_TESTS=OFF > $LOG_BUILD_3RDPARTY_DIR/geos/[CMake][configure][Debug].log 2> $LOG_BUILD_3RDPARTY_DIR/geos/[CMake][messages][Debug].log
-            make -j$NUM_THREADS > $LOG_BUILD_3RDPARTY_DIR/geos/[make][build][Debug][stdout].log 2> $LOG_BUILD_3RDPARTY_DIR/geos/[make][build][Debug][stderr].log
-            make install > $LOG_BUILD_3RDPARTY_DIR/geos/[make][install][Debug][stdout].log 2> $LOG_BUILD_3RDPARTY_DIR/geos/[make][install][Debug][stderr].log
+            $CMAKE_CMD -G "Unix Makefiles" ../../ -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=$GEOS_INSTALL_DEBUG_DIR -DGEOS_BUILD_SHARED=ON -DGEOS_BUILD_STATIC=OFF -DGEOS_ENABLE_TESTS=OFF > $LOG_BUILD_3RDPARTY_DIR/geos/[CMake][configure][debug].log 2> $LOG_BUILD_3RDPARTY_DIR/geos/[CMake][messages][debug].log
+            make -j$NUM_THREADS > $LOG_BUILD_3RDPARTY_DIR/geos/[make][build][debug][stdout].log 2> $LOG_BUILD_3RDPARTY_DIR/geos/[make][build][debug][stderr].log
+            make install > $LOG_BUILD_3RDPARTY_DIR/geos/[make][install][debug][stdout].log 2> $LOG_BUILD_3RDPARTY_DIR/geos/[make][install][debug][stderr].log
             
             printf "... Debug built successfully\n"
             
@@ -466,9 +466,9 @@ cd build
         if [ $IS_BUILD_RELEASE -eq 1 ]; then
             mkdir -p release;
             cd release
-            $CMAKE_CMD -G "Unix Makefiles" ../../ -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=$ZLIB_INSTALL_RELEASE_DIR -DCMAKE_POSITION_INDEPENDENT_CODE=ON > $LOG_BUILD_3RDPARTY_DIR/zlib/[CMake][configure][Release].log 2> $LOG_BUILD_3RDPARTY_DIR/zlib/[CMake][messages][Release].log
-            make -j$NUM_THREADS > $LOG_BUILD_3RDPARTY_DIR/zlib/[make][build][Release][stdout].log 2> $LOG_BUILD_3RDPARTY_DIR/zlib/[make][build][Release][stderr].log
-            make install > $LOG_BUILD_3RDPARTY_DIR/zlib/[make][install][Release][stdout].log 2> $LOG_BUILD_3RDPARTY_DIR/zlib/[make][install][Release][stderr].log
+            $CMAKE_CMD -G "Unix Makefiles" ../../ -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=$ZLIB_INSTALL_RELEASE_DIR -DCMAKE_POSITION_INDEPENDENT_CODE=ON > $LOG_BUILD_3RDPARTY_DIR/zlib/[CMake][configure][release].log 2> $LOG_BUILD_3RDPARTY_DIR/zlib/[CMake][messages][release].log
+            make -j$NUM_THREADS > $LOG_BUILD_3RDPARTY_DIR/zlib/[make][build][release][stdout].log 2> $LOG_BUILD_3RDPARTY_DIR/zlib/[make][build][release][stderr].log
+            make install > $LOG_BUILD_3RDPARTY_DIR/zlib/[make][install][release][stdout].log 2> $LOG_BUILD_3RDPARTY_DIR/zlib/[make][install][release][stderr].log
             
             printf "... Release built successfully\n"
             
@@ -478,9 +478,9 @@ cd build
         if [ $IS_BUILD_DEBUG -eq 1 ]; then
             mkdir -p debug;
             cd debug
-            $CMAKE_CMD -G "Unix Makefiles" ../../ -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=$ZLIB_INSTALL_DEBUG_DIR -DCMAKE_POSITION_INDEPENDENT_CODE=ON > $LOG_BUILD_3RDPARTY_DIR/zlib/[CMake][configure][Debug].log 2> $LOG_BUILD_3RDPARTY_DIR/zlib/[CMake][messages][Debug].log
-            make -j$NUM_THREADS > $LOG_BUILD_3RDPARTY_DIR/zlib/[make][build][Debug][stdout].log 2> $LOG_BUILD_3RDPARTY_DIR/zlib/[make][build][Debug][stderr].log
-            make install > $LOG_BUILD_3RDPARTY_DIR/zlib/[make][install][Debug][stdout].log 2> $LOG_BUILD_3RDPARTY_DIR/zlib/[make][install][Debug][stderr].log
+            $CMAKE_CMD -G "Unix Makefiles" ../../ -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=$ZLIB_INSTALL_DEBUG_DIR -DCMAKE_POSITION_INDEPENDENT_CODE=ON > $LOG_BUILD_3RDPARTY_DIR/zlib/[CMake][configure][debug].log 2> $LOG_BUILD_3RDPARTY_DIR/zlib/[CMake][messages][debug].log
+            make -j$NUM_THREADS > $LOG_BUILD_3RDPARTY_DIR/zlib/[make][build][debug][stdout].log 2> $LOG_BUILD_3RDPARTY_DIR/zlib/[make][build][debug][stderr].log
+            make install > $LOG_BUILD_3RDPARTY_DIR/zlib/[make][install][debug][stdout].log 2> $LOG_BUILD_3RDPARTY_DIR/zlib/[make][install][debug][stderr].log
             
             printf "... Debug built successfully\n"
             
@@ -541,9 +541,9 @@ cd build
         if [ $IS_BUILD_RELEASE -eq 1 ]; then
             mkdir -p release;
             cd release
-            $CMAKE_CMD -G "Unix Makefiles" ../../ -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=$PROTOBUF_INSTALL_RELEASE_DIR -Dprotobuf_BUILD_TESTS=OFF -Dprotobuf_BUILD_SHARED_LIBS=ON -Dprotobuf_WITH_ZLIB=ON -DZLIB_INCLUDE_DIR=$ZLIB_INCLUDE_DIR -DZLIB_LIBRARY_RELEASE=$ZLIB_LIBRARY_RELEASE > $LOG_BUILD_3RDPARTY_DIR/protobuf/[CMake][configure][Release].log 2> $LOG_BUILD_3RDPARTY_DIR/protobuf/[CMake][messages][Release].log
-            make -j$NUM_THREADS > $LOG_BUILD_3RDPARTY_DIR/protobuf/[make][build][Release][stdout].log 2> $LOG_BUILD_3RDPARTY_DIR/protobuf/[make][build][Release][stderr].log
-            make install > $LOG_BUILD_3RDPARTY_DIR/protobuf/[make][install][Release][stdout].log 2> $LOG_BUILD_3RDPARTY_DIR/protobuf/[make][install][Release][stderr].log
+            $CMAKE_CMD -G "Unix Makefiles" ../../ -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=$PROTOBUF_INSTALL_RELEASE_DIR -Dprotobuf_BUILD_TESTS=OFF -Dprotobuf_BUILD_SHARED_LIBS=ON -Dprotobuf_WITH_ZLIB=ON -DZLIB_INCLUDE_DIR=$ZLIB_INCLUDE_DIR -DZLIB_LIBRARY_RELEASE=$ZLIB_LIBRARY_RELEASE > $LOG_BUILD_3RDPARTY_DIR/protobuf/[CMake][configure][release].log 2> $LOG_BUILD_3RDPARTY_DIR/protobuf/[CMake][messages][release].log
+            make -j$NUM_THREADS > $LOG_BUILD_3RDPARTY_DIR/protobuf/[make][build][release][stdout].log 2> $LOG_BUILD_3RDPARTY_DIR/protobuf/[make][build][release][stderr].log
+            make install > $LOG_BUILD_3RDPARTY_DIR/protobuf/[make][install][release][stdout].log 2> $LOG_BUILD_3RDPARTY_DIR/protobuf/[make][install][release][stderr].log
             
             printf "... Release built successfully\n"
             
@@ -556,9 +556,9 @@ cd build
         if [ $IS_BUILD_DEBUG -eq 1 ]; then
             mkdir -p debug;
             cd debug
-            $CMAKE_CMD -G "Unix Makefiles" ../../ -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=$PROTOBUF_INSTALL_DEBUG_DIR -Dprotobuf_BUILD_TESTS=OFF -Dprotobuf_BUILD_SHARED_LIBS=ON -Dprotobuf_WITH_ZLIB=ON -DZLIB_INCLUDE_DIR=$ZLIB_INCLUDE_DIR -DZLIB_LIBRARY_DEBUG=$ZLIB_LIBRARY_DEBUG > $LOG_BUILD_3RDPARTY_DIR/protobuf/[CMake][configure][Debug].log 2> $LOG_BUILD_3RDPARTY_DIR/protobuf/[CMake][messages][Debug].log
-            make -j$NUM_THREADS > $LOG_BUILD_3RDPARTY_DIR/protobuf/[make][build][Debug][stdout].log 2> $LOG_BUILD_3RDPARTY_DIR/protobuf/[make][build][Debug][stderr].log
-            make install > $LOG_BUILD_3RDPARTY_DIR/protobuf/[make][install][Debug][stdout].log 2> $LOG_BUILD_3RDPARTY_DIR/protobuf/[make][install][Debug][stderr].log
+            $CMAKE_CMD -G "Unix Makefiles" ../../ -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=$PROTOBUF_INSTALL_DEBUG_DIR -Dprotobuf_BUILD_TESTS=OFF -Dprotobuf_BUILD_SHARED_LIBS=ON -Dprotobuf_WITH_ZLIB=ON -DZLIB_INCLUDE_DIR=$ZLIB_INCLUDE_DIR -DZLIB_LIBRARY_DEBUG=$ZLIB_LIBRARY_DEBUG > $LOG_BUILD_3RDPARTY_DIR/protobuf/[CMake][configure][debug].log 2> $LOG_BUILD_3RDPARTY_DIR/protobuf/[CMake][messages][debug].log
+            make -j$NUM_THREADS > $LOG_BUILD_3RDPARTY_DIR/protobuf/[make][build][debug][stdout].log 2> $LOG_BUILD_3RDPARTY_DIR/protobuf/[make][build][debug][stderr].log
+            make install > $LOG_BUILD_3RDPARTY_DIR/protobuf/[make][install][debug][stdout].log 2> $LOG_BUILD_3RDPARTY_DIR/protobuf/[make][install][debug][stderr].log
             
             printf "... Debug built successfully\n"
             
@@ -635,9 +635,9 @@ cd build
         if [ $IS_BUILD_RELEASE -eq 1 ]; then
             mkdir -p release;
             cd release
-            $CMAKE_CMD -G "Unix Makefiles" ../../ -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=$LIBPNG_INSTALL_RELEASE_DIR -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DPNG_BUILD_ZLIB=OFF -DZLIB_INCLUDE_DIR=$ZLIB_INCLUDE_DIR -DZLIB_LIBRARY=$ZLIB_LIBRARY_RELEASE > $LOG_BUILD_3RDPARTY_DIR/libpng/[CMake][configure][Release].log 2> $LOG_BUILD_3RDPARTY_DIR/libpng/[CMake][messages][Release].log
-            make -j$NUM_THREADS > $LOG_BUILD_3RDPARTY_DIR/libpng/[make][build][Release][stdout].log 2> $LOG_BUILD_3RDPARTY_DIR/libpng/[make][build][Release][stderr].log
-            make install > $LOG_BUILD_3RDPARTY_DIR/libpng/[make][install][Release][stdout].log 2> $LOG_BUILD_3RDPARTY_DIR/libpng/[make][install][Release][stderr].log
+            $CMAKE_CMD -G "Unix Makefiles" ../../ -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=$LIBPNG_INSTALL_RELEASE_DIR -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DPNG_BUILD_ZLIB=OFF -DZLIB_INCLUDE_DIR=$ZLIB_INCLUDE_DIR -DZLIB_LIBRARY=$ZLIB_LIBRARY_RELEASE > $LOG_BUILD_3RDPARTY_DIR/libpng/[CMake][configure][release].log 2> $LOG_BUILD_3RDPARTY_DIR/libpng/[CMake][messages][release].log
+            make -j$NUM_THREADS > $LOG_BUILD_3RDPARTY_DIR/libpng/[make][build][release][stdout].log 2> $LOG_BUILD_3RDPARTY_DIR/libpng/[make][build][release][stderr].log
+            make install > $LOG_BUILD_3RDPARTY_DIR/libpng/[make][install][release][stdout].log 2> $LOG_BUILD_3RDPARTY_DIR/libpng/[make][install][release][stderr].log
             
             printf "... Release built successfully\n"
             
@@ -647,9 +647,9 @@ cd build
         if [ $IS_BUILD_DEBUG -eq 1 ]; then
             mkdir -p debug;
             cd debug
-            $CMAKE_CMD -G "Unix Makefiles" ../../ -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=$LIBPNG_INSTALL_DEBUG_DIR -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DPNG_BUILD_ZLIB=OFF -DZLIB_INCLUDE_DIR=$ZLIB_INCLUDE_DIR -DZLIB_LIBRARY=$ZLIB_LIBRARY_DEBUG > $LOG_BUILD_3RDPARTY_DIR/libpng/[CMake][configure][Debug].log 2> $LOG_BUILD_3RDPARTY_DIR/libpng/[CMake][messages][Debug].log
-            make -j$NUM_THREADS > $LOG_BUILD_3RDPARTY_DIR/libpng/[make][build][Debug][stdout].log 2> $LOG_BUILD_3RDPARTY_DIR/libpng/[make][build][Debug][stderr].log
-            make install > $LOG_BUILD_3RDPARTY_DIR/libpng/[make][install][Debug][stdout].log 2> $LOG_BUILD_3RDPARTY_DIR/libpng/[make][install][Debug][stderr].log
+            $CMAKE_CMD -G "Unix Makefiles" ../../ -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=$LIBPNG_INSTALL_DEBUG_DIR -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DPNG_BUILD_ZLIB=OFF -DZLIB_INCLUDE_DIR=$ZLIB_INCLUDE_DIR -DZLIB_LIBRARY=$ZLIB_LIBRARY_DEBUG > $LOG_BUILD_3RDPARTY_DIR/libpng/[CMake][configure][debug].log 2> $LOG_BUILD_3RDPARTY_DIR/libpng/[CMake][messages][debug].log
+            make -j$NUM_THREADS > $LOG_BUILD_3RDPARTY_DIR/libpng/[make][build][debug][stdout].log 2> $LOG_BUILD_3RDPARTY_DIR/libpng/[make][build][debug][stderr].log
+            make install > $LOG_BUILD_3RDPARTY_DIR/libpng/[make][install][debug][stdout].log 2> $LOG_BUILD_3RDPARTY_DIR/libpng/[make][install][debug][stderr].log
             
             printf "... Debug built successfully\n"
             
@@ -710,9 +710,9 @@ cd build
         if [ $IS_BUILD_RELEASE -eq 1 ]; then
             mkdir -p release;
             cd release
-            $CMAKE_CMD -G "Unix Makefiles" ../../ -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=$LIBJPEG_INSTALL_RELEASE_DIR -DCMAKE_POSITION_INDEPENDENT_CODE=ON > $LOG_BUILD_3RDPARTY_DIR/libjpeg/[CMake][configure][Release].log 2> $LOG_BUILD_3RDPARTY_DIR/libjpeg/[CMake][messages][Release].log
-            make -j$NUM_THREADS > $LOG_BUILD_3RDPARTY_DIR/libjpeg/[make][build][Release][stdout].log 2> $LOG_BUILD_3RDPARTY_DIR/libjpeg/[make][build][Release][stderr].log
-            make install > $LOG_BUILD_3RDPARTY_DIR/libjpeg/[make][install][Release][stdout].log 2> $LOG_BUILD_3RDPARTY_DIR/libjpeg/[make][install][Release][stderr].log
+            $CMAKE_CMD -G "Unix Makefiles" ../../ -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=$LIBJPEG_INSTALL_RELEASE_DIR -DCMAKE_POSITION_INDEPENDENT_CODE=ON > $LOG_BUILD_3RDPARTY_DIR/libjpeg/[CMake][configure][release].log 2> $LOG_BUILD_3RDPARTY_DIR/libjpeg/[CMake][messages][release].log
+            make -j$NUM_THREADS > $LOG_BUILD_3RDPARTY_DIR/libjpeg/[make][build][release][stdout].log 2> $LOG_BUILD_3RDPARTY_DIR/libjpeg/[make][build][release][stderr].log
+            make install > $LOG_BUILD_3RDPARTY_DIR/libjpeg/[make][install][release][stdout].log 2> $LOG_BUILD_3RDPARTY_DIR/libjpeg/[make][install][release][stderr].log
             
             printf "... Release built successfully\n"
             
@@ -722,9 +722,9 @@ cd build
         if [ $IS_BUILD_DEBUG -eq 1 ]; then
             mkdir -p debug;
             cd debug
-            $CMAKE_CMD -G "Unix Makefiles" ../../ -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=$LIBJPEG_INSTALL_DEBUG_DIR -DCMAKE_POSITION_INDEPENDENT_CODE=ON > $LOG_BUILD_3RDPARTY_DIR/libjpeg/[CMake][configure][Debug].log 2> $LOG_BUILD_3RDPARTY_DIR/libjpeg/[CMake][messages][Debug].log
-            make -j$NUM_THREADS > $LOG_BUILD_3RDPARTY_DIR/libjpeg/[make][build][Debug][stdout].log 2> $LOG_BUILD_3RDPARTY_DIR/libjpeg/[make][build][Debug][stderr].log
-            make install > $LOG_BUILD_3RDPARTY_DIR/libjpeg/[make][install][Debug][stdout].log 2> $LOG_BUILD_3RDPARTY_DIR/libjpeg/[make][install][Debug][stderr].log
+            $CMAKE_CMD -G "Unix Makefiles" ../../ -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=$LIBJPEG_INSTALL_DEBUG_DIR -DCMAKE_POSITION_INDEPENDENT_CODE=ON > $LOG_BUILD_3RDPARTY_DIR/libjpeg/[CMake][configure][debug].log 2> $LOG_BUILD_3RDPARTY_DIR/libjpeg/[CMake][messages][debug].log
+            make -j$NUM_THREADS > $LOG_BUILD_3RDPARTY_DIR/libjpeg/[make][build][debug][stdout].log 2> $LOG_BUILD_3RDPARTY_DIR/libjpeg/[make][build][debug][stderr].log
+            make install > $LOG_BUILD_3RDPARTY_DIR/libjpeg/[make][install][debug][stdout].log 2> $LOG_BUILD_3RDPARTY_DIR/libjpeg/[make][install][debug][stderr].log
                     
             printf "... Debug built successfully\n"
             
@@ -785,9 +785,9 @@ cd build
         if [ $IS_BUILD_RELEASE -eq 1 ]; then
             mkdir -p release;
             cd release
-            $CMAKE_CMD -G "Unix Makefiles" ../../ -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=$LIBTIFF_INSTALL_RELEASE_DIR -DZLIB_INCLUDE_DIR=$ZLIB_INCLUDE_DIR -DZLIB_LIBRARY_RELEASE=$ZLIB_LIBRARY_RELEASE -DJPEG_INCLUDE_DIR=$LIBJPEG_INCLUDE_DIR -DJPEG_LIBRARY=$LIBJPEG_LIBRARY_RELEASE > $LOG_BUILD_3RDPARTY_DIR/libtiff/[CMake][configure][Release].log 2> $LOG_BUILD_3RDPARTY_DIR/libtiff/[CMake][messages][Release].log
-            make -j$NUM_THREADS > $LOG_BUILD_3RDPARTY_DIR/libtiff/[make][build][Release][stdout].log 2> $LOG_BUILD_3RDPARTY_DIR/libtiff/[make][build][Release][stderr].log
-            make install > $LOG_BUILD_3RDPARTY_DIR/libtiff/[make][install][Release][stdout].log 2> $LOG_BUILD_3RDPARTY_DIR/libtiff/[make][install][Release][stderr].log
+            $CMAKE_CMD -G "Unix Makefiles" ../../ -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=$LIBTIFF_INSTALL_RELEASE_DIR -DZLIB_INCLUDE_DIR=$ZLIB_INCLUDE_DIR -DZLIB_LIBRARY_RELEASE=$ZLIB_LIBRARY_RELEASE -DJPEG_INCLUDE_DIR=$LIBJPEG_INCLUDE_DIR -DJPEG_LIBRARY=$LIBJPEG_LIBRARY_RELEASE > $LOG_BUILD_3RDPARTY_DIR/libtiff/[CMake][configure][release].log 2> $LOG_BUILD_3RDPARTY_DIR/libtiff/[CMake][messages][release].log
+            make -j$NUM_THREADS > $LOG_BUILD_3RDPARTY_DIR/libtiff/[make][build][release][stdout].log 2> $LOG_BUILD_3RDPARTY_DIR/libtiff/[make][build][release][stderr].log
+            make install > $LOG_BUILD_3RDPARTY_DIR/libtiff/[make][install][release][stdout].log 2> $LOG_BUILD_3RDPARTY_DIR/libtiff/[make][install][release][stderr].log
             
             printf "... Release built successfully\n"
             
@@ -797,9 +797,9 @@ cd build
         if [ $IS_BUILD_DEBUG -eq 1 ]; then
             mkdir -p debug;
             cd debug
-            $CMAKE_CMD -G "Unix Makefiles" ../../ -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=$LIBTIFF_INSTALL_DEBUG_DIR -DZLIB_INCLUDE_DIR=$ZLIB_INCLUDE_DIR -DZLIB_LIBRARY_DEBUG=$ZLIB_LIBRARY_DEBUG -DJPEG_INCLUDE_DIR=$LIBJPEG_INCLUDE_DIR -DJPEG_LIBRARY=$LIBJPEG_LIBRARY_DEBUG > $LOG_BUILD_3RDPARTY_DIR/libtiff/[CMake][configure][Debug].log 2> $LOG_BUILD_3RDPARTY_DIR/libtiff/[CMake][messages][Debug].log
-            make -j$NUM_THREADS > $LOG_BUILD_3RDPARTY_DIR/libtiff/[make][build][Debug][stdout].log 2> $LOG_BUILD_3RDPARTY_DIR/libtiff/[make][build][Debug][stderr].log
-            make install > $LOG_BUILD_3RDPARTY_DIR/libtiff/[make][install][Debug][stdout].log 2> $LOG_BUILD_3RDPARTY_DIR/libtiff/[make][install][Debug][stderr].log
+            $CMAKE_CMD -G "Unix Makefiles" ../../ -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=$LIBTIFF_INSTALL_DEBUG_DIR -DZLIB_INCLUDE_DIR=$ZLIB_INCLUDE_DIR -DZLIB_LIBRARY_DEBUG=$ZLIB_LIBRARY_DEBUG -DJPEG_INCLUDE_DIR=$LIBJPEG_INCLUDE_DIR -DJPEG_LIBRARY=$LIBJPEG_LIBRARY_DEBUG > $LOG_BUILD_3RDPARTY_DIR/libtiff/[CMake][configure][debug].log 2> $LOG_BUILD_3RDPARTY_DIR/libtiff/[CMake][messages][debug].log
+            make -j$NUM_THREADS > $LOG_BUILD_3RDPARTY_DIR/libtiff/[make][build][debug][stdout].log 2> $LOG_BUILD_3RDPARTY_DIR/libtiff/[make][build][debug][stderr].log
+            make install > $LOG_BUILD_3RDPARTY_DIR/libtiff/[make][install][debug][stdout].log 2> $LOG_BUILD_3RDPARTY_DIR/libtiff/[make][install][debug][stderr].log
             
             printf "... Debug built successfully\n"
             
@@ -860,9 +860,9 @@ cd build
         if [ $IS_BUILD_RELEASE -eq 1 ]; then
             mkdir -p release;
             cd release
-            $CMAKE_CMD -G "Unix Makefiles" ../../ -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=$LIBCURL_INSTALL_RELEASE_DIR -DZLIB_INCLUDE_DIR=$ZLIB_INCLUDE_DIR -DZLIB_LIBRARY_RELEASE=$ZLIB_LIBRARY_RELEASE -DZLIB_LIBRARY_DEBUG=$ZLIB_LIBRARY_DEBUG > $LOG_BUILD_3RDPARTY_DIR/libcurl/[CMake][configure][Release].log 2> $LOG_BUILD_3RDPARTY_DIR/libcurl/[CMake][messages][Release].log
-            make -j$NUM_THREADS > $LOG_BUILD_3RDPARTY_DIR/libcurl/[make][build][Release][stdout].log 2> $LOG_BUILD_3RDPARTY_DIR/libcurl/[make][build][Release][stderr].log
-            make install > $LOG_BUILD_3RDPARTY_DIR/libcurl/[make][install][Release][stdout].log 2> $LOG_BUILD_3RDPARTY_DIR/libcurl/[make][install][Release][stderr].log
+            $CMAKE_CMD -G "Unix Makefiles" ../../ -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=$LIBCURL_INSTALL_RELEASE_DIR -DZLIB_INCLUDE_DIR=$ZLIB_INCLUDE_DIR -DZLIB_LIBRARY_RELEASE=$ZLIB_LIBRARY_RELEASE -DZLIB_LIBRARY_DEBUG=$ZLIB_LIBRARY_DEBUG > $LOG_BUILD_3RDPARTY_DIR/libcurl/[CMake][configure][release].log 2> $LOG_BUILD_3RDPARTY_DIR/libcurl/[CMake][messages][release].log
+            make -j$NUM_THREADS > $LOG_BUILD_3RDPARTY_DIR/libcurl/[make][build][release][stdout].log 2> $LOG_BUILD_3RDPARTY_DIR/libcurl/[make][build][release][stderr].log
+            make install > $LOG_BUILD_3RDPARTY_DIR/libcurl/[make][install][release][stdout].log 2> $LOG_BUILD_3RDPARTY_DIR/libcurl/[make][install][release][stderr].log
             
             printf "... Release built successfully\n"
             
@@ -872,9 +872,9 @@ cd build
         if [ $IS_BUILD_DEBUG -eq 1 ]; then
             mkdir -p debug;
             cd debug
-            $CMAKE_CMD -G "Unix Makefiles" ../../ -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=$LIBCURL_INSTALL_DEBUG_DIR -DZLIB_INCLUDE_DIR=$ZLIB_INCLUDE_DIR -DZLIB_LIBRARY_RELEASE=$ZLIB_LIBRARY_RELEASE -DZLIB_LIBRARY_DEBUG=$ZLIB_LIBRARY_DEBUG > $LOG_BUILD_3RDPARTY_DIR/libcurl/[CMake][configure][Debug].log 2> $LOG_BUILD_3RDPARTY_DIR/libcurl/[CMake][messages][Debug].log
-            make -j$NUM_THREADS > $LOG_BUILD_3RDPARTY_DIR/libcurl/[make][build][Debug][stdout].log 2> $LOG_BUILD_3RDPARTY_DIR/libcurl/[make][build][Debug][stderr].log
-            make install > $LOG_BUILD_3RDPARTY_DIR/libcurl/[make][install][Debug][stdout].log 2> $LOG_BUILD_3RDPARTY_DIR/libcurl/[make][install][Debug][stderr].log
+            $CMAKE_CMD -G "Unix Makefiles" ../../ -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=$LIBCURL_INSTALL_DEBUG_DIR -DZLIB_INCLUDE_DIR=$ZLIB_INCLUDE_DIR -DZLIB_LIBRARY_RELEASE=$ZLIB_LIBRARY_RELEASE -DZLIB_LIBRARY_DEBUG=$ZLIB_LIBRARY_DEBUG > $LOG_BUILD_3RDPARTY_DIR/libcurl/[CMake][configure][debug].log 2> $LOG_BUILD_3RDPARTY_DIR/libcurl/[CMake][messages][debug].log
+            make -j$NUM_THREADS > $LOG_BUILD_3RDPARTY_DIR/libcurl/[make][build][debug][stdout].log 2> $LOG_BUILD_3RDPARTY_DIR/libcurl/[make][build][debug][stderr].log
+            make install > $LOG_BUILD_3RDPARTY_DIR/libcurl/[make][install][debug][stdout].log 2> $LOG_BUILD_3RDPARTY_DIR/libcurl/[make][install][debug][stderr].log
             
             printf "... Debug built successfully\n"
             
@@ -935,9 +935,9 @@ cd build
         if [ $IS_BUILD_RELEASE -eq 1 ]; then
             mkdir -p release;
             cd release
-            $CMAKE_CMD -G "Unix Makefiles" ../../ -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=$FREETYPE_INSTALL_RELEASE_DIR -DBUILD_SHARED_LIBS=ON -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DZLIB_INCLUDE_DIR=$ZLIB_INCLUDE_DIR -DZLIB_LIBRARY_RELEASE=$ZLIB_LIBRARY_RELEASE > $LOG_BUILD_3RDPARTY_DIR/freetype/[CMake][configure][Release].log 2> $LOG_BUILD_3RDPARTY_DIR/freetype/[CMake][messages][Release].log
-            make -j$NUM_THREADS > $LOG_BUILD_3RDPARTY_DIR/freetype/[make][build][Release][stdout].log 2> $LOG_BUILD_3RDPARTY_DIR/freetype/[make][build][Release][stderr].log
-            make install > $LOG_BUILD_3RDPARTY_DIR/freetype/[make][install][Release][stdout].log 2> $LOG_BUILD_3RDPARTY_DIR/freetype/[make][install][Release][stderr].log
+            $CMAKE_CMD -G "Unix Makefiles" ../../ -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=$FREETYPE_INSTALL_RELEASE_DIR -DBUILD_SHARED_LIBS=ON -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DZLIB_INCLUDE_DIR=$ZLIB_INCLUDE_DIR -DZLIB_LIBRARY_RELEASE=$ZLIB_LIBRARY_RELEASE > $LOG_BUILD_3RDPARTY_DIR/freetype/[CMake][configure][release].log 2> $LOG_BUILD_3RDPARTY_DIR/freetype/[CMake][messages][release].log
+            make -j$NUM_THREADS > $LOG_BUILD_3RDPARTY_DIR/freetype/[make][build][release][stdout].log 2> $LOG_BUILD_3RDPARTY_DIR/freetype/[make][build][release][stderr].log
+            make install > $LOG_BUILD_3RDPARTY_DIR/freetype/[make][install][release][stdout].log 2> $LOG_BUILD_3RDPARTY_DIR/freetype/[make][install][release][stderr].log
             
             printf "... Release built successfully\n"
             
@@ -947,9 +947,9 @@ cd build
         if [ $IS_BUILD_DEBUG -eq 1 ]; then
             mkdir -p debug;
             cd debug
-            $CMAKE_CMD -G "Unix Makefiles" ../../ -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=$FREETYPE_INSTALL_DEBUG_DIR -DBUILD_SHARED_LIBS=ON -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DZLIB_INCLUDE_DIR=$ZLIB_INCLUDE_DIR -DZLIB_LIBRARY_DEBUG=$ZLIB_LIBRARY_DEBUG > $LOG_BUILD_3RDPARTY_DIR/freetype/[CMake][configure][Debug].log 2> $LOG_BUILD_3RDPARTY_DIR/freetype/[CMake][messages][Debug].log
-            make -j$NUM_THREADS > $LOG_BUILD_3RDPARTY_DIR/freetype/[make][build][Debug][stdout].log 2> $LOG_BUILD_3RDPARTY_DIR/freetype/[make][build][Debug][stderr].log
-            make install > $LOG_BUILD_3RDPARTY_DIR/freetype/[make][install][Debug][stdout].log 2> $LOG_BUILD_3RDPARTY_DIR/freetype/[make][install][Debug][stderr].log
+            $CMAKE_CMD -G "Unix Makefiles" ../../ -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=$FREETYPE_INSTALL_DEBUG_DIR -DBUILD_SHARED_LIBS=ON -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DZLIB_INCLUDE_DIR=$ZLIB_INCLUDE_DIR -DZLIB_LIBRARY_DEBUG=$ZLIB_LIBRARY_DEBUG > $LOG_BUILD_3RDPARTY_DIR/freetype/[CMake][configure][debug].log 2> $LOG_BUILD_3RDPARTY_DIR/freetype/[CMake][messages][debug].log
+            make -j$NUM_THREADS > $LOG_BUILD_3RDPARTY_DIR/freetype/[make][build][debug][stdout].log 2> $LOG_BUILD_3RDPARTY_DIR/freetype/[make][build][debug][stderr].log
+            make install > $LOG_BUILD_3RDPARTY_DIR/freetype/[make][install][debug][stdout].log 2> $LOG_BUILD_3RDPARTY_DIR/freetype/[make][install][debug][stderr].log
             
             printf "... Debug built successfully\n"
             
@@ -1010,9 +1010,9 @@ cd build
         if [ $IS_BUILD_RELEASE -eq 1 ]; then
             mkdir -p release;
             cd release
-            $CMAKE_CMD -G "Unix Makefiles" ../../ -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=$PROJ4_INSTALL_RELEASE_DIR -DBUILD_LIBPROJ_SHARED=ON -DPROJ_TESTS=OFF > $LOG_BUILD_3RDPARTY_DIR/proj/[CMake][configure][Release].log 2> $LOG_BUILD_3RDPARTY_DIR/proj/[CMake][messages][Release].log
-            make -j$NUM_THREADS > $LOG_BUILD_3RDPARTY_DIR/proj/[make][build][Release][stdout].log 2> $LOG_BUILD_3RDPARTY_DIR/proj/[make][build][Release][stderr].log
-            make install > $LOG_BUILD_3RDPARTY_DIR/proj/[make][install][Release][stdout].log 2> $LOG_BUILD_3RDPARTY_DIR/proj/[make][install][Release][stderr].log
+            $CMAKE_CMD -G "Unix Makefiles" ../../ -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=$PROJ4_INSTALL_RELEASE_DIR -DBUILD_LIBPROJ_SHARED=ON -DPROJ_TESTS=OFF > $LOG_BUILD_3RDPARTY_DIR/proj/[CMake][configure][release].log 2> $LOG_BUILD_3RDPARTY_DIR/proj/[CMake][messages][release].log
+            make -j$NUM_THREADS > $LOG_BUILD_3RDPARTY_DIR/proj/[make][build][release][stdout].log 2> $LOG_BUILD_3RDPARTY_DIR/proj/[make][build][release][stderr].log
+            make install > $LOG_BUILD_3RDPARTY_DIR/proj/[make][install][release][stdout].log 2> $LOG_BUILD_3RDPARTY_DIR/proj/[make][install][release][stderr].log
             
             printf "... Release built successfully\n"
             
@@ -1022,9 +1022,9 @@ cd build
         if [ $IS_BUILD_DEBUG -eq 1 ]; then
             mkdir -p debug;
             cd debug
-            $CMAKE_CMD -G "Unix Makefiles" ../../ -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=$PROJ4_INSTALL_DEBUG_DIR -DBUILD_LIBPROJ_SHARED=ON -DPROJ_TESTS=OFF > $LOG_BUILD_3RDPARTY_DIR/proj/[CMake][configure][Debug].log 2> $LOG_BUILD_3RDPARTY_DIR/proj/[CMake][messages][Debug].log
-            make -j$NUM_THREADS > $LOG_BUILD_3RDPARTY_DIR/proj/[make][build][Debug][stdout].log 2> $LOG_BUILD_3RDPARTY_DIR/proj/[make][build][Debug][stderr].log
-            make install > $LOG_BUILD_3RDPARTY_DIR/proj/[make][install][Debug][stdout].log 2> $LOG_BUILD_3RDPARTY_DIR/proj/[make][install][Debug][stderr].log
+            $CMAKE_CMD -G "Unix Makefiles" ../../ -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=$PROJ4_INSTALL_DEBUG_DIR -DBUILD_LIBPROJ_SHARED=ON -DPROJ_TESTS=OFF > $LOG_BUILD_3RDPARTY_DIR/proj/[CMake][configure][debug].log 2> $LOG_BUILD_3RDPARTY_DIR/proj/[CMake][messages][debug].log
+            make -j$NUM_THREADS > $LOG_BUILD_3RDPARTY_DIR/proj/[make][build][debug][stdout].log 2> $LOG_BUILD_3RDPARTY_DIR/proj/[make][build][debug][stderr].log
+            make install > $LOG_BUILD_3RDPARTY_DIR/proj/[make][install][debug][stdout].log 2> $LOG_BUILD_3RDPARTY_DIR/proj/[make][install][debug][stderr].log
             
             printf "... Debug built successfully\n"
             
@@ -1086,9 +1086,9 @@ cd build
             mkdir -p release;
             cd release
             
-            $CMAKE_CMD -G "Unix Makefiles" ../../ -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=$LIBGEOTIFF_INSTALL_RELEASE_DIR -DWITH_UTILITIES=OFF -DWITH_JPEG=ON -DWITH_TIFF=ON -DWITH_ZLIB=ON -DPROJ_INCLUDE_DIR=$PROJ4_INCLUDE_DIR -DPROJ_LIBRARY=$PROJ4_LIBRARY_RELEASE -DZLIB_INCLUDE_DIR=$ZLIB_INCLUDE_DIR -DZLIB_LIBRARY_RELEASE=$ZLIB_LIBRARY_RELEASE -DJPEG_INCLUDE_DIR=$LIBJPEG_INCLUDE_DIR -DJPEG_LIBRARY=$LIBJPEG_LIBRARY_RELEASE -DTIFF_INCLUDE_DIR=$LIBTIFF_INCLUDE_DIR -DTIFF_LIBRARY_RELEASE=$LIBTIFF_LIBRARY_RELEASE > $LOG_BUILD_3RDPARTY_DIR/libgeotiff/[CMake][configure][Release].log 2> $LOG_BUILD_3RDPARTY_DIR/libgeotiff/[CMake][messages][Release].log
-            make -j$NUM_THREADS > $LOG_BUILD_3RDPARTY_DIR/libgeotiff/[make][build][Release][stdout].log 2> $LOG_BUILD_3RDPARTY_DIR/libgeotiff/[make][build][Release][stderr].log
-            make install > $LOG_BUILD_3RDPARTY_DIR/libgeotiff/[make][install][Release][stdout].log 2> $LOG_BUILD_3RDPARTY_DIR/libgeotiff/[make][install][Release][stderr].log
+            $CMAKE_CMD -G "Unix Makefiles" ../../ -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=$LIBGEOTIFF_INSTALL_RELEASE_DIR -DWITH_UTILITIES=OFF -DWITH_JPEG=ON -DWITH_TIFF=ON -DWITH_ZLIB=ON -DPROJ_INCLUDE_DIR=$PROJ4_INCLUDE_DIR -DPROJ_LIBRARY=$PROJ4_LIBRARY_RELEASE -DZLIB_INCLUDE_DIR=$ZLIB_INCLUDE_DIR -DZLIB_LIBRARY_RELEASE=$ZLIB_LIBRARY_RELEASE -DJPEG_INCLUDE_DIR=$LIBJPEG_INCLUDE_DIR -DJPEG_LIBRARY=$LIBJPEG_LIBRARY_RELEASE -DTIFF_INCLUDE_DIR=$LIBTIFF_INCLUDE_DIR -DTIFF_LIBRARY_RELEASE=$LIBTIFF_LIBRARY_RELEASE > $LOG_BUILD_3RDPARTY_DIR/libgeotiff/[CMake][configure][release].log 2> $LOG_BUILD_3RDPARTY_DIR/libgeotiff/[CMake][messages][release].log
+            make -j$NUM_THREADS > $LOG_BUILD_3RDPARTY_DIR/libgeotiff/[make][build][release][stdout].log 2> $LOG_BUILD_3RDPARTY_DIR/libgeotiff/[make][build][release][stderr].log
+            make install > $LOG_BUILD_3RDPARTY_DIR/libgeotiff/[make][install][release][stdout].log 2> $LOG_BUILD_3RDPARTY_DIR/libgeotiff/[make][install][release][stderr].log
             
             printf "... Release built successfully\n"
             
@@ -1098,9 +1098,9 @@ cd build
         if [ $IS_BUILD_DEBUG -eq 1 ]; then
             mkdir -p debug;
             cd debug
-            $CMAKE_CMD -G "Unix Makefiles" ../../ -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=$LIBGEOTIFF_INSTALL_DEBUG_DIR -DWITH_UTILITIES=OFF -DWITH_JPEG=ON -DWITH_TIFF=ON -DWITH_ZLIB=ON -DPROJ_INCLUDE_DIR=$PROJ4_INCLUDE_DIR -DPROJ_LIBRARY=$PROJ4_LIBRARY_DEBUG -DZLIB_INCLUDE_DIR=$ZLIB_INCLUDE_DIR -DZLIB_LIBRARY_DEBUG=$ZLIB_LIBRARY_DEBUG -DJPEG_INCLUDE_DIR=$LIBJPEG_INCLUDE_DIR -DJPEG_LIBRARY=$LIBJPEG_LIBRARY_DEBUG -DTIFF_INCLUDE_DIR=$LIBTIFF_INCLUDE_DIR -DTIFF_LIBRARY_DEBUG=$LIBTIFF_LIBRARY_DEBUG > $LOG_BUILD_3RDPARTY_DIR/libgeotiff/[CMake][configure][Debug].log 2> $LOG_BUILD_3RDPARTY_DIR/libgeotiff/[CMake][messages][Debug].log
-            make -j$NUM_THREADS > $LOG_BUILD_3RDPARTY_DIR/libgeotiff/[make][build][Debug][stdout].log 2> $LOG_BUILD_3RDPARTY_DIR/libgeotiff/[make][build][Debug][stderr].log
-            make install > $LOG_BUILD_3RDPARTY_DIR/libgeotiff/[make][install][Debug][stdout].log 2> $LOG_BUILD_3RDPARTY_DIR/libgeotiff/[make][install][Debug][stderr].log
+            $CMAKE_CMD -G "Unix Makefiles" ../../ -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=$LIBGEOTIFF_INSTALL_DEBUG_DIR -DWITH_UTILITIES=OFF -DWITH_JPEG=ON -DWITH_TIFF=ON -DWITH_ZLIB=ON -DPROJ_INCLUDE_DIR=$PROJ4_INCLUDE_DIR -DPROJ_LIBRARY=$PROJ4_LIBRARY_DEBUG -DZLIB_INCLUDE_DIR=$ZLIB_INCLUDE_DIR -DZLIB_LIBRARY_DEBUG=$ZLIB_LIBRARY_DEBUG -DJPEG_INCLUDE_DIR=$LIBJPEG_INCLUDE_DIR -DJPEG_LIBRARY=$LIBJPEG_LIBRARY_DEBUG -DTIFF_INCLUDE_DIR=$LIBTIFF_INCLUDE_DIR -DTIFF_LIBRARY_DEBUG=$LIBTIFF_LIBRARY_DEBUG > $LOG_BUILD_3RDPARTY_DIR/libgeotiff/[CMake][configure][debug].log 2> $LOG_BUILD_3RDPARTY_DIR/libgeotiff/[CMake][messages][debug].log
+            make -j$NUM_THREADS > $LOG_BUILD_3RDPARTY_DIR/libgeotiff/[make][build][debug][stdout].log 2> $LOG_BUILD_3RDPARTY_DIR/libgeotiff/[make][build][debug][stderr].log
+            make install > $LOG_BUILD_3RDPARTY_DIR/libgeotiff/[make][install][debug][stdout].log 2> $LOG_BUILD_3RDPARTY_DIR/libgeotiff/[make][install][debug][stderr].log
             
             printf "... Debug built successfully\n"
             
@@ -1162,9 +1162,9 @@ cd build
             mkdir -p release;
             cd release
             
-            $CMAKE_CMD -G "Unix Makefiles" ../../ -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=$EXPAT_INSTALL_RELEASE_DIR -DBUILD_doc=OFF -DBUILD_examples=OFF -DBUILD_shared=ON -DBUILD_tests=OFF -DBUILD_tools=OFF > $LOG_BUILD_3RDPARTY_DIR/expat/[CMake][configure][Release].log 2> $LOG_BUILD_3RDPARTY_DIR/expat/[CMake][messages][Release].log
-            make -j$NUM_THREADS > $LOG_BUILD_3RDPARTY_DIR/expat/[make][build][Release][stdout].log 2> $LOG_BUILD_3RDPARTY_DIR/expat/[make][build][Release][stderr].log
-            make install > $LOG_BUILD_3RDPARTY_DIR/expat/[make][install][Release][stdout].log 2> $LOG_BUILD_3RDPARTY_DIR/expat/[make][install][Release][stderr].log
+            $CMAKE_CMD -G "Unix Makefiles" ../../ -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=$EXPAT_INSTALL_RELEASE_DIR -DBUILD_doc=OFF -DBUILD_examples=OFF -DBUILD_shared=ON -DBUILD_tests=OFF -DBUILD_tools=OFF > $LOG_BUILD_3RDPARTY_DIR/expat/[CMake][configure][release].log 2> $LOG_BUILD_3RDPARTY_DIR/expat/[CMake][messages][release].log
+            make -j$NUM_THREADS > $LOG_BUILD_3RDPARTY_DIR/expat/[make][build][release][stdout].log 2> $LOG_BUILD_3RDPARTY_DIR/expat/[make][build][release][stderr].log
+            make install > $LOG_BUILD_3RDPARTY_DIR/expat/[make][install][release][stdout].log 2> $LOG_BUILD_3RDPARTY_DIR/expat/[make][install][release][stderr].log
             
             printf "... Release built successfully\n"
             
@@ -1174,9 +1174,9 @@ cd build
         if [ $IS_BUILD_DEBUG -eq 1 ]; then
             mkdir -p debug;
             cd debug
-            $CMAKE_CMD -G "Unix Makefiles" ../../ -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=$EXPAT_INSTALL_DEBUG_DIR -DBUILD_doc=OFF -DBUILD_examples=OFF -DBUILD_shared=ON -DBUILD_tests=OFF -DBUILD_tools=OFF > $LOG_BUILD_3RDPARTY_DIR/expat/[CMake][configure][Debug].log 2> $LOG_BUILD_3RDPARTY_DIR/expat/[CMake][messages][Debug].log
-            make -j$NUM_THREADS > $LOG_BUILD_3RDPARTY_DIR/expat/[make][build][Debug][stdout].log 2> $LOG_BUILD_3RDPARTY_DIR/expat/[make][build][Debug][stderr].log
-            make install > $LOG_BUILD_3RDPARTY_DIR/expat/[make][install][Debug][stdout].log 2> $LOG_BUILD_3RDPARTY_DIR/expat/[make][install][Debug][stderr].log
+            $CMAKE_CMD -G "Unix Makefiles" ../../ -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=$EXPAT_INSTALL_DEBUG_DIR -DBUILD_doc=OFF -DBUILD_examples=OFF -DBUILD_shared=ON -DBUILD_tests=OFF -DBUILD_tools=OFF > $LOG_BUILD_3RDPARTY_DIR/expat/[CMake][configure][debug].log 2> $LOG_BUILD_3RDPARTY_DIR/expat/[CMake][messages][debug].log
+            make -j$NUM_THREADS > $LOG_BUILD_3RDPARTY_DIR/expat/[make][build][debug][stdout].log 2> $LOG_BUILD_3RDPARTY_DIR/expat/[make][build][debug][stderr].log
+            make install > $LOG_BUILD_3RDPARTY_DIR/expat/[make][install][debug][stdout].log 2> $LOG_BUILD_3RDPARTY_DIR/expat/[make][install][debug][stderr].log
             
             printf "... Debug built successfully\n"
             
@@ -1242,9 +1242,9 @@ cd build
             
             arg="--prefix=$GDAL_INSTALL_RELEASE_DIR --with-geos=$GEOS_INSTALL_RELEASE_DIR --with-libz=$ZLIB_INSTALL_RELEASE_DIR --with-png=$LIBPNG_INSTALL_RELEASE_DIR --with-jpeg=$LIBJPEG_INSTALL_RELEASE_DIR --with-libtiff=$LIBTIFF_INSTALL_RELEASE_DIR --with-curl=$LIBCURL_INSTALL_RELEASE_DIR/bin/curl-config --with-proj=$PROJ4_INSTALL_RELEASE_DIR --with-geotiff=$LIBGEOTIFF_INSTALL_RELEASE_DIR --with-expat=$EXPAT_INSTALL_RELEASE_DIR --with-ecw=$PREBUILT_3RDPARTY_DIR/ecw"
             
-            sh $cmd $arg > $LOG_BUILD_3RDPARTY_DIR/gdal/[configure][Release][stdout].log 2> $LOG_BUILD_3RDPARTY_DIR/gdal/[configure][Release][stderr].log
-            make -j$NUM_THREADS > $LOG_BUILD_3RDPARTY_DIR/gdal/[make][build][Release][stdout].log 2> $LOG_BUILD_3RDPARTY_DIR/gdal/[make][build][Release][stderr].log
-            make install > $LOG_BUILD_3RDPARTY_DIR/gdal/[make][install][Release][stdout].log 2> $LOG_BUILD_3RDPARTY_DIR/gdal/[make][install][Release][stderr].log
+            sh $cmd $arg > $LOG_BUILD_3RDPARTY_DIR/gdal/[configure][release][stdout].log 2> $LOG_BUILD_3RDPARTY_DIR/gdal/[configure][release][stderr].log
+            make -j$NUM_THREADS > $LOG_BUILD_3RDPARTY_DIR/gdal/[make][build][release][stdout].log 2> $LOG_BUILD_3RDPARTY_DIR/gdal/[make][build][release][stderr].log
+            make install > $LOG_BUILD_3RDPARTY_DIR/gdal/[make][install][release][stdout].log 2> $LOG_BUILD_3RDPARTY_DIR/gdal/[make][install][release][stderr].log
             
             strip -s $GDAL_INSTALL_RELEASE_DIR/lib/libgdal.a
             strip -s $GDAL_INSTALL_RELEASE_DIR/lib/libgdal.so
@@ -1271,9 +1271,9 @@ cd build
             
             arg="--prefix=$GDAL_INSTALL_DEBUG_DIR --with-geos=$GEOS_INSTALL_DEBUG_DIR --with-libz=$ZLIB_INSTALL_DEBUG_DIR --with-png=$LIBPNG_INSTALL_DEBUG_DIR --with-jpeg=$LIBJPEG_INSTALL_DEBUG_DIR --with-libtiff=$LIBTIFF_INSTALL_DEBUG_DIR --with-curl=$LIBCURL_INSTALL_DEBUG_DIR/bin/curl-config --with-proj=$PROJ4_INSTALL_DEBUG_DIR --with-geotiff=$LIBGEOTIFF_INSTALL_DEBUG_DIR --with-expat=$EXPAT_INSTALL_DEBUG_DIR --with-ecw=$PREBUILT_3RDPARTY_DIR/ecw --enable-debug"
 
-            sh $cmd $arg > $LOG_BUILD_3RDPARTY_DIR/gdal/[configure][Debug][stdout].log 2> $LOG_BUILD_3RDPARTY_DIR/gdal/[configure][Debug][stderr].log
-            make -j$NUM_THREADS > $LOG_BUILD_3RDPARTY_DIR/gdal/[make][build][Debug][stdout].log 2> $LOG_BUILD_3RDPARTY_DIR/gdal/[make][build][Debug][stderr].log
-            make install > $LOG_BUILD_3RDPARTY_DIR/gdal/[make][install][Debug][stdout].log 2> $LOG_BUILD_3RDPARTY_DIR/gdal/[make][install][Debug][stderr].log
+            sh $cmd $arg > $LOG_BUILD_3RDPARTY_DIR/gdal/[configure][debug][stdout].log 2> $LOG_BUILD_3RDPARTY_DIR/gdal/[configure][debug][stderr].log
+            make -j$NUM_THREADS > $LOG_BUILD_3RDPARTY_DIR/gdal/[make][build][debug][stdout].log 2> $LOG_BUILD_3RDPARTY_DIR/gdal/[make][build][debug][stderr].log
+            make install > $LOG_BUILD_3RDPARTY_DIR/gdal/[make][install][debug][stdout].log 2> $LOG_BUILD_3RDPARTY_DIR/gdal/[make][install][debug][stderr].log
             
             cp -au $PREBUILT_3RDPARTY_DIR/ecw/lib/newabi/x64/release/libNCSEcw.so.5.4.0 $GDAL_INSTALL_DEBUG_DIR/lib/
             
@@ -1355,9 +1355,9 @@ cd build
             export LD_LIBRARY_PATH=$GEOS_INSTALL_RELEASE_DIR/lib:$ZLIB_INSTALL_RELEASE_DIR/lib:$LIBPNG_INSTALL_RELEASE_DIR/lib:$LIBJPEG_INSTALL_RELEASE_DIR/lib:$LIBTIFF_INSTALL_RELEASE_DIR/lib:$LIBCURL_INSTALL_RELEASE_DIR/lib:$PROJ4_INSTALL_RELEASE_DIR/lib:$LIBGEOTIFF_INSTALL_RELEASE_DIR/lib:$EXPAT_INSTALL_RELEASE_DIR/lib:$GDAL_INSTALL_RELEASE_DIR/lib env
             ldconfig
             
-            $CMAKE_CMD -G "Unix Makefiles" ../../ -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=$OSG_INSTALL_DIR -DZLIB_INCLUDE_DIR=$ZLIB_INCLUDE_DIR -DZLIB_LIBRARY_RELEASE=$ZLIB_LIBRARY_RELEASE -DJPEG_INCLUDE_DIR=$LIBJPEG_INCLUDE_DIR -DJPEG_LIBRARY=$LIBJPEG_LIBRARY_RELEASE -DCURL_INCLUDE_DIR=$LIBCURL_INCLUDE_DIR -DCURL_LIBRARY=$LIBCURL_LIBRARY_RELEASE -DFREETYPE_INCLUDE_DIR_freetype2=$FREETYPE_INCLUDE_DIR -DFREETYPE_INCLUDE_DIR_ft2build=$FREETYPE_INCLUDE_DIR/freetype2 -DFREETYPE_LIBRARY_RELEASE=$FREETYPE_LIBRARY_RELEASE -DTIFF_INCLUDE_DIR=$LIBTIFF_INCLUDE_DIR -DTIFF_LIBRARY_RELEASE=$LIBTIFF_LIBRARY_RELEASE -DGDAL_CONFIG=$GDAL_INSTALL_RELEASE_DIR/bin/gdal-config -DGDAL_INCLUDE_DIR=$GDAL_INCLUDE_DIR -DGDAL_LIBRARY=$GDAL_LIBRARY_RELEASE -DPNG_PNG_INCLUDE_DIR=$LIBPNG_INCLUDE_DIR -DPNG_LIBRARY=$LIBPNG_LIBRARY_RELEASE > $LOG_BUILD_3RDPARTY_DIR/OpenSceneGraph/[CMake][configure][Release].log 2> $LOG_BUILD_3RDPARTY_DIR/OpenSceneGraph/[CMake][messages][Release].log
-            make -j$NUM_THREADS > $LOG_BUILD_3RDPARTY_DIR/OpenSceneGraph/[make][build][Release][stdout].log 2> $LOG_BUILD_3RDPARTY_DIR/OpenSceneGraph/[make][build][Release][stderr].log
-            make install > $LOG_BUILD_3RDPARTY_DIR/OpenSceneGraph/[make][install][Release][stdout].log 2> $LOG_BUILD_3RDPARTY_DIR/OpenSceneGraph/[make][install][Release][stderr].log
+            $CMAKE_CMD -G "Unix Makefiles" ../../ -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=$OSG_INSTALL_DIR -DZLIB_INCLUDE_DIR=$ZLIB_INCLUDE_DIR -DZLIB_LIBRARY_RELEASE=$ZLIB_LIBRARY_RELEASE -DJPEG_INCLUDE_DIR=$LIBJPEG_INCLUDE_DIR -DJPEG_LIBRARY=$LIBJPEG_LIBRARY_RELEASE -DCURL_INCLUDE_DIR=$LIBCURL_INCLUDE_DIR -DCURL_LIBRARY=$LIBCURL_LIBRARY_RELEASE -DFREETYPE_INCLUDE_DIR_freetype2=$FREETYPE_INCLUDE_DIR -DFREETYPE_INCLUDE_DIR_ft2build=$FREETYPE_INCLUDE_DIR/freetype2 -DFREETYPE_LIBRARY_RELEASE=$FREETYPE_LIBRARY_RELEASE -DTIFF_INCLUDE_DIR=$LIBTIFF_INCLUDE_DIR -DTIFF_LIBRARY_RELEASE=$LIBTIFF_LIBRARY_RELEASE -DGDAL_CONFIG=$GDAL_INSTALL_RELEASE_DIR/bin/gdal-config -DGDAL_INCLUDE_DIR=$GDAL_INCLUDE_DIR -DGDAL_LIBRARY=$GDAL_LIBRARY_RELEASE -DPNG_PNG_INCLUDE_DIR=$LIBPNG_INCLUDE_DIR -DPNG_LIBRARY=$LIBPNG_LIBRARY_RELEASE > $LOG_BUILD_3RDPARTY_DIR/OpenSceneGraph/[CMake][configure][release].log 2> $LOG_BUILD_3RDPARTY_DIR/OpenSceneGraph/[CMake][messages][release].log
+            make -j$NUM_THREADS > $LOG_BUILD_3RDPARTY_DIR/OpenSceneGraph/[make][build][release][stdout].log 2> $LOG_BUILD_3RDPARTY_DIR/OpenSceneGraph/[make][build][release][stderr].log
+            make install > $LOG_BUILD_3RDPARTY_DIR/OpenSceneGraph/[make][install][release][stdout].log 2> $LOG_BUILD_3RDPARTY_DIR/OpenSceneGraph/[make][install][release][stderr].log
             
             printf "... Release built successfully\n"
             
@@ -1371,9 +1371,9 @@ cd build
             export LD_LIBRARY_PATH=$GEOS_INSTALL_DEBUG_DIR/lib:$ZLIB_INSTALL_DEBUG_DIR/lib:$LIBPNG_INSTALL_DEBUG_DIR/lib:$LIBJPEG_INSTALL_DEBUG_DIR/lib:$LIBTIFF_INSTALL_DEBUG_DIR/lib:$LIBCURL_INSTALL_DEBUG_DIR/lib:$PROJ4_INSTALL_DEBUG_DIR/lib:$LIBGEOTIFF_INSTALL_DEBUG_DIR/lib:$EXPAT_INSTALL_DEBUG_DIR/lib:$GDAL_INSTALL_DEBUG_DIR/lib env
             ldconfig
             
-            $CMAKE_CMD -G "Unix Makefiles" ../../ -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=$OSG_INSTALL_DIR -DZLIB_INCLUDE_DIR=$ZLIB_INCLUDE_DIR -DZLIB_LIBRARY_DEBUG=$ZLIB_LIBRARY_DEBUG -DJPEG_INCLUDE_DIR=$LIBJPEG_INCLUDE_DIR -DJPEG_LIBRARY=$LIBJPEG_LIBRARY_DEBUG -DCURL_INCLUDE_DIR=$LIBCURL_INCLUDE_DIR -DCURL_LIBRARY=$LIBCURL_LIBRARY_DEBUG -DFREETYPE_INCLUDE_DIR_freetype2=$FREETYPE_INCLUDE_DIR -DFREETYPE_INCLUDE_DIR_ft2build=$FREETYPE_INCLUDE_DIR/freetype2 -DFREETYPE_LIBRARY_DEBUG=$FREETYPE_LIBRARY_DEBUG -DTIFF_INCLUDE_DIR=$LIBTIFF_INCLUDE_DIR -DTIFF_LIBRARY_DEBUG=$LIBTIFF_LIBRARY_DEBUG -DGDAL_CONFIG=$GDAL_INSTALL_DEBUG_DIR/bin/gdal-config -DGDAL_INCLUDE_DIR=$GDAL_INCLUDE_DIR -DGDAL_LIBRARY=$GDAL_LIBRARY_DEBUG -DPNG_PNG_INCLUDE_DIR=$LIBPNG_INCLUDE_DIR -DPNG_LIBRARY=$LIBPNG_LIBRARY_DEBUG > $LOG_BUILD_3RDPARTY_DIR/OpenSceneGraph/[CMake][configure][Debug].log 2> $LOG_BUILD_3RDPARTY_DIR/OpenSceneGraph/[CMake][messages][Debug].log
-            make -j$NUM_THREADS > $LOG_BUILD_3RDPARTY_DIR/OpenSceneGraph/[make][build][Debug][stdout].log 2> $LOG_BUILD_3RDPARTY_DIR/OpenSceneGraph/[make][build][Debug][stderr].log
-            make install > $LOG_BUILD_3RDPARTY_DIR/OpenSceneGraph/[make][install][Debug][stdout].log 2> $LOG_BUILD_3RDPARTY_DIR/OpenSceneGraph/[make][install][Debug][stderr].log
+            $CMAKE_CMD -G "Unix Makefiles" ../../ -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=$OSG_INSTALL_DIR -DZLIB_INCLUDE_DIR=$ZLIB_INCLUDE_DIR -DZLIB_LIBRARY_DEBUG=$ZLIB_LIBRARY_DEBUG -DJPEG_INCLUDE_DIR=$LIBJPEG_INCLUDE_DIR -DJPEG_LIBRARY=$LIBJPEG_LIBRARY_DEBUG -DCURL_INCLUDE_DIR=$LIBCURL_INCLUDE_DIR -DCURL_LIBRARY=$LIBCURL_LIBRARY_DEBUG -DFREETYPE_INCLUDE_DIR_freetype2=$FREETYPE_INCLUDE_DIR -DFREETYPE_INCLUDE_DIR_ft2build=$FREETYPE_INCLUDE_DIR/freetype2 -DFREETYPE_LIBRARY_DEBUG=$FREETYPE_LIBRARY_DEBUG -DTIFF_INCLUDE_DIR=$LIBTIFF_INCLUDE_DIR -DTIFF_LIBRARY_DEBUG=$LIBTIFF_LIBRARY_DEBUG -DGDAL_CONFIG=$GDAL_INSTALL_DEBUG_DIR/bin/gdal-config -DGDAL_INCLUDE_DIR=$GDAL_INCLUDE_DIR -DGDAL_LIBRARY=$GDAL_LIBRARY_DEBUG -DPNG_PNG_INCLUDE_DIR=$LIBPNG_INCLUDE_DIR -DPNG_LIBRARY=$LIBPNG_LIBRARY_DEBUG > $LOG_BUILD_3RDPARTY_DIR/OpenSceneGraph/[CMake][configure][debug].log 2> $LOG_BUILD_3RDPARTY_DIR/OpenSceneGraph/[CMake][messages][debug].log
+            make -j$NUM_THREADS > $LOG_BUILD_3RDPARTY_DIR/OpenSceneGraph/[make][build][debug][stdout].log 2> $LOG_BUILD_3RDPARTY_DIR/OpenSceneGraph/[make][build][debug][stderr].log
+            make install > $LOG_BUILD_3RDPARTY_DIR/OpenSceneGraph/[make][install][debug][stdout].log 2> $LOG_BUILD_3RDPARTY_DIR/OpenSceneGraph/[make][install][debug][stderr].log
             
             printf "... Debug built successfully\n"
             
@@ -1460,15 +1460,15 @@ cd build
             export LD_LIBRARY_PATH=$GEOS_INSTALL_RELEASE_DIR/lib:$ZLIB_INSTALL_RELEASE_DIR/lib:$LIBPNG_INSTALL_RELEASE_DIR/lib:$LIBJPEG_INSTALL_RELEASE_DIR/lib:$LIBTIFF_INSTALL_RELEASE_DIR/lib:$LIBCURL_INSTALL_RELEASE_DIR/lib:$PROJ4_INSTALL_RELEASE_DIR/lib:$LIBGEOTIFF_INSTALL_RELEASE_DIR/lib:$EXPAT_INSTALL_RELEASE_DIR/lib:$GDAL_INSTALL_RELEASE_DIR/lib:$QTDIR/lib env
             ldconfig
             
-            $CMAKE_CMD -G "Unix Makefiles" ../../ -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=$OSGQT_INSTALL_DIR -DCMAKE_PREFIX_PATH=$QTDIR -DOSG_DIR=$OSG_INSTALL_DIR -DOSG_INCLUDE_DIR=$OSG_INCLUDE_DIR > $LOG_BUILD_3RDPARTY_DIR/osgQt/[CMake][configure][Release].log 2> $LOG_BUILD_3RDPARTY_DIR/osgQt/[CMake][messages][Release].log
+            $CMAKE_CMD -G "Unix Makefiles" ../../ -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=$OSGQT_INSTALL_DIR -DCMAKE_PREFIX_PATH=$QTDIR -DOSG_DIR=$OSG_INSTALL_DIR -DOSG_INCLUDE_DIR=$OSG_INCLUDE_DIR > $LOG_BUILD_3RDPARTY_DIR/osgQt/[CMake][configure][release].log 2> $LOG_BUILD_3RDPARTY_DIR/osgQt/[CMake][messages][release].log
             
             # --- fix for Linux CMake
               sed -i 's/-loptimized//g' $OSGQT_LINK_FILE_PATH
               sed -i 's/-ldebug//g' $OSGQT_LINK_FILE_PATH
             # -------------------------
             
-            make -j$NUM_THREADS > $LOG_BUILD_3RDPARTY_DIR/osgQt/[make][build][Release][stdout].log 2> $LOG_BUILD_3RDPARTY_DIR/osgQt/[make][build][Release][stderr].log
-            make install > $LOG_BUILD_3RDPARTY_DIR/osgQt/[make][install][Release][stdout].log 2> $LOG_BUILD_3RDPARTY_DIR/osgQt/[make][install][Release][stderr].log
+            make -j$NUM_THREADS > $LOG_BUILD_3RDPARTY_DIR/osgQt/[make][build][release][stdout].log 2> $LOG_BUILD_3RDPARTY_DIR/osgQt/[make][build][release][stderr].log
+            make install > $LOG_BUILD_3RDPARTY_DIR/osgQt/[make][install][release][stdout].log 2> $LOG_BUILD_3RDPARTY_DIR/osgQt/[make][install][release][stderr].log
             
             printf "... Release built successfully\n"
             
@@ -1482,9 +1482,9 @@ cd build
             export LD_LIBRARY_PATH=$GEOS_INSTALL_DEBUG_DIR/lib:$ZLIB_INSTALL_DEBUG_DIR/lib:$LIBPNG_INSTALL_DEBUG_DIR/lib:$LIBJPEG_INSTALL_DEBUG_DIR/lib:$LIBTIFF_INSTALL_DEBUG_DIR/lib:$LIBCURL_INSTALL_DEBUG_DIR/lib:$PROJ4_INSTALL_DEBUG_DIR/lib:$LIBGEOTIFF_INSTALL_DEBUG_DIR/lib:$EXPAT_INSTALL_DEBUG_DIR/lib:$GDAL_INSTALL_DEBUG_DIR/lib:$QTDIR/lib env
             ldconfig
             
-            $CMAKE_CMD -G "Unix Makefiles" ../../ -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=$OSGQT_INSTALL_DIR -DCMAKE_PREFIX_PATH=$QTDIR -DOSG_DIR=$OSG_INSTALL_DIR -DOSG_INCLUDE_DIR=$OSG_INCLUDE_DIR > $LOG_BUILD_3RDPARTY_DIR/osgQt/[CMake][configure][Debug].log 2> $LOG_BUILD_3RDPARTY_DIR/osgQt/[CMake][messages][Debug].log
-            make -j$NUM_THREADS > $LOG_BUILD_3RDPARTY_DIR/osgQt/[make][build][Debug][stdout].log 2> $LOG_BUILD_3RDPARTY_DIR/osgQt/[make][build][Debug][stderr].log
-            make install > $LOG_BUILD_3RDPARTY_DIR/osgQt/[make][install][Debug][stdout].log 2> $LOG_BUILD_3RDPARTY_DIR/osgQt/[make][install][Debug][stderr].log
+            $CMAKE_CMD -G "Unix Makefiles" ../../ -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=$OSGQT_INSTALL_DIR -DCMAKE_PREFIX_PATH=$QTDIR -DOSG_DIR=$OSG_INSTALL_DIR -DOSG_INCLUDE_DIR=$OSG_INCLUDE_DIR > $LOG_BUILD_3RDPARTY_DIR/osgQt/[CMake][configure][debug].log 2> $LOG_BUILD_3RDPARTY_DIR/osgQt/[CMake][messages][debug].log
+            make -j$NUM_THREADS > $LOG_BUILD_3RDPARTY_DIR/osgQt/[make][build][debug][stdout].log 2> $LOG_BUILD_3RDPARTY_DIR/osgQt/[make][build][debug][stderr].log
+            make install > $LOG_BUILD_3RDPARTY_DIR/osgQt/[make][install][debug][stdout].log 2> $LOG_BUILD_3RDPARTY_DIR/osgQt/[make][install][debug][stderr].log
             
             printf "... Debug built successfully\n"
             
@@ -1545,9 +1545,9 @@ cd build
         if [ $IS_BUILD_RELEASE -eq 1 ]; then
             mkdir -p release;
             cd release
-            $CMAKE_CMD -G "Unix Makefiles" ../../ -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=$LEVELDB_INSTALL_RELEASE_DIR -DBUILD_SHARED_LIBS=ON -DLEVELDB_BUILD_BENCHMARKS=OFF -DLEVELDB_BUILD_TESTS=OFF > $LOG_BUILD_3RDPARTY_DIR/leveldb/[CMake][configure][Release].log 2> $LOG_BUILD_3RDPARTY_DIR/leveldb/[CMake][messages][Release].log
-            make -j$NUM_THREADS > $LOG_BUILD_3RDPARTY_DIR/leveldb/[make][build][Release][stdout].log 2> $LOG_BUILD_3RDPARTY_DIR/leveldb/[make][build][Release][stderr].log
-            make install > $LOG_BUILD_3RDPARTY_DIR/leveldb/[make][install][Release][stdout].log 2> $LOG_BUILD_3RDPARTY_DIR/leveldb/[make][install][Release][stderr].log
+            $CMAKE_CMD -G "Unix Makefiles" ../../ -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=$LEVELDB_INSTALL_RELEASE_DIR -DBUILD_SHARED_LIBS=ON -DLEVELDB_BUILD_BENCHMARKS=OFF -DLEVELDB_BUILD_TESTS=OFF > $LOG_BUILD_3RDPARTY_DIR/leveldb/[CMake][configure][release].log 2> $LOG_BUILD_3RDPARTY_DIR/leveldb/[CMake][messages][release].log
+            make -j$NUM_THREADS > $LOG_BUILD_3RDPARTY_DIR/leveldb/[make][build][release][stdout].log 2> $LOG_BUILD_3RDPARTY_DIR/leveldb/[make][build][release][stderr].log
+            make install > $LOG_BUILD_3RDPARTY_DIR/leveldb/[make][install][release][stdout].log 2> $LOG_BUILD_3RDPARTY_DIR/leveldb/[make][install][release][stderr].log
             
             printf "... Release built successfully\n"
             
@@ -1557,9 +1557,9 @@ cd build
         if [ $IS_BUILD_DEBUG -eq 1 ]; then
             mkdir -p debug;
             cd debug
-            $CMAKE_CMD -G "Unix Makefiles" ../../ -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=$LEVELDB_INSTALL_DEBUG_DIR -DBUILD_SHARED_LIBS=ON -DLEVELDB_BUILD_BENCHMARKS=OFF -DLEVELDB_BUILD_TESTS=OFF > $LOG_BUILD_3RDPARTY_DIR/leveldb/[CMake][configure][Debug].log 2> $LOG_BUILD_3RDPARTY_DIR/leveldb/[CMake][messages][Debug].log
-            make -j$NUM_THREADS > $LOG_BUILD_3RDPARTY_DIR/leveldb/[make][build][Debug][stdout].log 2> $LOG_BUILD_3RDPARTY_DIR/leveldb/[make][build][Debug][stderr].log
-            make install > $LOG_BUILD_3RDPARTY_DIR/leveldb/[make][install][Debug][stdout].log 2> $LOG_BUILD_3RDPARTY_DIR/leveldb/[make][install][Debug][stderr].log
+            $CMAKE_CMD -G "Unix Makefiles" ../../ -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=$LEVELDB_INSTALL_DEBUG_DIR -DBUILD_SHARED_LIBS=ON -DLEVELDB_BUILD_BENCHMARKS=OFF -DLEVELDB_BUILD_TESTS=OFF > $LOG_BUILD_3RDPARTY_DIR/leveldb/[CMake][configure][debug].log 2> $LOG_BUILD_3RDPARTY_DIR/leveldb/[CMake][messages][debug].log
+            make -j$NUM_THREADS > $LOG_BUILD_3RDPARTY_DIR/leveldb/[make][build][debug][stdout].log 2> $LOG_BUILD_3RDPARTY_DIR/leveldb/[make][build][debug][stderr].log
+            make install > $LOG_BUILD_3RDPARTY_DIR/leveldb/[make][install][debug][stdout].log 2> $LOG_BUILD_3RDPARTY_DIR/leveldb/[make][install][debug][stderr].log
             
             printf "... Debug built successfully\n"
             
@@ -1622,9 +1622,9 @@ cd build
             export LD_LIBRARY_PATH=$GEOS_INSTALL_RELEASE_DIR/lib:$ZLIB_INSTALL_RELEASE_DIR/lib:$PROTOBUF_INSTALL_RELEASE_DIR/lib:$LIBPNG_INSTALL_RELEASE_DIR/lib:$LIBJPEG_INSTALL_RELEASE_DIR/lib:$LIBTIFF_INSTALL_RELEASE_DIR/lib:$LIBCURL_INSTALL_RELEASE_DIR/lib:$PROJ4_INSTALL_RELEASE_DIR/lib:$LIBGEOTIFF_INSTALL_RELEASE_DIR/lib:$EXPAT_INSTALL_RELEASE_DIR/lib:$GDAL_INSTALL_RELEASE_DIR/lib:$QTDIR/lib:$OSG_INSTALL_DIR/lib:$OSGQT_INSTALL_DIR/lib64 env
             ldconfig
             
-            $CMAKE_CMD -G "Unix Makefiles" ../../ -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=$OSGEARTH_INSTALL_DIR -DCMAKE_PREFIX_PATH=$QTDIR -DBUILD_OSGEARTH_EXAMPLES=OFF -DOSGEARTH_INSTALL_SHADERS=ON -DOSGEARTH_QT_BUILD=ON -DOSGEARTH_QT_BUILD_LEGACY_WIDGETS=ON -DOSG_DIR=$OSG_INSTALL_DIR -DOSG_GEN_INCLUDE_DIR="$OSG_INCLUDE_DIR;$OSGQT_INCLUDE_DIR" -DOSG_INCLUDE_DIR=$OSG_INCLUDE_DIR -DOSGQT_LIBRARY=$OSGQT_LIBRARY_RELEASE -DCURL_IS_STATIC=OFF -DCURL_INCLUDE_DIR=$LIBCURL_INCLUDE_DIR -DCURL_LIBRARY=$LIBCURL_LIBRARY_RELEASE -DGDAL_INCLUDE_DIR=$GDAL_INCLUDE_DIR -DGDAL_LIBRARY=$GDAL_LIBRARY_RELEASE -DLEVELDB_INCLUDE_DIR=$LEVELDB_INCLUDE_DIR -DLEVELDB_LIBRARY=$LEVELDB_LIBRARY_RELEASE -DProtobuf_INCLUDE_DIR=$PROTOBUF_INCLUDE_DIR -DProtobuf_LIBRARY_RELEASE=$PROTOBUF_LIBRARY_RELEASE -DProtobuf_LITE_LIBRARY_RELEASE=$PROTOBUF_LITE_LIBRARY_RELEASE -DProtobuf_PROTOC_EXECUTABLE=$PROTOBUF_PROTOC_EXECUTABLE_RELEASE -DProtobuf_PROTOC_LIBRARY_RELEASE=$PROTOBUF_PROTOC_LIBRARY_RELEASE -DGEOS_DIR=$GEOS_INSTALL_RELEASE_DIR -DGEOS_INCLUDE_DIR=$GEOS_INCLUDE_DIR -DGEOS_LIBRARY_RELEASE=$GEOS_LIBRARY > $LOG_BUILD_3RDPARTY_DIR/osgearth/[CMake][configure][Release].log 2> $LOG_BUILD_3RDPARTY_DIR/osgearth/[CMake][messages][Release].log
-            make -j$NUM_THREADS > $LOG_BUILD_3RDPARTY_DIR/osgearth/[make][build][Release][stdout].log 2> $LOG_BUILD_3RDPARTY_DIR/osgearth/[make][build][Release][stderr].log
-            make install > $LOG_BUILD_3RDPARTY_DIR/osgearth/[make][install][Release][stdout].log 2> $LOG_BUILD_3RDPARTY_DIR/osgearth/[make][install][Release][stderr].log
+            $CMAKE_CMD -G "Unix Makefiles" ../../ -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=$OSGEARTH_INSTALL_DIR -DCMAKE_PREFIX_PATH=$QTDIR -DBUILD_OSGEARTH_EXAMPLES=OFF -DOSGEARTH_INSTALL_SHADERS=ON -DOSGEARTH_QT_BUILD=ON -DOSGEARTH_QT_BUILD_LEGACY_WIDGETS=ON -DOSG_DIR=$OSG_INSTALL_DIR -DOSG_GEN_INCLUDE_DIR="$OSG_INCLUDE_DIR;$OSGQT_INCLUDE_DIR" -DOSG_INCLUDE_DIR=$OSG_INCLUDE_DIR -DOSGQT_LIBRARY=$OSGQT_LIBRARY_RELEASE -DCURL_IS_STATIC=OFF -DCURL_INCLUDE_DIR=$LIBCURL_INCLUDE_DIR -DCURL_LIBRARY=$LIBCURL_LIBRARY_RELEASE -DGDAL_INCLUDE_DIR=$GDAL_INCLUDE_DIR -DGDAL_LIBRARY=$GDAL_LIBRARY_RELEASE -DLEVELDB_INCLUDE_DIR=$LEVELDB_INCLUDE_DIR -DLEVELDB_LIBRARY=$LEVELDB_LIBRARY_RELEASE -DProtobuf_INCLUDE_DIR=$PROTOBUF_INCLUDE_DIR -DProtobuf_LIBRARY_RELEASE=$PROTOBUF_LIBRARY_RELEASE -DProtobuf_LITE_LIBRARY_RELEASE=$PROTOBUF_LITE_LIBRARY_RELEASE -DProtobuf_PROTOC_EXECUTABLE=$PROTOBUF_PROTOC_EXECUTABLE_RELEASE -DProtobuf_PROTOC_LIBRARY_RELEASE=$PROTOBUF_PROTOC_LIBRARY_RELEASE -DGEOS_DIR=$GEOS_INSTALL_RELEASE_DIR -DGEOS_INCLUDE_DIR=$GEOS_INCLUDE_DIR -DGEOS_LIBRARY_RELEASE=$GEOS_LIBRARY > $LOG_BUILD_3RDPARTY_DIR/osgearth/[CMake][configure][release].log 2> $LOG_BUILD_3RDPARTY_DIR/osgearth/[CMake][messages][release].log
+            make -j$NUM_THREADS > $LOG_BUILD_3RDPARTY_DIR/osgearth/[make][build][release][stdout].log 2> $LOG_BUILD_3RDPARTY_DIR/osgearth/[make][build][release][stderr].log
+            make install > $LOG_BUILD_3RDPARTY_DIR/osgearth/[make][install][release][stdout].log 2> $LOG_BUILD_3RDPARTY_DIR/osgearth/[make][install][release][stderr].log
             
             printf "... Release built successfully\n"
             
@@ -1638,9 +1638,9 @@ cd build
             export LD_LIBRARY_PATH=$GEOS_INSTALL_DEBUG_DIR/lib:$ZLIB_INSTALL_DEBUG_DIR/lib:$PROTOBUF_INSTALL_DEBUG_DIR/lib:$LIBPNG_INSTALL_DEBUG_DIR/lib:$LIBJPEG_INSTALL_DEBUG_DIR/lib:$LIBTIFF_INSTALL_DEBUG_DIR/lib:$LIBCURL_INSTALL_DEBUG_DIR/lib:$PROJ4_INSTALL_DEBUG_DIR/lib:$LIBGEOTIFF_INSTALL_DEBUG_DIR/lib:$EXPAT_INSTALL_DEBUG_DIR/lib:$GDAL_INSTALL_DEBUG_DIR/lib:$QTDIR/lib:$OSG_INSTALL_DIR/lib:$OSGQT_INSTALL_DIR/lib64 env
             ldconfig
             
-            $CMAKE_CMD -G "Unix Makefiles" ../../ -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=$OSGEARTH_INSTALL_DIR -DCMAKE_PREFIX_PATH=$QTDIR -DBUILD_OSGEARTH_EXAMPLES=OFF -DOSGEARTH_INSTALL_SHADERS=ON -DOSGEARTH_QT_BUILD=ON -DOSGEARTH_QT_BUILD_LEGACY_WIDGETS=ON -DOSG_DIR=$OSG_INSTALL_DIR -DOSG_GEN_INCLUDE_DIR="$OSG_INCLUDE_DIR;$OSGQT_INCLUDE_DIR" -DOSG_INCLUDE_DIR=$OSG_INCLUDE_DIR -DOSGQT_LIBRARY=$OSGQT_LIBRARY_DEBUG -DCURL_IS_STATIC=OFF -DCURL_INCLUDE_DIR=$LIBCURL_INCLUDE_DIR -DCURL_LIBRARY=$LIBCURL_LIBRARY_DEBUG -DGDAL_INCLUDE_DIR=$GDAL_INCLUDE_DIR -DGDAL_LIBRARY=$GDAL_LIBRARY_DEBUG -DLEVELDB_INCLUDE_DIR=$LEVELDB_INCLUDE_DIR -DLEVELDB_LIBRARY=$LEVELDB_LIBRARY_DEBUG -DProtobuf_INCLUDE_DIR=$PROTOBUF_INCLUDE_DIR -DProtobuf_LIBRARY_DEBUG=$PROTOBUF_LIBRARY_DEBUG -DProtobuf_LITE_LIBRARY_DEBUG=$PROTOBUF_LITE_LIBRARY_DEBUG -DProtobuf_PROTOC_EXECUTABLE=$PROTOBUF_PROTOC_EXECUTABLE_DEBUG -DProtobuf_PROTOC_LIBRARY_DEBUG=$PROTOBUF_PROTOC_LIBRARY_DEBUG -DGEOS_DIR=$GEOS_INSTALL_DEBUG_DIR -DGEOS_INCLUDE_DIR=$GEOS_INCLUDE_DIR -DGEOS_LIBRARY_DEBUG=$GEOS_LIBRARY_DEBUG > $LOG_BUILD_3RDPARTY_DIR/osgearth/[CMake][configure][Debug].log 2> $LOG_BUILD_3RDPARTY_DIR/osgearth/[CMake][messages][Debug].log
-            make -j$NUM_THREADS > $LOG_BUILD_3RDPARTY_DIR/osgearth/[make][build][Debug][stdout].log 2> $LOG_BUILD_3RDPARTY_DIR/osgearth/[make][build][Debug][stderr].log
-            make install > $LOG_BUILD_3RDPARTY_DIR/osgearth/[make][install][Debug][stdout].log 2> $LOG_BUILD_3RDPARTY_DIR/osgearth/[make][install][Debug][stderr].log
+            $CMAKE_CMD -G "Unix Makefiles" ../../ -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=$OSGEARTH_INSTALL_DIR -DCMAKE_PREFIX_PATH=$QTDIR -DBUILD_OSGEARTH_EXAMPLES=OFF -DOSGEARTH_INSTALL_SHADERS=ON -DOSGEARTH_QT_BUILD=ON -DOSGEARTH_QT_BUILD_LEGACY_WIDGETS=ON -DOSG_DIR=$OSG_INSTALL_DIR -DOSG_GEN_INCLUDE_DIR="$OSG_INCLUDE_DIR;$OSGQT_INCLUDE_DIR" -DOSG_INCLUDE_DIR=$OSG_INCLUDE_DIR -DOSGQT_LIBRARY=$OSGQT_LIBRARY_DEBUG -DCURL_IS_STATIC=OFF -DCURL_INCLUDE_DIR=$LIBCURL_INCLUDE_DIR -DCURL_LIBRARY=$LIBCURL_LIBRARY_DEBUG -DGDAL_INCLUDE_DIR=$GDAL_INCLUDE_DIR -DGDAL_LIBRARY=$GDAL_LIBRARY_DEBUG -DLEVELDB_INCLUDE_DIR=$LEVELDB_INCLUDE_DIR -DLEVELDB_LIBRARY=$LEVELDB_LIBRARY_DEBUG -DProtobuf_INCLUDE_DIR=$PROTOBUF_INCLUDE_DIR -DProtobuf_LIBRARY_DEBUG=$PROTOBUF_LIBRARY_DEBUG -DProtobuf_LITE_LIBRARY_DEBUG=$PROTOBUF_LITE_LIBRARY_DEBUG -DProtobuf_PROTOC_EXECUTABLE=$PROTOBUF_PROTOC_EXECUTABLE_DEBUG -DProtobuf_PROTOC_LIBRARY_DEBUG=$PROTOBUF_PROTOC_LIBRARY_DEBUG -DGEOS_DIR=$GEOS_INSTALL_DEBUG_DIR -DGEOS_INCLUDE_DIR=$GEOS_INCLUDE_DIR -DGEOS_LIBRARY_DEBUG=$GEOS_LIBRARY_DEBUG > $LOG_BUILD_3RDPARTY_DIR/osgearth/[CMake][configure][debug].log 2> $LOG_BUILD_3RDPARTY_DIR/osgearth/[CMake][messages][debug].log
+            make -j$NUM_THREADS > $LOG_BUILD_3RDPARTY_DIR/osgearth/[make][build][debug][stdout].log 2> $LOG_BUILD_3RDPARTY_DIR/osgearth/[make][build][debug][stderr].log
+            make install > $LOG_BUILD_3RDPARTY_DIR/osgearth/[make][install][debug][stdout].log 2> $LOG_BUILD_3RDPARTY_DIR/osgearth/[make][install][debug][stderr].log
             
             printf "... Debug built successfully\n"
             
@@ -1715,10 +1715,10 @@ cd build
     if [ $IS_BUILD_RELEASE -eq 1 ]; then
       printf "* * * Release * * *\n"
       
-      if [ $SUCCESS_BUILD_PNAGEO_RELEASE -eq 1 ]; then
-        printf "[$STEP_NUM_PNAGEO of $STEP_NUM_TOTAL] pnageo         ... OK\n"
+      if [ $SUCCESS_BUILD_GCSFUNC_RELEASE -eq 1 ]; then
+        printf "[$STEP_NUM_GCSFUNC of $STEP_NUM_TOTAL] gcsfunc         ... OK\n"
       else
-        printf "[$STEP_NUM_PNAGEO of $STEP_NUM_TOTAL] pnageo         ... FAILED\n"
+        printf "[$STEP_NUM_GCSFUNC of $STEP_NUM_TOTAL] gcsfunc         ... FAILED\n"
       fi
       if [ $SUCCESS_BUILD_GEOS_RELEASE -eq 1 ]; then
         printf "[$STEP_NUM_GEOS of $STEP_NUM_TOTAL] GEOS           ... OK\n"
@@ -1805,10 +1805,10 @@ cd build
     if [ $IS_BUILD_DEBUG -eq 1 ]; then
       printf "* * * Debug * * *\n"
       
-      if [ $SUCCESS_BUILD_PNAGEO_DEBUG -eq 1 ]; then
-        printf "[$STEP_NUM_PNAGEO of $STEP_NUM_TOTAL] pnageo         ... OK\n"
+      if [ $SUCCESS_BUILD_GCSFUNC_DEBUG -eq 1 ]; then
+        printf "[$STEP_NUM_GCSFUNC of $STEP_NUM_TOTAL] gcsfunc         ... OK\n"
       else
-        printf "[$STEP_NUM_PNAGEO of $STEP_NUM_TOTAL] pnageo         ... FAILED\n"
+        printf "[$STEP_NUM_GCSFUNC of $STEP_NUM_TOTAL] gcsfunc         ... FAILED\n"
       fi
       if [ $SUCCESS_BUILD_GEOS_DEBUG -eq 1 ]; then
         printf "[$STEP_NUM_GEOS of $STEP_NUM_TOTAL] GEOS           ... OK\n"

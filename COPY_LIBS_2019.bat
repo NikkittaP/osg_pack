@@ -14,7 +14,7 @@ if not exist "%BIN_DEBUG_DIR%" mkdir %BIN_DEBUG_DIR%
 :: --------------------------------------------------
 :: Small libs
 :: --------------------------------------------------
-    xcopy /D /S /Y /Q install_2019\pnageo\release\bin\*.dll %BIN_RELEASE_DIR%
+    xcopy /D /S /Y /Q install_2019\gcsfunc\release\bin\*.dll %BIN_RELEASE_DIR%
     xcopy /D /S /Y /Q install_2019\geos\release\bin\*.dll %BIN_RELEASE_DIR%
     xcopy /D /S /Y /Q install_2019\zlib\release\bin\*.dll %BIN_RELEASE_DIR%
     xcopy /D /S /Y /Q install_2019\protobuf\release\bin\*.dll %BIN_RELEASE_DIR%
@@ -219,7 +219,7 @@ if not exist "%BIN_DEBUG_DIR%" mkdir %BIN_DEBUG_DIR%
 :: --------------------------------------------------
 :: Small libs
 :: --------------------------------------------------
-    xcopy /D /S /Y /Q install_2019\pnageo\debug\bin\*.dll %BIN_DEBUG_DIR%
+    xcopy /D /S /Y /Q install_2019\gcsfunc\debug\bin\*.dll %BIN_DEBUG_DIR%
     xcopy /D /S /Y /Q install_2019\geos\debug\bin\*.dll %BIN_DEBUG_DIR%
     xcopy /D /S /Y /Q install_2019\zlib\debug\bin\*.dll %BIN_DEBUG_DIR%
     xcopy /D /S /Y /Q install_2019\protobuf\debug\bin\*.dll %BIN_DEBUG_DIR%

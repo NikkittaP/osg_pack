@@ -1,5 +1,5 @@
-#ifndef _NGEO
-#define _NGEO
+#ifndef _GCSFUNC
+#define _GCSFUNC
 
 #include <math.h>
 

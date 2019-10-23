@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <math.h>
 
-#include "ngeo.h"
+#include "gcsfunc.h"
 
 double  WGS_A     = 6378137.0;
 double  WGS_alfa  = 1/298.257223563;

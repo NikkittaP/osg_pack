@@ -14,7 +14,7 @@ set /A IS_SOURCES_COPY_NEEDED=1
 :: 1 - means that lib was build and script can skip it
 set /A IS_GLOBAL_BUILD        = 0
 
-set /A IS_PNAGEO_BUILD        = %IS_GLOBAL_BUILD%
+set /A IS_GCSFUNC_BUILD       = %IS_GLOBAL_BUILD%
 set /A IS_GEOS_BUILD          = %IS_GLOBAL_BUILD%
 set /A IS_ZLIB_BUILD          = %IS_GLOBAL_BUILD%
 set /A IS_PROTOBUF_BUILD      = %IS_GLOBAL_BUILD%
@@ -63,7 +63,7 @@ set SQLITE_EXE=%PREBUILT_3RDPARTY_DIR%/sqlite3/release/bin/sqlite3.exe
 
 :: Steps numbering
 set /A STEP_NUM_TOTAL         = 17
-set /A STEP_NUM_PNAGEO        = 1
+set /A STEP_NUM_GCSFUNC        = 1
 set /A STEP_NUM_GEOS          = 2
 set /A STEP_NUM_ZLIB          = 3
 set /A STEP_NUM_PROTOBUF      = 4
@@ -83,7 +83,7 @@ set /A STEP_NUM_OSGEARTH      = 17
 
 
 :: Were libraries built for summary output
-set /A SUCCESS_BUILD_PNAGEO_RELEASE         = 0
+set /A SUCCESS_BUILD_GCSFUNC_RELEASE         = 0
 set /A SUCCESS_BUILD_GEOS_RELEASE           = 0
 set /A SUCCESS_BUILD_ZLIB_RELEASE           = 0
 set /A SUCCESS_BUILD_PROTOBUF_RELEASE       = 0
@@ -101,7 +101,7 @@ set /A SUCCESS_BUILD_OSGQT_RELEASE          = 0
 set /A SUCCESS_BUILD_LEVELDB_RELEASE        = 0
 set /A SUCCESS_BUILD_OSGEARTH_RELEASE       = 0
 
-set /A SUCCESS_BUILD_PNAGEO_DEBUG         = 0
+set /A SUCCESS_BUILD_GCSFUNC_DEBUG         = 0
 set /A SUCCESS_BUILD_GEOS_DEBUG           = 0
 set /A SUCCESS_BUILD_ZLIB_DEBUG           = 0
 set /A SUCCESS_BUILD_PROTOBUF_DEBUG       = 0
@@ -155,12 +155,12 @@ call :StartTimer
 ::        SQLITE_LIBRARY_DEBUG    = C:\OSG\3rdparty\prebuilt\sqlite3\debug\lib\sqlite3.lib
 ::        SQLITE_EXE              = C:\OSG\3rdparty\prebuilt\sqlite3\release\bin\sqlite3.exe
 
-::        PNAGEO_INSTALL_DIR          = C:\OSG\3rdparty\install\pnageo
-::        PNAGEO_INSTALL_RELEASE_DIR  = C:\OSG\3rdparty\install\pnageo\release
-::        PNAGEO_INSTALL_DEBUG_DIR    = C:\OSG\3rdparty\install\pnageo\debug
-::        PNAGEO_INCLUDE_DIR          = C:\OSG\3rdparty\install\pnageo\release\include
-::        PNAGEO_LIBRARY_RELEASE      = C:\OSG\3rdparty\install\pnageo\release\lib\pnageo.lib
-::        PNAGEO_LIBRARY_DEBUG        = C:\OSG\3rdparty\install\pnageo\debug\lib\pnageo.lib
+::        GCSFUNC_INSTALL_DIR          = C:\OSG\3rdparty\install\gcsfunc
+::        GCSFUNC_INSTALL_RELEASE_DIR  = C:\OSG\3rdparty\install\gcsfunc\release
+::        GCSFUNC_INSTALL_DEBUG_DIR    = C:\OSG\3rdparty\install\gcsfunc\debug
+::        GCSFUNC_INCLUDE_DIR          = C:\OSG\3rdparty\install\gcsfunc\release\include
+::        GCSFUNC_LIBRARY_RELEASE      = C:\OSG\3rdparty\install\gcsfunc\release\lib\gcsfunc.lib
+::        GCSFUNC_LIBRARY_DEBUG        = C:\OSG\3rdparty\install\gcsfunc\debug\lib\gcsfunc.lib
 
 ::        GEOS_INSTALL_DIR          = C:\OSG\3rdparty\install\geos
 ::        GEOS_INSTALL_RELEASE_DIR  = C:\OSG\3rdparty\install\geos\release
@@ -277,7 +277,7 @@ if not exist "%LOG_BUILD_3RDPARTY_DIR%" mkdir %LOG_BUILD_3RDPARTY_DIR%
 if not exist "%INSTALL_3RDPARTY_DIR%" mkdir %INSTALL_3RDPARTY_DIR%
 
 :: Creating log folders
-if not exist "%LOG_BUILD_3RDPARTY_DIR%\pnageo" mkdir %LOG_BUILD_3RDPARTY_DIR%\pnageo
+if not exist "%LOG_BUILD_3RDPARTY_DIR%\gcsfunc" mkdir %LOG_BUILD_3RDPARTY_DIR%\gcsfunc
 if not exist "%LOG_BUILD_3RDPARTY_DIR%\geos" mkdir %LOG_BUILD_3RDPARTY_DIR%\geos
 if not exist "%LOG_BUILD_3RDPARTY_DIR%\protobuf" mkdir %LOG_BUILD_3RDPARTY_DIR%\protobuf
 if not exist "%LOG_BUILD_3RDPARTY_DIR%\zlib" mkdir %LOG_BUILD_3RDPARTY_DIR%\zlib
@@ -300,16 +300,16 @@ cd %BUILD_3RDPARTY_DIR%
 
 
 :: --------------------------------------------------
-:: pnageo
+:: gcsfunc
 
-    echo [%STEP_NUM_PNAGEO% of %STEP_NUM_TOTAL%] Building pnageo ...
-    set PNAGEO_INSTALL_DIR=%INSTALL_3RDPARTY_DIR%\pnageo
-    set PNAGEO_INSTALL_RELEASE_DIR=%PNAGEO_INSTALL_DIR%\release
-    set PNAGEO_INSTALL_DEBUG_DIR=%PNAGEO_INSTALL_DIR%\debug
-    set PNAGEO_INCLUDE_DIR=%PNAGEO_INSTALL_RELEASE_DIR%\include\
+    echo [%STEP_NUM_GCSFUNC% of %STEP_NUM_TOTAL%] Building gcsfunc ...
+    set GCSFUNC_INSTALL_DIR=%INSTALL_3RDPARTY_DIR%\gcsfunc
+    set GCSFUNC_INSTALL_RELEASE_DIR=%GCSFUNC_INSTALL_DIR%\release
+    set GCSFUNC_INSTALL_DEBUG_DIR=%GCSFUNC_INSTALL_DIR%\debug
+    set GCSFUNC_INCLUDE_DIR=%GCSFUNC_INSTALL_RELEASE_DIR%\include\
     
-    if not %IS_PNAGEO_BUILD% EQU 1 (
-      cd pnageo
+    if not %IS_GCSFUNC_BUILD% EQU 1 (
+      cd gcsfunc
       
       if not exist build mkdir build
       cd build
@@ -317,17 +317,17 @@ cd %BUILD_3RDPARTY_DIR%
       if %IS_BUILD_RELEASE% EQU 1 (
           if not exist release mkdir release
           cd release
-          %CMAKE_BASE_COMMAND% ../../ -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=%PNAGEO_INSTALL_RELEASE_DIR% > %LOG_BUILD_3RDPARTY_DIR%\pnageo\[CMake][configure][release].log 2> %LOG_BUILD_3RDPARTY_DIR%\pnageo\[CMake][messages][release].log
-          %MS_BUILD_EXE% PnaGeo.sln /p:Configuration=Release;Platform=x64 %MS_BUILD_OPTIONS_PARALLEL% /fileLogger /flp:logfile=%LOG_BUILD_3RDPARTY_DIR%\pnageo\[MSBuild][build][release].log > nul
+          %CMAKE_BASE_COMMAND% ../../ -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=%GCSFUNC_INSTALL_RELEASE_DIR% > %LOG_BUILD_3RDPARTY_DIR%\gcsfunc\[CMake][configure][release].log 2> %LOG_BUILD_3RDPARTY_DIR%\gcsfunc\[CMake][messages][release].log
+          %MS_BUILD_EXE% GCSfunc.sln /p:Configuration=Release;Platform=x64 %MS_BUILD_OPTIONS_PARALLEL% /fileLogger /flp:logfile=%LOG_BUILD_3RDPARTY_DIR%\gcsfunc\[MSBuild][build][release].log > nul
           if not %ERRORLEVEL%==0 (
-              echo [!] ... error building Release. See build log for info: %LOG_BUILD_3RDPARTY_DIR%\pnageo\[MSBuild][build][release].log
+              echo [!] ... error building Release. See build log for info: %LOG_BUILD_3RDPARTY_DIR%\gcsfunc\[MSBuild][build][release].log
               goto error
           ) else (
               echo ... Release built successfully
           )
-          %MS_BUILD_EXE% INSTALL.vcxproj /p:Configuration=Release;Platform=x64 %MS_BUILD_OPTIONS_PARALLEL% /fileLogger /flp:logfile=%LOG_BUILD_3RDPARTY_DIR%\pnageo\[MSBuild][install][release].log
+          %MS_BUILD_EXE% INSTALL.vcxproj /p:Configuration=Release;Platform=x64 %MS_BUILD_OPTIONS_PARALLEL% /fileLogger /flp:logfile=%LOG_BUILD_3RDPARTY_DIR%\gcsfunc\[MSBuild][install][release].log
           if not %ERRORLEVEL%==0 (
-              echo [!] ... error installing Release. See build log for info: %LOG_BUILD_3RDPARTY_DIR%\pnageo\[MSBuild][install][release].log
+              echo [!] ... error installing Release. See build log for info: %LOG_BUILD_3RDPARTY_DIR%\gcsfunc\[MSBuild][install][release].log
               echo ... continuing to build
           ) else (
               echo ... Release installed successfully
@@ -339,17 +339,17 @@ cd %BUILD_3RDPARTY_DIR%
       if %IS_BUILD_DEBUG% EQU 1 (
           if not exist debug mkdir debug
           cd debug
-          %CMAKE_BASE_COMMAND% ../../ -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=%PNAGEO_INSTALL_DEBUG_DIR% > %LOG_BUILD_3RDPARTY_DIR%\pnageo\[CMake][configure][Debug].log 2> %LOG_BUILD_3RDPARTY_DIR%\pnageo\[CMake][messages][Debug].log
-          %MS_BUILD_EXE% PnaGeo.sln /p:Configuration=Debug;Platform=x64 %MS_BUILD_OPTIONS_PARALLEL% /fileLogger /flp:logfile=%LOG_BUILD_3RDPARTY_DIR%\pnageo\[MSBuild][build][Debug].log > nul
+          %CMAKE_BASE_COMMAND% ../../ -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=%GCSFUNC_INSTALL_DEBUG_DIR% > %LOG_BUILD_3RDPARTY_DIR%\gcsfunc\[CMake][configure][debug].log 2> %LOG_BUILD_3RDPARTY_DIR%\gcsfunc\[CMake][messages][debug].log
+          %MS_BUILD_EXE% GCSfunc.sln /p:Configuration=Debug;Platform=x64 %MS_BUILD_OPTIONS_PARALLEL% /fileLogger /flp:logfile=%LOG_BUILD_3RDPARTY_DIR%\gcsfunc\[MSBuild][build][debug].log > nul
           if not %ERRORLEVEL%==0 (
-              echo [!] ... error building Debug. See build log for info: %LOG_BUILD_3RDPARTY_DIR%\pnageo\[MSBuild][build][Debug].log
+              echo [!] ... error building Debug. See build log for info: %LOG_BUILD_3RDPARTY_DIR%\gcsfunc\[MSBuild][build][debug].log
               goto error
           ) else (
               echo ... Debug built successfully
           )
-          %MS_BUILD_EXE% INSTALL.vcxproj /p:Configuration=Debug;Platform=x64 %MS_BUILD_OPTIONS_PARALLEL% /fileLogger /flp:logfile=%LOG_BUILD_3RDPARTY_DIR%\pnageo\[MSBuild][install][Debug].log
+          %MS_BUILD_EXE% INSTALL.vcxproj /p:Configuration=Debug;Platform=x64 %MS_BUILD_OPTIONS_PARALLEL% /fileLogger /flp:logfile=%LOG_BUILD_3RDPARTY_DIR%\gcsfunc\[MSBuild][install][debug].log
           if not %ERRORLEVEL%==0 (
-              echo [!] ... error installing Debug. See build log for info: %LOG_BUILD_3RDPARTY_DIR%\pnageo\[MSBuild][install][Debug].log
+              echo [!] ... error installing Debug. See build log for info: %LOG_BUILD_3RDPARTY_DIR%\gcsfunc\[MSBuild][install][debug].log
               echo ... continuing to build
           ) else (
               echo ... Debug installed successfully
@@ -358,35 +358,35 @@ cd %BUILD_3RDPARTY_DIR%
           cd ..
       )
       
-      echo ... pnageo build finished.
+      echo ... gcsfunc build finished.
       
       cd ../../
     ) else (
-      echo ... pnageo is marked as built.
+      echo ... gcsfunc is marked as built.
     )
     
     echo.
-    echo PNAGEO_INCLUDE_DIR     = %PNAGEO_INCLUDE_DIR%
-    set PNAGEO_LIBRARY_RELEASE=%PNAGEO_INSTALL_RELEASE_DIR%\lib\pnageo.lib
-    set PNAGEO_LIBRARY_DEBUG=%PNAGEO_INSTALL_DEBUG_DIR%\lib\pnageo.lib
+    echo GCSFUNC_INCLUDE_DIR     = %GCSFUNC_INCLUDE_DIR%
+    set GCSFUNC_LIBRARY_RELEASE=%GCSFUNC_INSTALL_RELEASE_DIR%\lib\gcsfunc.lib
+    set GCSFUNC_LIBRARY_DEBUG=%GCSFUNC_INSTALL_DEBUG_DIR%\lib\gcsfunc.lib
     
     if %IS_BUILD_RELEASE% EQU 1 (
-        if exist %PNAGEO_LIBRARY_RELEASE% (
-            echo PNAGEO_LIBRARY_RELEASE = %PNAGEO_LIBRARY_RELEASE%
-            set /A SUCCESS_BUILD_PNAGEO_RELEASE=1
+        if exist %GCSFUNC_LIBRARY_RELEASE% (
+            echo GCSFUNC_LIBRARY_RELEASE = %GCSFUNC_LIBRARY_RELEASE%
+            set /A SUCCESS_BUILD_GCSFUNC_RELEASE=1
         ) else (
-            set PNAGEO_LIBRARY_RELEASE=
-            echo PNAGEO_LIBRARY_RELEASE not found [not built?]
+            set GCSFUNC_LIBRARY_RELEASE=
+            echo GCSFUNC_LIBRARY_RELEASE not found [not built?]
         )
     )
     
     if %IS_BUILD_DEBUG% EQU 1 (
-        if exist %PNAGEO_LIBRARY_DEBUG% (
-            echo PNAGEO_LIBRARY_DEBUG   = %PNAGEO_LIBRARY_DEBUG%
-            set /A SUCCESS_BUILD_PNAGEO_DEBUG=1
+        if exist %GCSFUNC_LIBRARY_DEBUG% (
+            echo GCSFUNC_LIBRARY_DEBUG   = %GCSFUNC_LIBRARY_DEBUG%
+            set /A SUCCESS_BUILD_GCSFUNC_DEBUG=1
         ) else (
-            set PNAGEO_LIBRARY_DEBUG=
-            echo PNAGEO_LIBRARY_DEBUG not found [not built?]
+            set GCSFUNC_LIBRARY_DEBUG=
+            echo GCSFUNC_LIBRARY_DEBUG not found [not built?]
         )
     )
     
@@ -434,17 +434,17 @@ cd %BUILD_3RDPARTY_DIR%
       if %IS_BUILD_DEBUG% EQU 1 (
           if not exist debug mkdir debug
           cd debug
-          %CMAKE_BASE_COMMAND% ../../ -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=%GEOS_INSTALL_DEBUG_DIR% -DGEOS_BUILD_SHARED=ON -DGEOS_BUILD_STATIC=OFF -DGEOS_ENABLE_TESTS=OFF > %LOG_BUILD_3RDPARTY_DIR%\geos\[CMake][configure][Debug].log 2> %LOG_BUILD_3RDPARTY_DIR%\geos\[CMake][messages][Debug].log
-          %MS_BUILD_EXE% GEOS.sln /p:Configuration=Debug;Platform=x64 %MS_BUILD_OPTIONS_PARALLEL% /fileLogger /flp:logfile=%LOG_BUILD_3RDPARTY_DIR%\geos\[MSBuild][build][Debug].log > nul
+          %CMAKE_BASE_COMMAND% ../../ -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=%GEOS_INSTALL_DEBUG_DIR% -DGEOS_BUILD_SHARED=ON -DGEOS_BUILD_STATIC=OFF -DGEOS_ENABLE_TESTS=OFF > %LOG_BUILD_3RDPARTY_DIR%\geos\[CMake][configure][debug].log 2> %LOG_BUILD_3RDPARTY_DIR%\geos\[CMake][messages][debug].log
+          %MS_BUILD_EXE% GEOS.sln /p:Configuration=Debug;Platform=x64 %MS_BUILD_OPTIONS_PARALLEL% /fileLogger /flp:logfile=%LOG_BUILD_3RDPARTY_DIR%\geos\[MSBuild][build][debug].log > nul
           if not %ERRORLEVEL%==0 (
-              echo [!] ... error building Debug. See build log for info: %LOG_BUILD_3RDPARTY_DIR%\geos\[MSBuild][build][Debug].log
+              echo [!] ... error building Debug. See build log for info: %LOG_BUILD_3RDPARTY_DIR%\geos\[MSBuild][build][debug].log
               goto error
           ) else (
               echo ... Debug built successfully
           )
-          %MS_BUILD_EXE% INSTALL.vcxproj /p:Configuration=Debug;Platform=x64 %MS_BUILD_OPTIONS_PARALLEL% /fileLogger /flp:logfile=%LOG_BUILD_3RDPARTY_DIR%\geos\[MSBuild][install][Debug].log
+          %MS_BUILD_EXE% INSTALL.vcxproj /p:Configuration=Debug;Platform=x64 %MS_BUILD_OPTIONS_PARALLEL% /fileLogger /flp:logfile=%LOG_BUILD_3RDPARTY_DIR%\geos\[MSBuild][install][debug].log
           if not %ERRORLEVEL%==0 (
-              echo [!] ... error installing Debug. See build log for info: %LOG_BUILD_3RDPARTY_DIR%\geos\[MSBuild][install][Debug].log
+              echo [!] ... error installing Debug. See build log for info: %LOG_BUILD_3RDPARTY_DIR%\geos\[MSBuild][install][debug].log
               echo ... continuing to build
           ) else (
               echo ... Debug installed successfully
@@ -529,17 +529,17 @@ cd %BUILD_3RDPARTY_DIR%
       if %IS_BUILD_DEBUG% EQU 1 (
           if not exist debug mkdir debug
           cd debug
-          %CMAKE_BASE_COMMAND% ../../ -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=%ZLIB_INSTALL_DEBUG_DIR% -DCMAKE_POSITION_INDEPENDENT_CODE=ON > %LOG_BUILD_3RDPARTY_DIR%\zlib\[CMake][configure][Debug].log 2> %LOG_BUILD_3RDPARTY_DIR%\zlib\[CMake][messages][Debug].log
-          %MS_BUILD_EXE% zlib.sln /p:Configuration=Debug;Platform=x64 %MS_BUILD_OPTIONS_PARALLEL% /fileLogger /flp:logfile=%LOG_BUILD_3RDPARTY_DIR%\zlib\[MSBuild][build][Debug].log > nul
+          %CMAKE_BASE_COMMAND% ../../ -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=%ZLIB_INSTALL_DEBUG_DIR% -DCMAKE_POSITION_INDEPENDENT_CODE=ON > %LOG_BUILD_3RDPARTY_DIR%\zlib\[CMake][configure][debug].log 2> %LOG_BUILD_3RDPARTY_DIR%\zlib\[CMake][messages][debug].log
+          %MS_BUILD_EXE% zlib.sln /p:Configuration=Debug;Platform=x64 %MS_BUILD_OPTIONS_PARALLEL% /fileLogger /flp:logfile=%LOG_BUILD_3RDPARTY_DIR%\zlib\[MSBuild][build][debug].log > nul
           if not %ERRORLEVEL%==0 (
-              echo [!] ... error building Debug. See build log for info: %LOG_BUILD_3RDPARTY_DIR%\zlib\[MSBuild][build][Debug].log
+              echo [!] ... error building Debug. See build log for info: %LOG_BUILD_3RDPARTY_DIR%\zlib\[MSBuild][build][debug].log
               goto error
           ) else (
               echo ... Debug built successfully
           )
-          %MS_BUILD_EXE% INSTALL.vcxproj /p:Configuration=Debug;Platform=x64 %MS_BUILD_OPTIONS_PARALLEL% /fileLogger /flp:logfile=%LOG_BUILD_3RDPARTY_DIR%\zlib\[MSBuild][install][Debug].log
+          %MS_BUILD_EXE% INSTALL.vcxproj /p:Configuration=Debug;Platform=x64 %MS_BUILD_OPTIONS_PARALLEL% /fileLogger /flp:logfile=%LOG_BUILD_3RDPARTY_DIR%\zlib\[MSBuild][install][debug].log
           if not %ERRORLEVEL%==0 (
-              echo [!] ... error installing Debug. See build log for info: %LOG_BUILD_3RDPARTY_DIR%\zlib\[MSBuild][install][Debug].log
+              echo [!] ... error installing Debug. See build log for info: %LOG_BUILD_3RDPARTY_DIR%\zlib\[MSBuild][install][debug].log
               echo ... continuing to build
           ) else (
               echo ... Debug installed successfully
@@ -627,17 +627,17 @@ cd %BUILD_3RDPARTY_DIR%
       if %IS_BUILD_DEBUG% EQU 1 (
           if not exist debug mkdir debug
           cd debug
-          %CMAKE_BASE_COMMAND% ../../ -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=%PROTOBUF_INSTALL_DEBUG_DIR% -Dprotobuf_BUILD_TESTS=OFF -Dprotobuf_BUILD_SHARED_LIBS=ON -Dprotobuf_WITH_ZLIB=ON -DZLIB_INCLUDE_DIR=%ZLIB_INCLUDE_DIR% -DZLIB_LIBRARY_DEBUG=%ZLIB_LIBRARY_DEBUG% > %LOG_BUILD_3RDPARTY_DIR%\protobuf\[CMake][configure][Debug].log 2> %LOG_BUILD_3RDPARTY_DIR%\protobuf\[CMake][messages][Debug].log
-          %MS_BUILD_EXE% protobuf.sln /p:Configuration=Debug;Platform=x64 %MS_BUILD_OPTIONS_PARALLEL% /fileLogger /flp:logfile=%LOG_BUILD_3RDPARTY_DIR%\protobuf\[MSBuild][build][Debug].log > nul
+          %CMAKE_BASE_COMMAND% ../../ -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=%PROTOBUF_INSTALL_DEBUG_DIR% -Dprotobuf_BUILD_TESTS=OFF -Dprotobuf_BUILD_SHARED_LIBS=ON -Dprotobuf_WITH_ZLIB=ON -DZLIB_INCLUDE_DIR=%ZLIB_INCLUDE_DIR% -DZLIB_LIBRARY_DEBUG=%ZLIB_LIBRARY_DEBUG% > %LOG_BUILD_3RDPARTY_DIR%\protobuf\[CMake][configure][debug].log 2> %LOG_BUILD_3RDPARTY_DIR%\protobuf\[CMake][messages][debug].log
+          %MS_BUILD_EXE% protobuf.sln /p:Configuration=Debug;Platform=x64 %MS_BUILD_OPTIONS_PARALLEL% /fileLogger /flp:logfile=%LOG_BUILD_3RDPARTY_DIR%\protobuf\[MSBuild][build][debug].log > nul
           if not %ERRORLEVEL%==0 (
-              echo [!] ... error building Debug. See build log for info: %LOG_BUILD_3RDPARTY_DIR%\protobuf\[MSBuild][build][Debug].log
+              echo [!] ... error building Debug. See build log for info: %LOG_BUILD_3RDPARTY_DIR%\protobuf\[MSBuild][build][debug].log
               goto error
           ) else (
               echo ... Debug built successfully
           )
-          %MS_BUILD_EXE% INSTALL.vcxproj /p:Configuration=Debug;Platform=x64 %MS_BUILD_OPTIONS_PARALLEL% /fileLogger /flp:logfile=%LOG_BUILD_3RDPARTY_DIR%\protobuf\[MSBuild][install][Debug].log
+          %MS_BUILD_EXE% INSTALL.vcxproj /p:Configuration=Debug;Platform=x64 %MS_BUILD_OPTIONS_PARALLEL% /fileLogger /flp:logfile=%LOG_BUILD_3RDPARTY_DIR%\protobuf\[MSBuild][install][debug].log
           if not %ERRORLEVEL%==0 (
-              echo [!] ... error installing Debug. See build log for info: %LOG_BUILD_3RDPARTY_DIR%\protobuf\[MSBuild][install][Debug].log
+              echo [!] ... error installing Debug. See build log for info: %LOG_BUILD_3RDPARTY_DIR%\protobuf\[MSBuild][install][debug].log
               echo ... continuing to build
           ) else (
               echo ... Debug installed successfully
@@ -744,17 +744,17 @@ cd %BUILD_3RDPARTY_DIR%
         if %IS_BUILD_DEBUG% EQU 1 (
             if not exist debug mkdir debug
             cd debug
-            %CMAKE_BASE_COMMAND% ../../ -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=%LIBPNG_INSTALL_DEBUG_DIR% -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DPNG_BUILD_ZLIB=OFF -DZLIB_INCLUDE_DIR=%ZLIB_INCLUDE_DIR% -DZLIB_LIBRARY=%ZLIB_LIBRARY_DEBUG% > %LOG_BUILD_3RDPARTY_DIR%\libpng\[CMake][configure][Debug].log 2> %LOG_BUILD_3RDPARTY_DIR%\libpng\[CMake][messages][Debug].log
-            %MS_BUILD_EXE% libpng.sln /p:Configuration=Debug;Platform=x64 %MS_BUILD_OPTIONS_PARALLEL% /fileLogger /flp:logfile=%LOG_BUILD_3RDPARTY_DIR%\libpng\[MSBuild][build][Debug].log
+            %CMAKE_BASE_COMMAND% ../../ -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=%LIBPNG_INSTALL_DEBUG_DIR% -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DPNG_BUILD_ZLIB=OFF -DZLIB_INCLUDE_DIR=%ZLIB_INCLUDE_DIR% -DZLIB_LIBRARY=%ZLIB_LIBRARY_DEBUG% > %LOG_BUILD_3RDPARTY_DIR%\libpng\[CMake][configure][debug].log 2> %LOG_BUILD_3RDPARTY_DIR%\libpng\[CMake][messages][debug].log
+            %MS_BUILD_EXE% libpng.sln /p:Configuration=Debug;Platform=x64 %MS_BUILD_OPTIONS_PARALLEL% /fileLogger /flp:logfile=%LOG_BUILD_3RDPARTY_DIR%\libpng\[MSBuild][build][debug].log
             if not %ERRORLEVEL%==0 (
-                echo [!] ... error building Debug. See build log for info: %LOG_BUILD_3RDPARTY_DIR%\libpng\[MSBuild][build][Debug].log
+                echo [!] ... error building Debug. See build log for info: %LOG_BUILD_3RDPARTY_DIR%\libpng\[MSBuild][build][debug].log
                 goto error
             ) else (
                 echo ... Debug built successfully
             )
-            %MS_BUILD_EXE% INSTALL.vcxproj /p:Configuration=Debug;Platform=x64 %MS_BUILD_OPTIONS_PARALLEL% /fileLogger /flp:logfile=%LOG_BUILD_3RDPARTY_DIR%\libpng\[MSBuild][install][Debug].log
+            %MS_BUILD_EXE% INSTALL.vcxproj /p:Configuration=Debug;Platform=x64 %MS_BUILD_OPTIONS_PARALLEL% /fileLogger /flp:logfile=%LOG_BUILD_3RDPARTY_DIR%\libpng\[MSBuild][install][debug].log
             if not %ERRORLEVEL%==0 (
-                echo [!] ... error installing Debug. See build log for info: %LOG_BUILD_3RDPARTY_DIR%\libpng\[MSBuild][install][Debug].log
+                echo [!] ... error installing Debug. See build log for info: %LOG_BUILD_3RDPARTY_DIR%\libpng\[MSBuild][install][debug].log
                 echo ... continuing to build
             ) else (
                 echo ... Debug installed successfully
@@ -839,17 +839,17 @@ cd %BUILD_3RDPARTY_DIR%
         if %IS_BUILD_DEBUG% EQU 1 (
             if not exist debug mkdir debug
             cd debug
-            %CMAKE_BASE_COMMAND% ../../ -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=%LIBJPEG_INSTALL_DEBUG_DIR% -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DCMAKE_DEBUG_POSTFIX='d' > %LOG_BUILD_3RDPARTY_DIR%\libjpeg\[CMake][configure][Debug].log 2> %LOG_BUILD_3RDPARTY_DIR%\libjpeg\[CMake][messages][Debug].log
-            %MS_BUILD_EXE% libjpeg-turbo.sln /p:Configuration=Debug;Platform=x64 %MS_BUILD_OPTIONS_PARALLEL% /fileLogger /flp:logfile=%LOG_BUILD_3RDPARTY_DIR%\libjpeg\[MSBuild][build][Debug].log
+            %CMAKE_BASE_COMMAND% ../../ -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=%LIBJPEG_INSTALL_DEBUG_DIR% -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DCMAKE_DEBUG_POSTFIX='d' > %LOG_BUILD_3RDPARTY_DIR%\libjpeg\[CMake][configure][debug].log 2> %LOG_BUILD_3RDPARTY_DIR%\libjpeg\[CMake][messages][debug].log
+            %MS_BUILD_EXE% libjpeg-turbo.sln /p:Configuration=Debug;Platform=x64 %MS_BUILD_OPTIONS_PARALLEL% /fileLogger /flp:logfile=%LOG_BUILD_3RDPARTY_DIR%\libjpeg\[MSBuild][build][debug].log
             if not %ERRORLEVEL%==0 (
-                echo [!] ... error building Debug. See build log for info: %LOG_BUILD_3RDPARTY_DIR%\libjpeg\[MSBuild][build][Debug].log
+                echo [!] ... error building Debug. See build log for info: %LOG_BUILD_3RDPARTY_DIR%\libjpeg\[MSBuild][build][debug].log
                 goto error
             ) else (
                 echo ... Debug built successfully
             )
-            %MS_BUILD_EXE% INSTALL.vcxproj /p:Configuration=Debug;Platform=x64 %MS_BUILD_OPTIONS_PARALLEL% /fileLogger /flp:logfile=%LOG_BUILD_3RDPARTY_DIR%\libjpeg\[MSBuild][install][Debug].log
+            %MS_BUILD_EXE% INSTALL.vcxproj /p:Configuration=Debug;Platform=x64 %MS_BUILD_OPTIONS_PARALLEL% /fileLogger /flp:logfile=%LOG_BUILD_3RDPARTY_DIR%\libjpeg\[MSBuild][install][debug].log
             if not %ERRORLEVEL%==0 (
-                echo [!] ... error installing Debug. See build log for info: %LOG_BUILD_3RDPARTY_DIR%\libjpeg\[MSBuild][install][Debug].log
+                echo [!] ... error installing Debug. See build log for info: %LOG_BUILD_3RDPARTY_DIR%\libjpeg\[MSBuild][install][debug].log
                 echo ... continuing to build
             ) else (
                 echo ... Debug installed successfully
@@ -934,17 +934,17 @@ cd %BUILD_3RDPARTY_DIR%
         if %IS_BUILD_DEBUG% EQU 1 (
             if not exist debug mkdir debug
             cd debug
-            %CMAKE_BASE_COMMAND% ../../ -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=%LIBTIFF_INSTALL_DEBUG_DIR% -DZLIB_INCLUDE_DIR=%ZLIB_INCLUDE_DIR% -DZLIB_LIBRARY_DEBUG=%ZLIB_LIBRARY_DEBUG% -DJPEG_INCLUDE_DIR=%LIBJPEG_INCLUDE_DIR% -DJPEG_LIBRARY=%LIBJPEG_LIBRARY_DEBUG% > %LOG_BUILD_3RDPARTY_DIR%\libtiff\[CMake][configure][Debug].log 2> %LOG_BUILD_3RDPARTY_DIR%\libtiff\[CMake][messages][Debug].log
-            %MS_BUILD_EXE% tiff.sln /p:Configuration=Debug;Platform=x64 %MS_BUILD_OPTIONS_PARALLEL% /fileLogger /flp:logfile=%LOG_BUILD_3RDPARTY_DIR%\libtiff\[MSBuild][build][Debug].log
+            %CMAKE_BASE_COMMAND% ../../ -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=%LIBTIFF_INSTALL_DEBUG_DIR% -DZLIB_INCLUDE_DIR=%ZLIB_INCLUDE_DIR% -DZLIB_LIBRARY_DEBUG=%ZLIB_LIBRARY_DEBUG% -DJPEG_INCLUDE_DIR=%LIBJPEG_INCLUDE_DIR% -DJPEG_LIBRARY=%LIBJPEG_LIBRARY_DEBUG% > %LOG_BUILD_3RDPARTY_DIR%\libtiff\[CMake][configure][debug].log 2> %LOG_BUILD_3RDPARTY_DIR%\libtiff\[CMake][messages][debug].log
+            %MS_BUILD_EXE% tiff.sln /p:Configuration=Debug;Platform=x64 %MS_BUILD_OPTIONS_PARALLEL% /fileLogger /flp:logfile=%LOG_BUILD_3RDPARTY_DIR%\libtiff\[MSBuild][build][debug].log
             if not %ERRORLEVEL%==0 (
-                echo [!] ... error building Debug. See build log for info: %LOG_BUILD_3RDPARTY_DIR%\libtiff\[MSBuild][build][Debug].log
+                echo [!] ... error building Debug. See build log for info: %LOG_BUILD_3RDPARTY_DIR%\libtiff\[MSBuild][build][debug].log
                 goto error
             ) else (
                 echo ... Debug built successfully
             )
-            %MS_BUILD_EXE% INSTALL.vcxproj /p:Configuration=Debug;Platform=x64 %MS_BUILD_OPTIONS_PARALLEL% /fileLogger /flp:logfile=%LOG_BUILD_3RDPARTY_DIR%\libtiff\[MSBuild][install][Debug].log
+            %MS_BUILD_EXE% INSTALL.vcxproj /p:Configuration=Debug;Platform=x64 %MS_BUILD_OPTIONS_PARALLEL% /fileLogger /flp:logfile=%LOG_BUILD_3RDPARTY_DIR%\libtiff\[MSBuild][install][debug].log
             if not %ERRORLEVEL%==0 (
-                echo [!] ... error installing Debug. See build log for info: %LOG_BUILD_3RDPARTY_DIR%\libtiff\[MSBuild][install][Debug].log
+                echo [!] ... error installing Debug. See build log for info: %LOG_BUILD_3RDPARTY_DIR%\libtiff\[MSBuild][install][debug].log
                 echo ... continuing to build
             ) else (
                 echo ... Debug installed successfully
@@ -1029,17 +1029,17 @@ cd %BUILD_3RDPARTY_DIR%
         if %IS_BUILD_RELEASE% EQU 1 (
             if not exist debug mkdir debug
             cd debug
-            %CMAKE_BASE_COMMAND% ../../ -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=%LIBCURL_INSTALL_DEBUG_DIR% -DBUILD_TESTING=OFF -DZLIB_INCLUDE_DIR=%ZLIB_INCLUDE_DIR% -DZLIB_LIBRARY_RELEASE=%ZLIB_LIBRARY_RELEASE% -DZLIB_LIBRARY_DEBUG=%ZLIB_LIBRARY_DEBUG% > %LOG_BUILD_3RDPARTY_DIR%\libcurl\[CMake][configure][Debug].log 2> %LOG_BUILD_3RDPARTY_DIR%\libcurl\[CMake][messages][Debug].log
-            %MS_BUILD_EXE% CURL.sln /p:Configuration=Debug;Platform=x64 %MS_BUILD_OPTIONS_PARALLEL% /fileLogger /flp:logfile=%LOG_BUILD_3RDPARTY_DIR%\libcurl\[MSBuild][build][Debug].log
+            %CMAKE_BASE_COMMAND% ../../ -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=%LIBCURL_INSTALL_DEBUG_DIR% -DBUILD_TESTING=OFF -DZLIB_INCLUDE_DIR=%ZLIB_INCLUDE_DIR% -DZLIB_LIBRARY_RELEASE=%ZLIB_LIBRARY_RELEASE% -DZLIB_LIBRARY_DEBUG=%ZLIB_LIBRARY_DEBUG% > %LOG_BUILD_3RDPARTY_DIR%\libcurl\[CMake][configure][debug].log 2> %LOG_BUILD_3RDPARTY_DIR%\libcurl\[CMake][messages][debug].log
+            %MS_BUILD_EXE% CURL.sln /p:Configuration=Debug;Platform=x64 %MS_BUILD_OPTIONS_PARALLEL% /fileLogger /flp:logfile=%LOG_BUILD_3RDPARTY_DIR%\libcurl\[MSBuild][build][debug].log
             if not %ERRORLEVEL%==0 (
-                echo [!] ... error building Debug. See build log for info: %LOG_BUILD_3RDPARTY_DIR%\libcurl\[MSBuild][build][Debug].log
+                echo [!] ... error building Debug. See build log for info: %LOG_BUILD_3RDPARTY_DIR%\libcurl\[MSBuild][build][debug].log
                 goto error
             ) else (
                 echo ... Debug built successfully
             )
-            %MS_BUILD_EXE% INSTALL.vcxproj /p:Configuration=Debug;Platform=x64 %MS_BUILD_OPTIONS_PARALLEL% /fileLogger /flp:logfile=%LOG_BUILD_3RDPARTY_DIR%\libcurl\[MSBuild][install][Debug].log
+            %MS_BUILD_EXE% INSTALL.vcxproj /p:Configuration=Debug;Platform=x64 %MS_BUILD_OPTIONS_PARALLEL% /fileLogger /flp:logfile=%LOG_BUILD_3RDPARTY_DIR%\libcurl\[MSBuild][install][debug].log
             if not %ERRORLEVEL%==0 (
-                echo [!] ... error installing Debug. See build log for info: %LOG_BUILD_3RDPARTY_DIR%\libcurl\[MSBuild][install][Debug].log
+                echo [!] ... error installing Debug. See build log for info: %LOG_BUILD_3RDPARTY_DIR%\libcurl\[MSBuild][install][debug].log
                 echo ... continuing to build
             ) else (
                 echo ... Debug installed successfully
@@ -1124,17 +1124,17 @@ cd %BUILD_3RDPARTY_DIR%
         if %IS_BUILD_DEBUG% EQU 1 (
             if not exist debug mkdir debug
             cd debug
-            %CMAKE_BASE_COMMAND% ../../ -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=%FREETYPE_INSTALL_DEBUG_DIR% -DBUILD_SHARED_LIBS=ON -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DFT_WITH_ZLIB=ON -DZLIB_INCLUDE_DIR=%ZLIB_INCLUDE_DIR% -DZLIB_LIBRARY_DEBUG=%ZLIB_LIBRARY_DEBUG% > %LOG_BUILD_3RDPARTY_DIR%\freetype\[CMake][configure][Debug].log 2> %LOG_BUILD_3RDPARTY_DIR%\freetype\[CMake][messages][Debug].log
-            %MS_BUILD_EXE% freetype.sln /p:Configuration=Debug;Platform=x64 %MS_BUILD_OPTIONS_PARALLEL% /fileLogger /flp:logfile=%LOG_BUILD_3RDPARTY_DIR%\freetype\[MSBuild][build][Debug].log
+            %CMAKE_BASE_COMMAND% ../../ -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=%FREETYPE_INSTALL_DEBUG_DIR% -DBUILD_SHARED_LIBS=ON -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DFT_WITH_ZLIB=ON -DZLIB_INCLUDE_DIR=%ZLIB_INCLUDE_DIR% -DZLIB_LIBRARY_DEBUG=%ZLIB_LIBRARY_DEBUG% > %LOG_BUILD_3RDPARTY_DIR%\freetype\[CMake][configure][debug].log 2> %LOG_BUILD_3RDPARTY_DIR%\freetype\[CMake][messages][debug].log
+            %MS_BUILD_EXE% freetype.sln /p:Configuration=Debug;Platform=x64 %MS_BUILD_OPTIONS_PARALLEL% /fileLogger /flp:logfile=%LOG_BUILD_3RDPARTY_DIR%\freetype\[MSBuild][build][debug].log
             if not %ERRORLEVEL%==0 (
-                echo [!] ... error building Debug. See build log for info: %LOG_BUILD_3RDPARTY_DIR%\freetype\[MSBuild][build][Debug].log
+                echo [!] ... error building Debug. See build log for info: %LOG_BUILD_3RDPARTY_DIR%\freetype\[MSBuild][build][debug].log
                 goto error
             ) else (
                 echo ... Debug built successfully
             )
-            %MS_BUILD_EXE% INSTALL.vcxproj /p:Configuration=Debug;Platform=x64 %MS_BUILD_OPTIONS_PARALLEL% /fileLogger /flp:logfile=%LOG_BUILD_3RDPARTY_DIR%\freetype\[MSBuild][install][Debug].log
+            %MS_BUILD_EXE% INSTALL.vcxproj /p:Configuration=Debug;Platform=x64 %MS_BUILD_OPTIONS_PARALLEL% /fileLogger /flp:logfile=%LOG_BUILD_3RDPARTY_DIR%\freetype\[MSBuild][install][debug].log
             if not %ERRORLEVEL%==0 (
-                echo [!] ... error installing Debug. See build log for info: %LOG_BUILD_3RDPARTY_DIR%\freetype\[MSBuild][install][Debug].log
+                echo [!] ... error installing Debug. See build log for info: %LOG_BUILD_3RDPARTY_DIR%\freetype\[MSBuild][install][debug].log
                 echo ... continuing to build
             ) else (
                 echo ... Debug installed successfully
@@ -1219,17 +1219,17 @@ cd %BUILD_3RDPARTY_DIR%
         if %IS_BUILD_DEBUG% EQU 1 (
             if not exist debug mkdir debug
             cd debug
-            %CMAKE_BASE_COMMAND% ../../ -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=%PROJ4_INSTALL_DEBUG_DIR% -DBUILD_LIBPROJ_SHARED=ON -DPROJ_TESTS=OFF -DSQLITE3_INCLUDE_DIR=%SQLITE_INCLUDE_DIR% -DSQLITE3_LIBRARY=%SQLITE_LIBRARY_DEBUG% -DEXE_SQLITE3=%SQLITE_EXE% > %LOG_BUILD_3RDPARTY_DIR%\proj\[CMake][configure][Debug].log 2> %LOG_BUILD_3RDPARTY_DIR%\proj\[CMake][messages][Debug].log
-            %MS_BUILD_EXE% PROJ4.sln /p:Configuration=Debug;Platform=x64 %MS_BUILD_OPTIONS_PARALLEL% /fileLogger /flp:logfile=%LOG_BUILD_3RDPARTY_DIR%\proj\[MSBuild][build][Debug].log
+            %CMAKE_BASE_COMMAND% ../../ -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=%PROJ4_INSTALL_DEBUG_DIR% -DBUILD_LIBPROJ_SHARED=ON -DPROJ_TESTS=OFF -DSQLITE3_INCLUDE_DIR=%SQLITE_INCLUDE_DIR% -DSQLITE3_LIBRARY=%SQLITE_LIBRARY_DEBUG% -DEXE_SQLITE3=%SQLITE_EXE% > %LOG_BUILD_3RDPARTY_DIR%\proj\[CMake][configure][debug].log 2> %LOG_BUILD_3RDPARTY_DIR%\proj\[CMake][messages][debug].log
+            %MS_BUILD_EXE% PROJ4.sln /p:Configuration=Debug;Platform=x64 %MS_BUILD_OPTIONS_PARALLEL% /fileLogger /flp:logfile=%LOG_BUILD_3RDPARTY_DIR%\proj\[MSBuild][build][debug].log
             if not %ERRORLEVEL%==0 (
-                echo [!] ... error building Debug. See build log for info: %LOG_BUILD_3RDPARTY_DIR%\proj\[MSBuild][build][Debug].log
+                echo [!] ... error building Debug. See build log for info: %LOG_BUILD_3RDPARTY_DIR%\proj\[MSBuild][build][debug].log
                 goto error
             ) else (
                 echo ... Debug built successfully
             )
-            %MS_BUILD_EXE% INSTALL.vcxproj /p:Configuration=Debug;Platform=x64 %MS_BUILD_OPTIONS_PARALLEL% /fileLogger /flp:logfile=%LOG_BUILD_3RDPARTY_DIR%\proj\[MSBuild][install][Debug].log
+            %MS_BUILD_EXE% INSTALL.vcxproj /p:Configuration=Debug;Platform=x64 %MS_BUILD_OPTIONS_PARALLEL% /fileLogger /flp:logfile=%LOG_BUILD_3RDPARTY_DIR%\proj\[MSBuild][install][debug].log
             if not %ERRORLEVEL%==0 (
-                echo [!] ... error installing Debug. See build log for info: %LOG_BUILD_3RDPARTY_DIR%\proj\[MSBuild][install][Debug].log
+                echo [!] ... error installing Debug. See build log for info: %LOG_BUILD_3RDPARTY_DIR%\proj\[MSBuild][install][debug].log
                 echo ... continuing to build
             ) else (
                 echo ... Debug installed successfully
@@ -1314,17 +1314,17 @@ cd %BUILD_3RDPARTY_DIR%
         if %IS_BUILD_DEBUG% EQU 1 (
             if not exist debug mkdir debug
             cd debug
-            %CMAKE_BASE_COMMAND% ../../ -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=%LIBGEOTIFF_INSTALL_DEBUG_DIR% -DWITH_UTILITIES=OFF -DWITH_JPEG=ON -DWITH_TIFF=ON -DWITH_ZLIB=ON -DPROJ_INCLUDE_DIR=%PROJ4_INCLUDE_DIR% -DPROJ_LIBRARY=%PROJ4_LIBRARY_DEBUG% -DZLIB_INCLUDE_DIR=%ZLIB_INCLUDE_DIR% -DZLIB_LIBRARY_DEBUG=%ZLIB_LIBRARY_DEBUG% -DJPEG_INCLUDE_DIR=%LIBJPEG_INCLUDE_DIR% -DJPEG_LIBRARY_DEBUG=%LIBJPEG_LIBRARY_DEBUG% -DTIFF_INCLUDE_DIR=%LIBTIFF_INCLUDE_DIR% -DTIFF_LIBRARY_DEBUG=%LIBTIFF_LIBRARY_DEBUG% > %LOG_BUILD_3RDPARTY_DIR%\libgeotiff\[CMake][configure][Debug].log 2> %LOG_BUILD_3RDPARTY_DIR%\libgeotiff\[CMake][messages][Debug].log
-            %MS_BUILD_EXE% GeoTIFF.sln /p:Configuration=Debug;Platform=x64 %MS_BUILD_OPTIONS_PARALLEL% /fileLogger /flp:logfile=%LOG_BUILD_3RDPARTY_DIR%\libgeotiff\[MSBuild][build][Debug].log
+            %CMAKE_BASE_COMMAND% ../../ -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=%LIBGEOTIFF_INSTALL_DEBUG_DIR% -DWITH_UTILITIES=OFF -DWITH_JPEG=ON -DWITH_TIFF=ON -DWITH_ZLIB=ON -DPROJ_INCLUDE_DIR=%PROJ4_INCLUDE_DIR% -DPROJ_LIBRARY=%PROJ4_LIBRARY_DEBUG% -DZLIB_INCLUDE_DIR=%ZLIB_INCLUDE_DIR% -DZLIB_LIBRARY_DEBUG=%ZLIB_LIBRARY_DEBUG% -DJPEG_INCLUDE_DIR=%LIBJPEG_INCLUDE_DIR% -DJPEG_LIBRARY_DEBUG=%LIBJPEG_LIBRARY_DEBUG% -DTIFF_INCLUDE_DIR=%LIBTIFF_INCLUDE_DIR% -DTIFF_LIBRARY_DEBUG=%LIBTIFF_LIBRARY_DEBUG% > %LOG_BUILD_3RDPARTY_DIR%\libgeotiff\[CMake][configure][debug].log 2> %LOG_BUILD_3RDPARTY_DIR%\libgeotiff\[CMake][messages][debug].log
+            %MS_BUILD_EXE% GeoTIFF.sln /p:Configuration=Debug;Platform=x64 %MS_BUILD_OPTIONS_PARALLEL% /fileLogger /flp:logfile=%LOG_BUILD_3RDPARTY_DIR%\libgeotiff\[MSBuild][build][debug].log
             if not %ERRORLEVEL%==0 (
-                echo [!] ... error building Debug. See build log for info: %LOG_BUILD_3RDPARTY_DIR%\libgeotiff\[MSBuild][build][Debug].log
+                echo [!] ... error building Debug. See build log for info: %LOG_BUILD_3RDPARTY_DIR%\libgeotiff\[MSBuild][build][debug].log
                 goto error
             ) else (
                 echo ... Debug built successfully
             )
-            %MS_BUILD_EXE% INSTALL.vcxproj /p:Configuration=Debug;Platform=x64 %MS_BUILD_OPTIONS_PARALLEL% /fileLogger /flp:logfile=%LOG_BUILD_3RDPARTY_DIR%\libgeotiff\[MSBuild][install][Debug].log
+            %MS_BUILD_EXE% INSTALL.vcxproj /p:Configuration=Debug;Platform=x64 %MS_BUILD_OPTIONS_PARALLEL% /fileLogger /flp:logfile=%LOG_BUILD_3RDPARTY_DIR%\libgeotiff\[MSBuild][install][debug].log
             if not %ERRORLEVEL%==0 (
-                echo [!] ... error installing Debug. See build log for info: %LOG_BUILD_3RDPARTY_DIR%\libgeotiff\[MSBuild][install][Debug].log
+                echo [!] ... error installing Debug. See build log for info: %LOG_BUILD_3RDPARTY_DIR%\libgeotiff\[MSBuild][install][debug].log
                 echo ... continuing to build
             ) else (
                 echo ... Debug installed successfully
@@ -1409,17 +1409,17 @@ cd %BUILD_3RDPARTY_DIR%
         if %IS_BUILD_DEBUG% EQU 1 (
             if not exist debug mkdir debug
             cd debug
-            %CMAKE_BASE_COMMAND% ../../ -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=%EXPAT_INSTALL_DEBUG_DIR% -DBUILD_doc=OFF -DBUILD_examples=OFF -DBUILD_shared=ON -DBUILD_tests=OFF -DBUILD_tools=OFF > %LOG_BUILD_3RDPARTY_DIR%\expat\[CMake][configure][Debug].log 2> %LOG_BUILD_3RDPARTY_DIR%\expat\[CMake][messages][Debug].log
-            %MS_BUILD_EXE% expat.sln /p:Configuration=Debug;Platform=x64 %MS_BUILD_OPTIONS_PARALLEL% /fileLogger /flp:logfile=%LOG_BUILD_3RDPARTY_DIR%\expat\[MSBuild][build][Debug].log
+            %CMAKE_BASE_COMMAND% ../../ -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=%EXPAT_INSTALL_DEBUG_DIR% -DBUILD_doc=OFF -DBUILD_examples=OFF -DBUILD_shared=ON -DBUILD_tests=OFF -DBUILD_tools=OFF > %LOG_BUILD_3RDPARTY_DIR%\expat\[CMake][configure][debug].log 2> %LOG_BUILD_3RDPARTY_DIR%\expat\[CMake][messages][debug].log
+            %MS_BUILD_EXE% expat.sln /p:Configuration=Debug;Platform=x64 %MS_BUILD_OPTIONS_PARALLEL% /fileLogger /flp:logfile=%LOG_BUILD_3RDPARTY_DIR%\expat\[MSBuild][build][debug].log
             if not %ERRORLEVEL%==0 (
-                echo [!] ... error building Debug. See build log for info: %LOG_BUILD_3RDPARTY_DIR%\expat\[MSBuild][build][Debug].log
+                echo [!] ... error building Debug. See build log for info: %LOG_BUILD_3RDPARTY_DIR%\expat\[MSBuild][build][debug].log
                 goto error
             ) else (
                 echo ... Debug built successfully
             )
-            %MS_BUILD_EXE% INSTALL.vcxproj /p:Configuration=Debug;Platform=x64 %MS_BUILD_OPTIONS_PARALLEL% /fileLogger /flp:logfile=%LOG_BUILD_3RDPARTY_DIR%\expat\[MSBuild][install][Debug].log
+            %MS_BUILD_EXE% INSTALL.vcxproj /p:Configuration=Debug;Platform=x64 %MS_BUILD_OPTIONS_PARALLEL% /fileLogger /flp:logfile=%LOG_BUILD_3RDPARTY_DIR%\expat\[MSBuild][install][debug].log
             if not %ERRORLEVEL%==0 (
-                echo [!] ... error installing Debug. See build log for info: %LOG_BUILD_3RDPARTY_DIR%\expat\[MSBuild][install][Debug].log
+                echo [!] ... error installing Debug. See build log for info: %LOG_BUILD_3RDPARTY_DIR%\expat\[MSBuild][install][debug].log
                 echo ... continuing to build
             ) else (
                 echo ... Debug installed successfully
@@ -1506,17 +1506,17 @@ cd %BUILD_3RDPARTY_DIR%
             
             CALL %VS_DEV_CMD% > nul 2> nul
             cd %BUILD_3RDPARTY_DIR%\gdal_debug
-            nmake /f makefile.vc GDAL_HOME=%GDAL_INSTALL_DEBUG_DIR% GDAL_DEPENDENCIES=%INSTALL_3RDPARTY_DIR% > %LOG_BUILD_3RDPARTY_DIR%\gdal\[NMake][build][Debug].log 2> %LOG_BUILD_3RDPARTY_DIR%\gdal\[NMake][messages][Debug].log
+            nmake /f makefile.vc GDAL_HOME=%GDAL_INSTALL_DEBUG_DIR% GDAL_DEPENDENCIES=%INSTALL_3RDPARTY_DIR% > %LOG_BUILD_3RDPARTY_DIR%\gdal\[NMake][build][debug].log 2> %LOG_BUILD_3RDPARTY_DIR%\gdal\[NMake][messages][debug].log
             if not %ERRORLEVEL%==0 (
-                echo [!] ... error building Debug. See build log for info: %LOG_BUILD_3RDPARTY_DIR%\gdal\[NMake][build][Debug].log
+                echo [!] ... error building Debug. See build log for info: %LOG_BUILD_3RDPARTY_DIR%\gdal\[NMake][build][debug].log
                 goto error
             ) else (
                 echo ... Debug built successfully
             )
-            nmake /f makefile.vc install GDAL_HOME=%GDAL_INSTALL_DEBUG_DIR% GDAL_DEPENDENCIES=%INSTALL_3RDPARTY_DIR% > %LOG_BUILD_3RDPARTY_DIR%\gdal\[NMake][install][Debug].log 2> nul
-            nmake /f makefile.vc devinstall GDAL_HOME=%GDAL_INSTALL_DEBUG_DIR% GDAL_DEPENDENCIES=%INSTALL_3RDPARTY_DIR% > %LOG_BUILD_3RDPARTY_DIR%\gdal\[NMake][devinstall][Debug].log 2> nul
+            nmake /f makefile.vc install GDAL_HOME=%GDAL_INSTALL_DEBUG_DIR% GDAL_DEPENDENCIES=%INSTALL_3RDPARTY_DIR% > %LOG_BUILD_3RDPARTY_DIR%\gdal\[NMake][install][debug].log 2> nul
+            nmake /f makefile.vc devinstall GDAL_HOME=%GDAL_INSTALL_DEBUG_DIR% GDAL_DEPENDENCIES=%INSTALL_3RDPARTY_DIR% > %LOG_BUILD_3RDPARTY_DIR%\gdal\[NMake][devinstall][debug].log 2> nul
             if not %ERRORLEVEL%==0 (
-                echo [!] ... error installing Debug. See build log for info: %LOG_BUILD_3RDPARTY_DIR%\gdal\[NMake][install][Debug].log
+                echo [!] ... error installing Debug. See build log for info: %LOG_BUILD_3RDPARTY_DIR%\gdal\[NMake][install][debug].log
                 echo ... continuing to build
             ) else (
                 echo ... Debug installed successfully
@@ -1596,17 +1596,17 @@ cd %BUILD_3RDPARTY_DIR%
         if %IS_BUILD_DEBUG% EQU 1 (
             if not exist debug mkdir debug
             cd debug
-            %CMAKE_BASE_COMMAND% ../../ -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=%OSG_INSTALL_DIR% -DWIN32_USE_MP=%OSG_USE_MP% -DZLIB_INCLUDE_DIR=%ZLIB_INCLUDE_DIR% -DZLIB_LIBRARY_DEBUG=%ZLIB_LIBRARY_DEBUG% -DJPEG_INCLUDE_DIR=%LIBJPEG_INCLUDE_DIR% -DJPEG_LIBRARY_DEBUG=%LIBJPEG_LIBRARY_DEBUG% -DCURL_INCLUDE_DIR=%LIBCURL_INCLUDE_DIR% -DCURL_LIBRARY_DEBUG=%LIBCURL_LIBRARY_DEBUG% -DFREETYPE_INCLUDE_DIR_freetype2=%FREETYPE_INCLUDE_DIR% -DFREETYPE_INCLUDE_DIR_ft2build=%FREETYPE_INCLUDE_DIR%\freetype2 -DFREETYPE_LIBRARY_DEBUG=%FREETYPE_LIBRARY_DEBUG% -DTIFF_INCLUDE_DIR=%LIBTIFF_INCLUDE_DIR% -DTIFF_LIBRARY_DEBUG=%LIBTIFF_LIBRARY_DEBUG% -DGDAL_INCLUDE_DIR=%GDAL_INCLUDE_DIR% -DGDAL_LIBRARY=%GDAL_LIBRARY_DEBUG% -DPNG_PNG_INCLUDE_DIR=%LIBPNG_INCLUDE_DIR% -DPNG_LIBRARY_DEBUG=%LIBPNG_LIBRARY_DEBUG% > %LOG_BUILD_3RDPARTY_DIR%\OpenSceneGraph\[CMake][configure][Debug].log 2> %LOG_BUILD_3RDPARTY_DIR%\OpenSceneGraph\[CMake][messages][Debug].log
-            %MS_BUILD_EXE% OpenSceneGraph.sln /p:Configuration=Debug;Platform=x64 %MS_BUILD_OPTIONS_PARALLEL% /fileLogger /flp:logfile=%LOG_BUILD_3RDPARTY_DIR%\OpenSceneGraph\[MSBuild][build][Debug].log
+            %CMAKE_BASE_COMMAND% ../../ -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=%OSG_INSTALL_DIR% -DWIN32_USE_MP=%OSG_USE_MP% -DZLIB_INCLUDE_DIR=%ZLIB_INCLUDE_DIR% -DZLIB_LIBRARY_DEBUG=%ZLIB_LIBRARY_DEBUG% -DJPEG_INCLUDE_DIR=%LIBJPEG_INCLUDE_DIR% -DJPEG_LIBRARY_DEBUG=%LIBJPEG_LIBRARY_DEBUG% -DCURL_INCLUDE_DIR=%LIBCURL_INCLUDE_DIR% -DCURL_LIBRARY_DEBUG=%LIBCURL_LIBRARY_DEBUG% -DFREETYPE_INCLUDE_DIR_freetype2=%FREETYPE_INCLUDE_DIR% -DFREETYPE_INCLUDE_DIR_ft2build=%FREETYPE_INCLUDE_DIR%\freetype2 -DFREETYPE_LIBRARY_DEBUG=%FREETYPE_LIBRARY_DEBUG% -DTIFF_INCLUDE_DIR=%LIBTIFF_INCLUDE_DIR% -DTIFF_LIBRARY_DEBUG=%LIBTIFF_LIBRARY_DEBUG% -DGDAL_INCLUDE_DIR=%GDAL_INCLUDE_DIR% -DGDAL_LIBRARY=%GDAL_LIBRARY_DEBUG% -DPNG_PNG_INCLUDE_DIR=%LIBPNG_INCLUDE_DIR% -DPNG_LIBRARY_DEBUG=%LIBPNG_LIBRARY_DEBUG% > %LOG_BUILD_3RDPARTY_DIR%\OpenSceneGraph\[CMake][configure][debug].log 2> %LOG_BUILD_3RDPARTY_DIR%\OpenSceneGraph\[CMake][messages][debug].log
+            %MS_BUILD_EXE% OpenSceneGraph.sln /p:Configuration=Debug;Platform=x64 %MS_BUILD_OPTIONS_PARALLEL% /fileLogger /flp:logfile=%LOG_BUILD_3RDPARTY_DIR%\OpenSceneGraph\[MSBuild][build][debug].log
             if not %ERRORLEVEL%==0 (
-                echo [!] ... error building Debug. See build log for info: %LOG_BUILD_3RDPARTY_DIR%\OpenSceneGraph\[MSBuild][build][Debug].log
+                echo [!] ... error building Debug. See build log for info: %LOG_BUILD_3RDPARTY_DIR%\OpenSceneGraph\[MSBuild][build][debug].log
                 goto error
             ) else (
                 echo ... Debug built successfully
             )
-            %MS_BUILD_EXE% Install.vcxproj /p:Configuration=Debug;Platform=x64 %MS_BUILD_OPTIONS_PARALLEL% /fileLogger /flp:logfile=%LOG_BUILD_3RDPARTY_DIR%\OpenSceneGraph\[MSBuild][install][Debug].log
+            %MS_BUILD_EXE% Install.vcxproj /p:Configuration=Debug;Platform=x64 %MS_BUILD_OPTIONS_PARALLEL% /fileLogger /flp:logfile=%LOG_BUILD_3RDPARTY_DIR%\OpenSceneGraph\[MSBuild][install][debug].log
             if not %ERRORLEVEL%==0 (
-                echo [!] ... error installing Debug. See build log for info: %LOG_BUILD_3RDPARTY_DIR%\OpenSceneGraph\[MSBuild][install][Debug].log
+                echo [!] ... error installing Debug. See build log for info: %LOG_BUILD_3RDPARTY_DIR%\OpenSceneGraph\[MSBuild][install][debug].log
                 echo ... continuing to build
             ) else (
                 echo ... Debug installed successfully
@@ -1710,17 +1710,17 @@ cd %BUILD_3RDPARTY_DIR%
         if %IS_BUILD_DEBUG% EQU 1 (
             if not exist debug mkdir debug
             cd debug
-            %CMAKE_BASE_COMMAND% ../../ -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=%OSGQT_INSTALL_DIR% -DCMAKE_PREFIX_PATH=%QTDIR% -DWIN32_USE_MP=%OSG_USE_MP% -DOSG_DIR=%OSG_INSTALL_DIR% -DOSG_INCLUDE_DIR=%OSG_INCLUDE_DIR% > %LOG_BUILD_3RDPARTY_DIR%\osgQt\[CMake][configure][Debug].log 2> %LOG_BUILD_3RDPARTY_DIR%\osgQt\[CMake][messages][Debug].log
-            %MS_BUILD_EXE% osgQt.sln /p:Configuration=Debug;Platform=x64 %MS_BUILD_OPTIONS_PARALLEL% /fileLogger /flp:logfile=%LOG_BUILD_3RDPARTY_DIR%\osgQt\[MSBuild][build][Debug].log
+            %CMAKE_BASE_COMMAND% ../../ -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=%OSGQT_INSTALL_DIR% -DCMAKE_PREFIX_PATH=%QTDIR% -DWIN32_USE_MP=%OSG_USE_MP% -DOSG_DIR=%OSG_INSTALL_DIR% -DOSG_INCLUDE_DIR=%OSG_INCLUDE_DIR% > %LOG_BUILD_3RDPARTY_DIR%\osgQt\[CMake][configure][debug].log 2> %LOG_BUILD_3RDPARTY_DIR%\osgQt\[CMake][messages][debug].log
+            %MS_BUILD_EXE% osgQt.sln /p:Configuration=Debug;Platform=x64 %MS_BUILD_OPTIONS_PARALLEL% /fileLogger /flp:logfile=%LOG_BUILD_3RDPARTY_DIR%\osgQt\[MSBuild][build][debug].log
             if not %ERRORLEVEL%==0 (
-                echo [!] ... error building Debug. See build log for info: %LOG_BUILD_3RDPARTY_DIR%\osgQt\[MSBuild][build][Debug].log
+                echo [!] ... error building Debug. See build log for info: %LOG_BUILD_3RDPARTY_DIR%\osgQt\[MSBuild][build][debug].log
                 goto error
             ) else (
                 echo ... Debug built successfully
             )
-            %MS_BUILD_EXE% Install.vcxproj /p:Configuration=Debug;Platform=x64 %MS_BUILD_OPTIONS_PARALLEL% /fileLogger /flp:logfile=%LOG_BUILD_3RDPARTY_DIR%\osgQt\[MSBuild][install][Debug].log
+            %MS_BUILD_EXE% Install.vcxproj /p:Configuration=Debug;Platform=x64 %MS_BUILD_OPTIONS_PARALLEL% /fileLogger /flp:logfile=%LOG_BUILD_3RDPARTY_DIR%\osgQt\[MSBuild][install][debug].log
             if not %ERRORLEVEL%==0 (
-                echo [!] ... error installing Debug. See build log for info: %LOG_BUILD_3RDPARTY_DIR%\osgQt\[MSBuild][install][Debug].log
+                echo [!] ... error installing Debug. See build log for info: %LOG_BUILD_3RDPARTY_DIR%\osgQt\[MSBuild][install][debug].log
                 echo ... continuing to build
             ) else (
                 echo ... Debug installed successfully
@@ -1804,17 +1804,17 @@ cd %BUILD_3RDPARTY_DIR%
         if %IS_BUILD_DEBUG% EQU 1 (
             if not exist debug mkdir debug
             cd debug
-            %CMAKE_BASE_COMMAND% ../../ -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=%LEVELDB_INSTALL_DEBUG_DIR% -DLEVELDB_BUILD_BENCHMARKS=OFF -DLEVELDB_BUILD_TESTS=OFF > %LOG_BUILD_3RDPARTY_DIR%\leveldb\[CMake][configure][Debug].log 2> %LOG_BUILD_3RDPARTY_DIR%\leveldb\[CMake][messages][Debug].log
-            %MS_BUILD_EXE% leveldb.sln /p:Configuration=Debug;Platform=x64 %MS_BUILD_OPTIONS_PARALLEL% /fileLogger /flp:logfile=%LOG_BUILD_3RDPARTY_DIR%\leveldb\[MSBuild][build][Debug].log
+            %CMAKE_BASE_COMMAND% ../../ -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=%LEVELDB_INSTALL_DEBUG_DIR% -DLEVELDB_BUILD_BENCHMARKS=OFF -DLEVELDB_BUILD_TESTS=OFF > %LOG_BUILD_3RDPARTY_DIR%\leveldb\[CMake][configure][debug].log 2> %LOG_BUILD_3RDPARTY_DIR%\leveldb\[CMake][messages][debug].log
+            %MS_BUILD_EXE% leveldb.sln /p:Configuration=Debug;Platform=x64 %MS_BUILD_OPTIONS_PARALLEL% /fileLogger /flp:logfile=%LOG_BUILD_3RDPARTY_DIR%\leveldb\[MSBuild][build][debug].log
             if not %ERRORLEVEL%==0 (
-                echo [!] ... error building Debug. See build log for info: %LOG_BUILD_3RDPARTY_DIR%\leveldb\[MSBuild][build][Debug].log
+                echo [!] ... error building Debug. See build log for info: %LOG_BUILD_3RDPARTY_DIR%\leveldb\[MSBuild][build][debug].log
                 goto error
             ) else (
                 echo ... Debug built successfully
             )
-            %MS_BUILD_EXE% Install.vcxproj /p:Configuration=Debug;Platform=x64 %MS_BUILD_OPTIONS_PARALLEL% /fileLogger /flp:logfile=%LOG_BUILD_3RDPARTY_DIR%\leveldb\[MSBuild][install][Debug].log
+            %MS_BUILD_EXE% Install.vcxproj /p:Configuration=Debug;Platform=x64 %MS_BUILD_OPTIONS_PARALLEL% /fileLogger /flp:logfile=%LOG_BUILD_3RDPARTY_DIR%\leveldb\[MSBuild][install][debug].log
             if not %ERRORLEVEL%==0 (
-                echo [!] ... error installing Debug. See build log for info: %LOG_BUILD_3RDPARTY_DIR%\leveldb\[MSBuild][install][Debug].log
+                echo [!] ... error installing Debug. See build log for info: %LOG_BUILD_3RDPARTY_DIR%\leveldb\[MSBuild][install][debug].log
                 echo ... continuing to build
             ) else (
                 echo ... Debug installed successfully
@@ -1903,17 +1903,17 @@ cd %BUILD_3RDPARTY_DIR%
         if %IS_BUILD_DEBUG% EQU 1 (
             if not exist debug mkdir debug
             cd debug
-            %CMAKE_BASE_COMMAND% ../../ -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=%OSGEARTH_INSTALL_DIR% -DCMAKE_PREFIX_PATH=%QTDIR% -DWIN32_USE_MP=%OSG_USE_MP% -DBUILD_OSGEARTH_EXAMPLES=OFF -DOSGEARTH_INSTALL_SHADERS=ON -DOSGEARTH_QT_BUILD=ON -DOSGEARTH_QT_BUILD_LEGACY_WIDGETS=ON -DOSG_DIR=%OSG_INSTALL_DIR% -DOSG_GEN_INCLUDE_DIR=%OSG_INCLUDE_DIR%;%OSGQT_INCLUDE_DIR% -DOSG_INCLUDE_DIR=%OSG_INCLUDE_DIR% -DOSGQT_LIBRARY=%OSGQT_LIBRARY_DEBUG% -DCURL_IS_STATIC=OFF -DCURL_INCLUDE_DIR=%LIBCURL_INCLUDE_DIR% -DCURL_LIBRARY_DEBUG=%LIBCURL_LIBRARY_DEBUG% -DGDAL_INCLUDE_DIR=%GDAL_INCLUDE_DIR% -DGDAL_LIBRARY=%GDAL_LIBRARY_DEBUG% -DLEVELDB_INCLUDE_DIR=%LEVELDB_INCLUDE_DIR% -DLEVELDB_LIBRARY=%LEVELDB_LIBRARY_DEBUG% -DPROTOBUF_USE_DLLS=ON -DProtobuf_INCLUDE_DIR=%PROTOBUF_INCLUDE_DIR% -DProtobuf_LIBRARY_DEBUG=%PROTOBUF_LIBRARY_DEBUG% -DProtobuf_LITE_LIBRARY_DEBUG=%PROTOBUF_LITE_LIBRARY_DEBUG% -DProtobuf_PROTOC_EXECUTABLE=%PROTOBUF_PROTOC_EXECUTABLE_DEBUG% -DProtobuf_PROTOC_LIBRARY_DEBUG=%PROTOBUF_PROTOC_LIBRARY_DEBUG% -DGEOS_DIR=%GEOS_INSTALL_DEBUG_DIR% -DGEOS_INCLUDE_DIR=%GEOS_INCLUDE_DIR% -DGEOS_LIBRARY_DEBUG=%GEOS_LIBRARY_DEBUG% -DSQLITE3_INCLUDE_DIR=%SQLITE_INCLUDE_DIR% -DSQLITE3_LIBRARY=%SQLITE_LIBRARY_DEBUG% > %LOG_BUILD_3RDPARTY_DIR%\osgearth\[CMake][configure][Debug].log 2> %LOG_BUILD_3RDPARTY_DIR%\osgearth\[CMake][messages][Debug].log
-            %MS_BUILD_EXE% OSGEARTH.sln /p:Configuration=Debug;Platform=x64 %MS_BUILD_OPTIONS_PARALLEL% /fileLogger /flp:logfile=%LOG_BUILD_3RDPARTY_DIR%\osgearth\[MSBuild][build][Debug].log
+            %CMAKE_BASE_COMMAND% ../../ -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=%OSGEARTH_INSTALL_DIR% -DCMAKE_PREFIX_PATH=%QTDIR% -DWIN32_USE_MP=%OSG_USE_MP% -DBUILD_OSGEARTH_EXAMPLES=OFF -DOSGEARTH_INSTALL_SHADERS=ON -DOSGEARTH_QT_BUILD=ON -DOSGEARTH_QT_BUILD_LEGACY_WIDGETS=ON -DOSG_DIR=%OSG_INSTALL_DIR% -DOSG_GEN_INCLUDE_DIR=%OSG_INCLUDE_DIR%;%OSGQT_INCLUDE_DIR% -DOSG_INCLUDE_DIR=%OSG_INCLUDE_DIR% -DOSGQT_LIBRARY=%OSGQT_LIBRARY_DEBUG% -DCURL_IS_STATIC=OFF -DCURL_INCLUDE_DIR=%LIBCURL_INCLUDE_DIR% -DCURL_LIBRARY_DEBUG=%LIBCURL_LIBRARY_DEBUG% -DGDAL_INCLUDE_DIR=%GDAL_INCLUDE_DIR% -DGDAL_LIBRARY=%GDAL_LIBRARY_DEBUG% -DLEVELDB_INCLUDE_DIR=%LEVELDB_INCLUDE_DIR% -DLEVELDB_LIBRARY=%LEVELDB_LIBRARY_DEBUG% -DPROTOBUF_USE_DLLS=ON -DProtobuf_INCLUDE_DIR=%PROTOBUF_INCLUDE_DIR% -DProtobuf_LIBRARY_DEBUG=%PROTOBUF_LIBRARY_DEBUG% -DProtobuf_LITE_LIBRARY_DEBUG=%PROTOBUF_LITE_LIBRARY_DEBUG% -DProtobuf_PROTOC_EXECUTABLE=%PROTOBUF_PROTOC_EXECUTABLE_DEBUG% -DProtobuf_PROTOC_LIBRARY_DEBUG=%PROTOBUF_PROTOC_LIBRARY_DEBUG% -DGEOS_DIR=%GEOS_INSTALL_DEBUG_DIR% -DGEOS_INCLUDE_DIR=%GEOS_INCLUDE_DIR% -DGEOS_LIBRARY_DEBUG=%GEOS_LIBRARY_DEBUG% -DSQLITE3_INCLUDE_DIR=%SQLITE_INCLUDE_DIR% -DSQLITE3_LIBRARY=%SQLITE_LIBRARY_DEBUG% > %LOG_BUILD_3RDPARTY_DIR%\osgearth\[CMake][configure][debug].log 2> %LOG_BUILD_3RDPARTY_DIR%\osgearth\[CMake][messages][debug].log
+            %MS_BUILD_EXE% OSGEARTH.sln /p:Configuration=Debug;Platform=x64 %MS_BUILD_OPTIONS_PARALLEL% /fileLogger /flp:logfile=%LOG_BUILD_3RDPARTY_DIR%\osgearth\[MSBuild][build][debug].log
             if not %ERRORLEVEL%==0 (
-                echo [!] ... error building Debug. See build log for info: %LOG_BUILD_3RDPARTY_DIR%\osgearth\[MSBuild][build][Debug].log
+                echo [!] ... error building Debug. See build log for info: %LOG_BUILD_3RDPARTY_DIR%\osgearth\[MSBuild][build][debug].log
                 goto error
             ) else (
                 echo ... Debug built successfully
             )
-            %MS_BUILD_EXE% Install.vcxproj /p:Configuration=Debug;Platform=x64 %MS_BUILD_OPTIONS_PARALLEL% /fileLogger /flp:logfile=%LOG_BUILD_3RDPARTY_DIR%\osgearth\[MSBuild][install][Debug].log
+            %MS_BUILD_EXE% Install.vcxproj /p:Configuration=Debug;Platform=x64 %MS_BUILD_OPTIONS_PARALLEL% /fileLogger /flp:logfile=%LOG_BUILD_3RDPARTY_DIR%\osgearth\[MSBuild][install][debug].log
             if not %ERRORLEVEL%==0 (
-                echo [!] ... error installing Debug. See build log for info: %LOG_BUILD_3RDPARTY_DIR%\osgearth\[MSBuild][install][Debug].log
+                echo [!] ... error installing Debug. See build log for info: %LOG_BUILD_3RDPARTY_DIR%\osgearth\[MSBuild][install][debug].log
                 echo ... continuing to build
             ) else (
                 echo ... Debug installed successfully
@@ -2041,10 +2041,10 @@ cd %BUILD_3RDPARTY_DIR%
     if %IS_BUILD_RELEASE% EQU 1 (
       echo - - - Release - - -
       
-      if %SUCCESS_BUILD_PNAGEO_RELEASE% EQU 1 (
-        echo [%STEP_NUM_PNAGEO% of %STEP_NUM_TOTAL%] pnageo         ... OK
+      if %SUCCESS_BUILD_GCSFUNC_RELEASE% EQU 1 (
+        echo [%STEP_NUM_GCSFUNC% of %STEP_NUM_TOTAL%] gcsfunc         ... OK
       ) else (
-        echo [%STEP_NUM_PNAGEO% of %STEP_NUM_TOTAL%] pnageo         ... FAILED
+        echo [%STEP_NUM_GCSFUNC% of %STEP_NUM_TOTAL%] gcsfunc         ... FAILED
       )
       if %SUCCESS_BUILD_GEOS_RELEASE% EQU 1 (
         echo [%STEP_NUM_GEOS% of %STEP_NUM_TOTAL%] GEOS           ... OK
@@ -2131,10 +2131,10 @@ cd %BUILD_3RDPARTY_DIR%
     if %IS_BUILD_DEBUG% EQU 1 (
       echo - - - Debug - - -
       
-      if %SUCCESS_BUILD_PNAGEO_DEBUG% EQU 1 (
-        echo [%STEP_NUM_PNAGEO% of %STEP_NUM_TOTAL%] pnageo         ... OK
+      if %SUCCESS_BUILD_GCSFUNC_DEBUG% EQU 1 (
+        echo [%STEP_NUM_GCSFUNC% of %STEP_NUM_TOTAL%] gcsfunc         ... OK
       ) else (
-        echo [%STEP_NUM_PNAGEO% of %STEP_NUM_TOTAL%] pnageo         ... FAILED
+        echo [%STEP_NUM_GCSFUNC% of %STEP_NUM_TOTAL%] gcsfunc         ... FAILED
       )
       if %SUCCESS_BUILD_GEOS_DEBUG% EQU 1 (
         echo [%STEP_NUM_GEOS% of %STEP_NUM_TOTAL%] GEOS           ... OK

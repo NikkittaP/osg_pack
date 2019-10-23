@@ -1,6 +1,6 @@
 Name            Source                                                2019-07-23      2019-09-19      2019-MM-DD
 
-pnageo          Custom handcrafted lib                                1.0             -
+gcsfunc         Custom handcrafted lib                                1.0             -
 geos            https://trac.osgeo.org/geos/                          3.7.2           -
 zlib            https://zlib.net                                      1.2.11          -
 protobuf        https://github.com/protocolbuffers/protobuf           3.9.0           -
