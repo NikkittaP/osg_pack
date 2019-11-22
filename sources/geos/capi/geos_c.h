@@ -51,42 +51,30 @@ extern "C" {
  *
  ***********************************************************************/
 
-/*
- * Following 'ifdef' hack fixes problem with generating geos_c.h on Windows,
- * when building with Visual C++ compiler.
- *
- */
-#if defined(_MSC_VER)
-#include <geos/version.h>
-#define GEOS_CAPI_VERSION_MAJOR 1
-#define GEOS_CAPI_VERSION_MINOR 11
-#define GEOS_CAPI_VERSION_PATCH 0
-#define GEOS_CAPI_VERSION "3.7.2-CAPI-1.11.0"
-#else
 #ifndef GEOS_VERSION_MAJOR
 #define GEOS_VERSION_MAJOR 3
 #endif
 #ifndef GEOS_VERSION_MINOR
-#define GEOS_VERSION_MINOR 7
+#define GEOS_VERSION_MINOR 8
 #endif
 #ifndef GEOS_VERSION_PATCH
-#define GEOS_VERSION_PATCH 2
+#define GEOS_VERSION_PATCH 0
 #endif
 #ifndef GEOS_VERSION
-#define GEOS_VERSION "3.7.2"
+#define GEOS_VERSION "3.8.0"
 #endif
 #ifndef GEOS_JTS_PORT
 #define GEOS_JTS_PORT "1.13.0"
 #endif
 
 #define GEOS_CAPI_VERSION_MAJOR 1
-#define GEOS_CAPI_VERSION_MINOR 11
-#define GEOS_CAPI_VERSION_PATCH 2
-#define GEOS_CAPI_VERSION "3.7.2-CAPI-1.11.2"
-#endif
+#define GEOS_CAPI_VERSION_MINOR 13
+#define GEOS_CAPI_VERSION_PATCH 1
+#define GEOS_CAPI_VERSION "3.8.0-CAPI-1.13.1"
 
 #define GEOS_CAPI_FIRST_INTERFACE GEOS_CAPI_VERSION_MAJOR
 #define GEOS_CAPI_LAST_INTERFACE (GEOS_CAPI_VERSION_MAJOR+GEOS_CAPI_VERSION_MINOR)
+
 
 /************************************************************************
  *
@@ -314,6 +302,13 @@ extern int GEOS_DLL GEOSCoordSeq_setY_r(GEOSContextHandle_t handle,
 extern int GEOS_DLL GEOSCoordSeq_setZ_r(GEOSContextHandle_t handle,
                                         GEOSCoordSequence* s, unsigned int idx,
                                         double val);
+extern int GEOS_DLL GEOSCoordSeq_setXY_r(GEOSContextHandle_t handle,
+                                        GEOSCoordSequence* s, unsigned int idx,
+                                        double x, double y);
+extern int GEOS_DLL GEOSCoordSeq_setXYZ_r(GEOSContextHandle_t handle,
+                                        GEOSCoordSequence* s, unsigned int idx,
+                                        double x, double y, double z);
+
 extern int GEOS_DLL GEOSCoordSeq_setOrdinate_r(GEOSContextHandle_t handle,
                                                GEOSCoordSequence* s,
                                                unsigned int idx,
@@ -332,6 +327,12 @@ extern int GEOS_DLL GEOSCoordSeq_getY_r(GEOSContextHandle_t handle,
 extern int GEOS_DLL GEOSCoordSeq_getZ_r(GEOSContextHandle_t handle,
                                         const GEOSCoordSequence* s,
                                         unsigned int idx, double *val);
+extern int GEOS_DLL GEOSCoordSeq_getXY_r(GEOSContextHandle_t handle,
+                                         const GEOSCoordSequence* s,
+                                         unsigned int idx, double *x, double *y);
+extern int GEOS_DLL GEOSCoordSeq_getXYZ_r(GEOSContextHandle_t handle,
+                                          const GEOSCoordSequence* s,
+                                          unsigned int idx, double *x, double *y, double *z);
 extern int GEOS_DLL GEOSCoordSeq_getOrdinate_r(GEOSContextHandle_t handle,
                                                const GEOSCoordSequence* s,
                                                unsigned int idx,
@@ -492,6 +493,10 @@ extern GEOSGeometry GEOS_DLL *GEOSOffsetCurve_r(GEOSContextHandle_t handle,
 extern GEOSGeometry GEOS_DLL *GEOSGeom_createPoint_r(
                                        GEOSContextHandle_t handle,
                                        GEOSCoordSequence* s);
+extern GEOSGeometry GEOS_DLL *GEOSGeom_createPointFromXY_r(
+                                       GEOSContextHandle_t handle,
+                                       double x,
+                                       double y);
 extern GEOSGeometry GEOS_DLL *GEOSGeom_createEmptyPoint_r(
                                        GEOSContextHandle_t handle);
 extern GEOSGeometry GEOS_DLL *GEOSGeom_createLinearRing_r(
@@ -585,6 +590,11 @@ extern GEOSGeometry GEOS_DLL *GEOSUnion_r(GEOSContextHandle_t handle,
                                           const GEOSGeometry* g2);
 extern GEOSGeometry GEOS_DLL *GEOSUnaryUnion_r(GEOSContextHandle_t handle,
                                           const GEOSGeometry* g);
+/* GEOSCoverageUnion is an optimized union algorithm for polygonal inputs that are correctly
+ * noded and do not overlap. It will not generate an error (return NULL) for inputs that
+ * do not satisfy this constraint. */
+extern GEOSGeometry GEOS_DLL *GEOSCoverageUnion_r(GEOSContextHandle_t handle,
+                                                  const GEOSGeometry* g);
 /* @deprecated in 3.3.0: use GEOSUnaryUnion_r instead */
 extern GEOSGeometry GEOS_DLL *GEOSUnionCascaded_r(GEOSContextHandle_t handle,
                                                   const GEOSGeometry* g);
@@ -592,6 +602,9 @@ extern GEOSGeometry GEOS_DLL *GEOSPointOnSurface_r(GEOSContextHandle_t handle,
                                                    const GEOSGeometry* g);
 extern GEOSGeometry GEOS_DLL *GEOSGetCentroid_r(GEOSContextHandle_t handle,
                                                 const GEOSGeometry* g);
+extern GEOSGeometry GEOS_DLL *GEOSMinimumBoundingCircle_r(GEOSContextHandle_t handle,
+                                                const GEOSGeometry* g, double* radius,
+                                                GEOSGeometry** center);
 extern GEOSGeometry GEOS_DLL *GEOSNode_r(GEOSContextHandle_t handle,
                                          const GEOSGeometry* g);
 /* Fast, non-robust intersection between an arbitrary geometry and
@@ -609,20 +622,20 @@ extern GEOSGeometry GEOS_DLL *GEOSClipByRect_r(GEOSContextHandle_t handle,
  * Polygonizes a set of Geometries which contain linework that
  * represents the edges of a planar graph.
  *
- * Any dimension of Geometry is handled - the constituent linework
- * is extracted to form the edges.
+ * All types of Geometry are accepted as input; the constituent
+ * linework is extracted as the edges to be polygonized.
  *
  * The edges must be correctly noded; that is, they must only meet
- * at their endpoints.
- * The Polygonizer will still run on incorrectly noded input
- * but will not form polygons from incorrectly noded edges.
+ * at their endpoints. Polygonization will accept incorrectly noded
+ * input but will not form polygons from non-noded edges, and reports
+ * them as errors.
  *
  * The Polygonizer reports the follow kinds of errors:
  *
  * - Dangles - edges which have one or both ends which are
  *   not incident on another edge endpoint
  * - Cut Edges - edges which are connected at both ends but
- *   which do not form part of polygon
+ *   which do not form part of a polygon
  * - Invalid Ring Lines - edges which form rings which are invalid
  *   (e.g. the component lines contain a self-intersection)
  *
@@ -631,11 +644,19 @@ extern GEOSGeometry GEOS_DLL *GEOSClipByRect_r(GEOSContextHandle_t handle,
  * collection. NULL is returned on exception. All returned
  * geometries must be destroyed by caller.
  *
+ * The GEOSPolygonize_valid_r variant allows extracting only polygons
+ * which form a valid polygonal result. The set of extracted polygons
+ * is guaranteed to be edge-disjoint. This is useful when it is known
+ * that the input lines form a valid polygonal geometry (which may
+ * include holes or nested polygons).
  */
 
 extern GEOSGeometry GEOS_DLL *GEOSPolygonize_r(GEOSContextHandle_t handle,
                               const GEOSGeometry *const geoms[],
                               unsigned int ngeoms);
+extern GEOSGeometry GEOS_DLL *GEOSPolygonize_valid_r(GEOSContextHandle_t handle,
+                                                     const GEOSGeometry *const geoms[],
+                                                     unsigned int ngems);
 extern GEOSGeometry GEOS_DLL *GEOSPolygonizer_getCutEdges_r(
                               GEOSContextHandle_t handle,
                               const GEOSGeometry * const geoms[],
@@ -643,6 +664,10 @@ extern GEOSGeometry GEOS_DLL *GEOSPolygonizer_getCutEdges_r(
 extern GEOSGeometry GEOS_DLL *GEOSPolygonize_full_r(GEOSContextHandle_t handle,
                               const GEOSGeometry* input, GEOSGeometry** cuts,
                               GEOSGeometry** dangles, GEOSGeometry** invalidRings);
+
+extern GEOSGeometry GEOS_DLL *GEOSBuildArea_r(
+                                              GEOSContextHandle_t handle,
+                                              const GEOSGeometry* g);
 
 extern GEOSGeometry GEOS_DLL *GEOSLineMerge_r(GEOSContextHandle_t handle,
                                               const GEOSGeometry* g);
@@ -967,6 +992,9 @@ extern char GEOS_DLL GEOSisValidDetail_r(GEOSContextHandle_t handle,
                                          int flags,
                                          char** reason,
                                          GEOSGeometry** location);
+
+extern GEOSGeometry GEOS_DLL *GEOSMakeValid_r(GEOSContextHandle_t handle,
+                                              const GEOSGeometry* g);
 
 /************************************************************************
  *
@@ -1381,6 +1409,10 @@ extern int GEOS_DLL GEOSCoordSeq_setY(GEOSCoordSequence* s,
     unsigned int idx, double val);
 extern int GEOS_DLL GEOSCoordSeq_setZ(GEOSCoordSequence* s,
     unsigned int idx, double val);
+extern int GEOS_DLL GEOSCoordSeq_setXY(GEOSCoordSequence* s,
+    unsigned int idx, double x, double y);
+extern int GEOS_DLL GEOSCoordSeq_setXYZ(GEOSCoordSequence* s,
+    unsigned int idx, double x, double y, double z);
 extern int GEOS_DLL GEOSCoordSeq_setOrdinate(GEOSCoordSequence* s,
     unsigned int idx, unsigned int dim, double val);
 
@@ -1394,6 +1426,10 @@ extern int GEOS_DLL GEOSCoordSeq_getY(const GEOSCoordSequence* s,
     unsigned int idx, double *val);
 extern int GEOS_DLL GEOSCoordSeq_getZ(const GEOSCoordSequence* s,
     unsigned int idx, double *val);
+extern int GEOS_DLL GEOSCoordSeq_getXY(const GEOSCoordSequence* s,
+    unsigned int idx, double *x, double *y);
+extern int GEOS_DLL GEOSCoordSeq_getXYZ(const GEOSCoordSequence* s,
+    unsigned int idx, double *x, double *y, double *z);
 extern int GEOS_DLL GEOSCoordSeq_getOrdinate(const GEOSCoordSequence* s,
     unsigned int idx, unsigned int dim, double *val);
 /*
@@ -1517,6 +1553,7 @@ extern GEOSGeometry GEOS_DLL *GEOSOffsetCurve(const GEOSGeometry* g,
  ***********************************************************************/
 
 extern GEOSGeometry GEOS_DLL *GEOSGeom_createPoint(GEOSCoordSequence* s);
+extern GEOSGeometry GEOS_DLL *GEOSGeom_createPointFromXY(double x, double y);
 extern GEOSGeometry GEOS_DLL *GEOSGeom_createEmptyPoint();
 extern GEOSGeometry GEOS_DLL *GEOSGeom_createLinearRing(GEOSCoordSequence* s);
 extern GEOSGeometry GEOS_DLL *GEOSGeom_createLineString(GEOSCoordSequence* s);
@@ -1601,10 +1638,17 @@ extern GEOSGeometry GEOS_DLL *GEOSBoundary(const GEOSGeometry* g);
 extern GEOSGeometry GEOS_DLL *GEOSUnion(const GEOSGeometry* g1, const GEOSGeometry* g2);
 extern GEOSGeometry GEOS_DLL *GEOSUnaryUnion(const GEOSGeometry* g);
 
+/* GEOSCoverageUnion is an optimized union algorithm for polygonal inputs that are correctly
+ * noded and do not overlap. It will not generate an error (return NULL) for inputs that
+ * do not satisfy this constraint. */
+extern GEOSGeometry GEOS_DLL *GEOSCoverageUnion(const GEOSGeometry *g);
+
 /* @deprecated in 3.3.0: use GEOSUnaryUnion instead */
 extern GEOSGeometry GEOS_DLL *GEOSUnionCascaded(const GEOSGeometry* g);
+
 extern GEOSGeometry GEOS_DLL *GEOSPointOnSurface(const GEOSGeometry* g);
 extern GEOSGeometry GEOS_DLL *GEOSGetCentroid(const GEOSGeometry* g);
+extern GEOSGeometry GEOS_DLL *GEOSMinimumBoundingCircle(const GEOSGeometry* g, double* radius, GEOSGeometry** center);
 extern GEOSGeometry GEOS_DLL *GEOSNode(const GEOSGeometry* g);
 extern GEOSGeometry GEOS_DLL *GEOSClipByRect(const GEOSGeometry* g, double xmin, double ymin, double xmax, double ymax);
 
@@ -1613,36 +1657,12 @@ extern GEOSGeometry GEOS_DLL *GEOSClipByRect(const GEOSGeometry* g, double xmin,
  * (both Geometries and pointers)
  */
 extern GEOSGeometry GEOS_DLL *GEOSPolygonize(const GEOSGeometry * const geoms[], unsigned int ngeoms);
+extern GEOSGeometry GEOS_DLL *GEOSPolygonize_valid(const GEOSGeometry * const geoms[], unsigned int ngeoms);
 extern GEOSGeometry GEOS_DLL *GEOSPolygonizer_getCutEdges(const GEOSGeometry * const geoms[], unsigned int ngeoms);
-/*
- * Polygonizes a set of Geometries which contain linework that
- * represents the edges of a planar graph.
- *
- * Any dimension of Geometry is handled - the constituent linework
- * is extracted to form the edges.
- *
- * The edges must be correctly noded; that is, they must only meet
- * at their endpoints.
- * The Polygonizer will still run on incorrectly noded input
- * but will not form polygons from incorrectly noded edges.
- *
- * The Polygonizer reports the follow kinds of errors:
- *
- * - Dangles - edges which have one or both ends which are
- *   not incident on another edge endpoint
- * - Cut Edges - edges which are connected at both ends but
- *   which do not form part of polygon
- * - Invalid Ring Lines - edges which form rings which are invalid
- *   (e.g. the component lines contain a self-intersection)
- *
- * Errors are reported to output parameters "cuts", "dangles" and
- * "invalid" (if not-null). Formed polygons are returned as a
- * collection. NULL is returned on exception. All returned
- * geometries must be destroyed by caller.
- *
- */
 extern GEOSGeometry GEOS_DLL *GEOSPolygonize_full(const GEOSGeometry* input,
     GEOSGeometry** cuts, GEOSGeometry** dangles, GEOSGeometry** invalid);
+
+extern GEOSGeometry GEOS_DLL *GEOSBuildArea(const GEOSGeometry* g);
 
 extern GEOSGeometry GEOS_DLL *GEOSLineMerge(const GEOSGeometry* g);
 extern GEOSGeometry GEOS_DLL *GEOSReverse(const GEOSGeometry* g);
@@ -1750,9 +1770,18 @@ extern char GEOS_DLL GEOSWithin(const GEOSGeometry* g1, const GEOSGeometry* g2);
 extern char GEOS_DLL GEOSContains(const GEOSGeometry* g1, const GEOSGeometry* g2);
 extern char GEOS_DLL GEOSOverlaps(const GEOSGeometry* g1, const GEOSGeometry* g2);
 extern char GEOS_DLL GEOSEquals(const GEOSGeometry* g1, const GEOSGeometry* g2);
-extern char GEOS_DLL GEOSEqualsExact(const GEOSGeometry* g1, const GEOSGeometry* g2, double tolerance);
 extern char GEOS_DLL GEOSCovers(const GEOSGeometry* g1, const GEOSGeometry* g2);
 extern char GEOS_DLL GEOSCoveredBy(const GEOSGeometry* g1, const GEOSGeometry* g2);
+
+/**
+ * Determine pointwise equivalence of two geometries, by checking if each vertex of g2 is
+ * within tolerance of the corresponding vertex in g1.
+ * Unlike GEOSEquals, geometries that are topologically equivalent but have different
+ * representations (e.g., LINESTRING (0 0, 1 1) and MULTILINESTRING ((0 0, 1 1)) ) are not
+ * considered equivalent by GEOSEqualsExact.
+ * returns 2 on exception, 1 on true, 0 on false
+ */
+extern char GEOS_DLL GEOSEqualsExact(const GEOSGeometry* g1, const GEOSGeometry* g2, double tolerance);
 
 /************************************************************************
  *
@@ -1934,6 +1963,8 @@ extern char GEOS_DLL *GEOSisValidReason(const GEOSGeometry *g);
 extern char GEOS_DLL GEOSisValidDetail(const GEOSGeometry* g,
                                        int flags,
                                        char** reason, GEOSGeometry** location);
+
+extern GEOSGeometry GEOS_DLL *GEOSMakeValid(const GEOSGeometry* g);
 
 /************************************************************************
  *

@@ -1,1 +1,0 @@
-#define GEOS_REVISION "b55d2125"

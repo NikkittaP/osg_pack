@@ -1344,7 +1344,7 @@ TEST_F(CApi, proj_create_operations) {
     ASSERT_NE(res, nullptr);
     ObjListKeeper keeper_res(res);
 
-    EXPECT_EQ(proj_list_get_count(res), 7);
+    EXPECT_EQ(proj_list_get_count(res), 8);
 
     EXPECT_EQ(proj_list_get(m_ctxt, res, -1), nullptr);
     EXPECT_EQ(proj_list_get(m_ctxt, res, proj_list_get_count(res)), nullptr);
@@ -3735,6 +3735,106 @@ TEST_F(CApi, proj_create_crs_to_crs_from_pj) {
     EXPECT_EQ(std::string(projstr),
               "+proj=pipeline +step +proj=unitconvert +xy_in=deg +xy_out=rad "
               "+step +proj=utm +zone=31 +ellps=WGS84");
+}
+
+// ---------------------------------------------------------------------------
+
+TEST_F(CApi, proj_crs_promote_to_3D) {
+
+    auto crs2D =
+        proj_create(m_ctxt, GeographicCRS::EPSG_4326
+                                ->exportToWKT(WKTFormatter::create().get())
+                                .c_str());
+    ObjectKeeper keeper_crs2D(crs2D);
+    EXPECT_NE(crs2D, nullptr);
+
+    auto crs3D = proj_crs_promote_to_3D(m_ctxt, nullptr, crs2D);
+    ObjectKeeper keeper_crs3D(crs3D);
+    EXPECT_NE(crs3D, nullptr);
+
+    auto cs = proj_crs_get_coordinate_system(m_ctxt, crs3D);
+    ASSERT_NE(cs, nullptr);
+    ObjectKeeper keeperCs(cs);
+    EXPECT_EQ(proj_cs_get_axis_count(m_ctxt, cs), 3);
+
+    auto code = proj_get_id_code(crs3D, 0);
+    ASSERT_TRUE(code != nullptr);
+    EXPECT_EQ(code, std::string("4979"));
+}
+
+// ---------------------------------------------------------------------------
+
+TEST_F(CApi, proj_crs_create_projected_3D_crs_from_2D) {
+
+    auto projCRS = proj_create_from_database(m_ctxt, "EPSG", "32631",
+                                             PJ_CATEGORY_CRS, false, nullptr);
+    ASSERT_NE(projCRS, nullptr);
+    ObjectKeeper keeper_projCRS(projCRS);
+
+    {
+        auto geog3DCRS = proj_create_from_database(
+            m_ctxt, "EPSG", "4979", PJ_CATEGORY_CRS, false, nullptr);
+        ASSERT_NE(geog3DCRS, nullptr);
+        ObjectKeeper keeper_geog3DCRS(geog3DCRS);
+
+        auto crs3D = proj_crs_create_projected_3D_crs_from_2D(
+            m_ctxt, nullptr, projCRS, geog3DCRS);
+        ObjectKeeper keeper_crs3D(crs3D);
+        EXPECT_NE(crs3D, nullptr);
+
+        EXPECT_EQ(proj_get_type(crs3D), PJ_TYPE_PROJECTED_CRS);
+
+        EXPECT_EQ(std::string(proj_get_name(crs3D)),
+                  std::string(proj_get_name(projCRS)));
+
+        auto cs = proj_crs_get_coordinate_system(m_ctxt, crs3D);
+        ASSERT_NE(cs, nullptr);
+        ObjectKeeper keeperCs(cs);
+        EXPECT_EQ(proj_cs_get_axis_count(m_ctxt, cs), 3);
+    }
+
+    {
+        auto crs3D = proj_crs_create_projected_3D_crs_from_2D(m_ctxt, nullptr,
+                                                              projCRS, nullptr);
+        ObjectKeeper keeper_crs3D(crs3D);
+        EXPECT_NE(crs3D, nullptr);
+
+        EXPECT_EQ(proj_get_type(crs3D), PJ_TYPE_PROJECTED_CRS);
+
+        EXPECT_EQ(std::string(proj_get_name(crs3D)),
+                  std::string(proj_get_name(projCRS)));
+
+        auto cs = proj_crs_get_coordinate_system(m_ctxt, crs3D);
+        ASSERT_NE(cs, nullptr);
+        ObjectKeeper keeperCs(cs);
+        EXPECT_EQ(proj_cs_get_axis_count(m_ctxt, cs), 3);
+    }
+}
+
+// ---------------------------------------------------------------------------
+
+TEST_F(CApi, proj_create_crs_to_crs_with_only_ballpark_transformations) {
+    // ETRS89 / UTM zone 31N + EGM96 height to WGS 84 (G1762)
+    auto P =
+        proj_create_crs_to_crs(m_ctxt, "EPSG:25831+5773", "EPSG:7665", nullptr);
+    ObjectKeeper keeper_P(P);
+    ASSERT_NE(P, nullptr);
+    auto Pnormalized = proj_normalize_for_visualization(m_ctxt, P);
+    ObjectKeeper keeper_Pnormalized(Pnormalized);
+    ASSERT_NE(Pnormalized, nullptr);
+
+    PJ_COORD coord;
+    coord.xyzt.x = 500000;
+    coord.xyzt.y = 4500000;
+    coord.xyzt.z = 0;
+    coord.xyzt.t = 0;
+    coord = proj_trans(Pnormalized, PJ_FWD, coord);
+    EXPECT_NEAR(coord.xyzt.x, 3.0, 1e-9);
+    EXPECT_NEAR(coord.xyzt.y, 40.65085651660555, 1e-9);
+    if (coord.xyzt.z != 0) {
+        // z will depend if the egm96_15.gtx grid is there or not
+        EXPECT_NEAR(coord.xyzt.z, 47.04784081844435, 1e-3);
+    }
 }
 
 } // namespace

@@ -339,6 +339,7 @@ java_EXTRA_DIST=                                                                
   java/core/src/main/java/com/google/protobuf/TextFormatEscaper.java               \
   java/core/src/main/java/com/google/protobuf/TextFormatParseInfoTree.java         \
   java/core/src/main/java/com/google/protobuf/TextFormatParseLocation.java         \
+  java/core/src/main/java/com/google/protobuf/TypeRegistry.java                    \
   java/core/src/main/java/com/google/protobuf/UninitializedMessageException.java   \
   java/core/src/main/java/com/google/protobuf/UnknownFieldSchema.java              \
   java/core/src/main/java/com/google/protobuf/UnknownFieldSet.java                 \
@@ -435,6 +436,7 @@ java_EXTRA_DIST=                                                                
   java/core/src/test/java/com/google/protobuf/TextFormatParseInfoTreeTest.java     \
   java/core/src/test/java/com/google/protobuf/TextFormatParseLocationTest.java     \
   java/core/src/test/java/com/google/protobuf/TextFormatTest.java                  \
+  java/core/src/test/java/com/google/protobuf/TypeRegistryTest.java                \
   java/core/src/test/java/com/google/protobuf/UnknownEnumValueTest.java            \
   java/core/src/test/java/com/google/protobuf/UnknownFieldSetTest.java             \
   java/core/src/test/java/com/google/protobuf/UnmodifiableLazyStringListTest.java  \
@@ -1228,14 +1230,13 @@ EXTRA_DIST = $(@DIST_LANG@_EXTRA_DIST)   \
   examples/list_people.py                \
   examples/list_people_test.go           \
   examples/pubspec.yaml                  \
-  examples/third_party/zlib.BUILD        \
   protobuf.bzl                           \
   protobuf_deps.bzl                      \
   python/release/wheel/build_wheel_manylinux.sh  \
   python/release/wheel/Dockerfile                \
   python/release/wheel/protobuf_optimized_pip.sh \
   python/release/wheel/README.md         \
-  six.BUILD                              \
+  third_party/six.BUILD                  \
   third_party/zlib.BUILD                 \
   util/python/BUILD
 

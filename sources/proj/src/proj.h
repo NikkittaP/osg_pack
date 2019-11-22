@@ -154,7 +154,7 @@ extern "C" {
 /* The version numbers should be updated with every release! **/
 #define PROJ_VERSION_MAJOR 6
 #define PROJ_VERSION_MINOR 2
-#define PROJ_VERSION_PATCH 0
+#define PROJ_VERSION_PATCH 1
 
 extern char const PROJ_DLL pj_release[]; /* global release id string */
 
@@ -358,8 +358,8 @@ PJ PROJ_DLL *proj_create (PJ_CONTEXT *ctx, const char *definition);
 PJ PROJ_DLL *proj_create_argv (PJ_CONTEXT *ctx, int argc, char **argv);
 PJ PROJ_DLL *proj_create_crs_to_crs(PJ_CONTEXT *ctx, const char *source_crs, const char *target_crs, PJ_AREA *area);
 PJ PROJ_DLL *proj_create_crs_to_crs_from_pj(PJ_CONTEXT *ctx,
-                                            PJ *source_crs,
-                                            PJ *target_crs,
+                                            const PJ *source_crs,
+                                            const PJ *target_crs,
                                             PJ_AREA *area,
                                             const char* const *options);
 PJ PROJ_DLL *proj_normalize_for_visualization(PJ_CONTEXT *ctx, const PJ* obj);

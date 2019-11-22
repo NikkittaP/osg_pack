@@ -49,7 +49,7 @@
 #include <google/protobuf/port.h>
 #include <google/protobuf/stubs/strutil.h>
 
-
+// Must be included last.
 #include <google/protobuf/port_def.inc>
 
 namespace google {
@@ -133,9 +133,18 @@ std::string DefaultInstanceType(const Descriptor* descriptor,
 std::string DefaultInstanceName(const Descriptor* descriptor,
                                 const Options& options);
 
+// Non-qualified name of the default instance pointer. This is used only for
+// implicit weak fields, where we need an extra indirection.
+std::string DefaultInstancePtr(const Descriptor* descriptor,
+                               const Options& options);
+
 // Fully qualified name of the default_instance of this message.
 std::string QualifiedDefaultInstanceName(const Descriptor* descriptor,
                                          const Options& options);
+
+// Fully qualified name of the default instance pointer.
+std::string QualifiedDefaultInstancePtr(const Descriptor* descriptor,
+                                        const Options& options);
 
 // DescriptorTable variable name.
 std::string DescriptorTableName(const FileDescriptor* file,
@@ -144,12 +153,6 @@ std::string DescriptorTableName(const FileDescriptor* file,
 // When declaring symbol externs from another file, this macro will supply the
 // dllexport needed for the target file, if any.
 std::string FileDllExport(const FileDescriptor* file, const Options& options);
-
-// Returns the name of a no-op function that we can call to introduce a linker
-// dependency on the given message type. This is used to implement implicit weak
-// fields.
-std::string ReferenceFunctionName(const Descriptor* descriptor,
-                                  const Options& options);
 
 // Name of the base class: google::protobuf::Message or google::protobuf::MessageLite.
 std::string SuperClassName(const Descriptor* descriptor,
@@ -375,14 +378,6 @@ inline bool HasGenericServices(const FileDescriptor* file,
          file->options().cc_generic_services();
 }
 
-// Should we generate a separate, super-optimized code path for serializing to
-// flat arrays?  We don't do this in Lite mode because we'd rather reduce code
-// size.
-inline bool HasFastArraySerialization(const FileDescriptor* file,
-                                      const Options& options) {
-  return GetOptimizeFor(file, options) == FileOptions::SPEED;
-}
-
 inline bool IsProto2MessageSet(const Descriptor* descriptor,
                                const Options& options) {
   return !options.opensource_runtime &&
@@ -554,6 +549,11 @@ class PROTOC_EXPORT MessageSCCAnalyzer {
 
 inline std::string SccInfoSymbol(const SCC* scc, const Options& options) {
   return UniqueName("scc_info_" + ClassName(scc->GetRepresentative()),
+                    scc->GetRepresentative(), options);
+}
+
+inline std::string SccInfoPtrSymbol(const SCC* scc, const Options& options) {
+  return UniqueName("scc_info_ptr_" + ClassName(scc->GetRepresentative()),
                     scc->GetRepresentative(), options);
 }
 

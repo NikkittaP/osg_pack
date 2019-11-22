@@ -1,5 +1,5 @@
 #
-# This file is part of project GEOS (http://trac.osgeo.org/geos/) 
+# This file is part of project GEOS (http://trac.osgeo.org/geos/)
 #
 SUBDIRS = \
     algorithm \
@@ -16,11 +16,12 @@ SUBDIRS = \
     triangulate \
     util
 
-EXTRA_DIST = version.h.vc platform.h.vc platform.h.cmake
+EXTRA_DIST = 
 
 geosdir = $(includedir)/geos
 
 geos_HEADERS = \
+    constants.h \
     export.h \
     geomgraph.h \
     geomgraphindex.h \
@@ -49,10 +50,8 @@ geos_HEADERS = \
     precision.h \
     profiler.h \
     spatialIndex.h \
-    timeval.h \
     unload.h \
     util.h
 
 nodist_geos_HEADERS = \
-    version.h \
-    platform.h
+    version.h

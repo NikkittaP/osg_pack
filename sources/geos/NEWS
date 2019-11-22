@@ -1,3 +1,43 @@
+Changes in 3.8.0
+2019-10-10
+
+- New things:
+  - CAPI: GEOSBuildArea (#952, Even Rouault)
+  - CAPI: GEOSMakeValid (#952, Even Rouault)
+  - CAPI: GEOSPolygonize_valid (#727, Dan Baston)
+  - CAPI: GEOSCoverageUnion (Dan Baston)
+  - CAPI: GEOSCoordSeq_setXY, GEOSCoordSeq_setXYZ,
+          GEOSCoordSeq_getXY, GEOSCoordSeq_getXYZ (Dan Baston)
+  - CAPI: GEOSMinimumBoundingCircle (#735)
+  - CAPI: GEOSGeom_createPointFromXY (Dan Baston)
+
+- Improvements:
+  - Improve overall performance by reducing of heap allocations (Dan Baston)
+  - Improve performance and robustness of GEOSPointOnSurface (Martin Davis)
+  - Improve performance of GEOSPolygonize for cases with many potential
+    holes (#748, Dan Baston)
+  - Support extended precision calculations (ttmath) and port JTS
+    improvements related to extended precision (Paul Ramsey, Mateusz Loskot)
+  - Improve performance of GEOSPolygonize for cases with many or complex
+    shells (Dan Baston, Martin Davis)
+  - Improve performance of Delaunay triangulations / Voronoi Diagrams
+    (Dan Baston)
+  - Improve performance of prepared geometry operations (Dan Baston)
+  - Improve robustness of Delaunay triangulations (Paul Ramsey, Martin Davis)
+  - Improve performance of unary union for lines (Dan Baston)
+  - Improve general predicate, overlay, and buffer performance (Dan Baston, Paul Ramsey)
+  - Improve cascaded union performance (Paul Ramsey, Martin Davis)
+  - Allocate default GeometryFactory singleton on the stack (Sandro Mani)
+  - Harmonize XML tests with JTS and harmonize cmake/autoconf
+    test running (Paul Ramsey)
+  - CMake modernization (Mateusz Loskot, Paul Ramsey, Dan Baston)
+  - Return unique_ptr from most methods that produce a new geometry (Dan Baston)
+
+- Changes:
+  - Constructive geometry functions in CAPI now preserve SRID
+    of input arguments in output (#896)
+
+
 Changes in 3.7.2
 2019-05-02
 
@@ -35,14 +75,13 @@ Changes in 3.7.0
           GEOSGeom_getYMin, GEOSGeom_getYMax (#871, Dan Baston)
   - CAPI: GEOSFrechetDistance (#797, Shinichi SUGIYAMA)
   - CAPI: GEOSReverse (#872, Dan Baston)
+  - CAPI: GEOSSegmentIntersection (#873, Dan Baston)
   - CAPI: GEOSGeomGetZ (#581, J Smith)
 
 - Improvements
   - Interruptible snap operation (Paul Ramsey)
   - Numerous packaging, doc, and build changes
     (Debian group: Bas Couwenberg, Francesco Paolo Lovergine)
-    (NetBSD: Greg Troxel)
-  - Allow static library with C API for CMake builds (#878, Dakota Hawkins)
 
 - C++ API changes:
   - Require defining USE_UNSTABLE_GEOS_CPP_API for use without
@@ -55,25 +94,12 @@ Changes in 3.7.0
   - Fix CommonBits::getBit to correctly handle i >= 32
     (#834, Kurt Schwehr)
 
-
-Changes in 3.7.0rc2
-2018-09-03
-Fixes / enhancements since 3.7.0rc1
-  - Drop ? from extended regular expression,
-    so that the expression strictly conforms to the POSIX ERE rules.
-    (#917, Greg Troxel, Bas Couwenberg)
-  - include .editorconfig in tar ball,
-    fixes Cmake on VS (#920, Jeff Mckenna, Regina Obe)
-  - Ignore error in CoordinateArraySequenceFactoryTest
-    failing on FreeBSD/macOS Clang (#894)
-
 Changes in 3.7.0rc1
 2018-08-19
 Fixes / enhancements since 3.7.0beta2
   - Avoid segfault when querying empty tree (#730, framm)
   - Collection with Empty components crashes overlay (#782, Dan Baston)
   - Allow static library with C API for CMake builds (#878, Dakota Hawkins)
-
 
 Changes in 3.7.0beta2
 2018-08-06
@@ -82,6 +108,7 @@ Fixes since 3.7.0beta1
   - Make GEOSException inherit from std::runtime_error
     to address clang warnings (Dan Baston)
   - Add missing CMake files to tarball (#895, Regina Obe)
+
 
 Changes in 3.7.0beta1
 2018-06-25

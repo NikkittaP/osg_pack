@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gdal_array.i 9a4744d153081b3f5afc4bf0768e703a1680c026 2019-05-07 20:09:35 +0200 Even Rouault $
+ * $Id: gdal_array.i 5ec508c7aced408147e898c945ffbe9075056d2a 2019-07-08 14:34:55 +0200 Even Rouault $
  *
  * Name:     gdal_array.i
  * Project:  GDAL Python Interface
@@ -913,12 +913,18 @@ retStringAndCPLFree* GetArrayFilename(PyArrayObject *psArray)
     }
 
     /* Keep a reference to the VirtualMem object */
+%#if SWIGVERSION >= 0x040000
+%#define obj0 swig_obj[0]
+%#endif
 %#if NPY_API_VERSION >= 0x00000007
     PyArray_SetBaseObject(ar, obj0);
 %#else
     PyArray_BASE(ar) = obj0;
 %#endif
     Py_INCREF(obj0);
+%#if SWIGVERSION >= 0x040000
+%#undef obj0
+%#endif
     Py_DECREF($result);
     $result = (PyObject*) ar;
 }

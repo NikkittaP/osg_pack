@@ -1,5 +1,6 @@
 /* set ellipsoid parameters a and es */
 
+#include <errno.h>
 #include <math.h>
 #include <stddef.h>
 #include <string.h>
@@ -156,7 +157,14 @@ static int ellps_ellps (PJ *P) {
     err = proj_errno_reset (P);
 
     paralist* new_params = pj_mkparam (ellps->major);
+    if (nullptr == new_params)
+        return proj_errno_set (P, ENOMEM);
     new_params->next = pj_mkparam (ellps->ell);
+    if (nullptr == new_params->next)
+    {
+        pj_dealloc(new_params);
+        return proj_errno_set (P, ENOMEM);
+    }
     paralist* old_params = P->params;
     P->params = new_params;
 
@@ -389,6 +397,9 @@ static int ellps_spherification (PJ *P) {
             return proj_errno_set (P, PJD_ERR_REF_RAD_LARGER_THAN_90);
         t = sin (t);
         t = 1 - P->es * t * t;
+        if (t == 0.) {
+            return proj_errno_set(P, PJD_ERR_INVALID_ECCENTRICITY);
+        }
         if (i==5)   /* arithmetic */
             P->a *= (1. - P->es + t) / (2 * t * sqrt(t));
         else        /* geometric */

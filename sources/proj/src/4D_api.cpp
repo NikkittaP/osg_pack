@@ -362,6 +362,7 @@ size_t proj_trans_generic (
     PJ_COORD coord = {{0,0,0,0}};
     size_t i, nmin;
     double null_broadcast = 0;
+    double invalid_time = HUGE_VAL;
 
     if (nullptr==P)
         return 0;
@@ -379,7 +380,7 @@ size_t proj_trans_generic (
     if (0==nx) x = &null_broadcast;
     if (0==ny) y = &null_broadcast;
     if (0==nz) z = &null_broadcast;
-    if (0==nt) t = &null_broadcast;
+    if (0==nt) t = &invalid_time;
 
     /* nothing to do? */
     if (0==nx+ny+nz+nt)
@@ -946,7 +947,7 @@ static PJ* add_coord_op_to_list(PJ* op,
 }
 
 /*****************************************************************************/
-static PJ* create_operation_to_base_geog_crs(PJ_CONTEXT* ctx, PJ* crs) {
+static PJ* create_operation_to_base_geog_crs(PJ_CONTEXT* ctx, const PJ* crs) {
 /*****************************************************************************/
     // Create a geographic 2D long-lat degrees CRS that is related to the
     // CRS
@@ -1052,7 +1053,7 @@ PJ  *proj_create_crs_to_crs (PJ_CONTEXT *ctx, const char *source_crs, const char
 }
 
 /*****************************************************************************/
-PJ  *proj_create_crs_to_crs_from_pj (PJ_CONTEXT *ctx, PJ *source_crs, PJ *target_crs, PJ_AREA *area, const char* const *) {
+PJ  *proj_create_crs_to_crs_from_pj (PJ_CONTEXT *ctx, const PJ *source_crs, const PJ *target_crs, PJ_AREA *area, const char* const *) {
 /******************************************************************************
     Create a transformation pipeline between two known coordinate reference
     systems.
@@ -1136,6 +1137,8 @@ PJ  *proj_create_crs_to_crs_from_pj (PJ_CONTEXT *ctx, PJ *source_crs, PJ *target
 
     try
     {
+        bool skipDefaultTransforms = true;
+
         // Iterate over source->target candidate transformations and reproject
         // their long-lat bounding box into the source CRS.
         for( int i = 0; i < op_count; i++ )
@@ -1148,12 +1151,25 @@ PJ  *proj_create_crs_to_crs_from_pj (PJ_CONTEXT *ctx, PJ *source_crs, PJ *target
             double north_lat = 0.0;
 
             const char* name = proj_get_name(op);
-            if( name && (strstr(name, "Ballpark geographic offset") ||
+            bool canUseOp = true;
+            if( skipDefaultTransforms &&
+                name && (strstr(name, "Ballpark geographic offset") ||
                          strstr(name, "Ballpark geocentric translation")) )
             {
-                // Skip default transformations
+                // Skip default transformations unless there is already one at
+                // the beginning (in which case all of them will have one)
+                if( i == 0 )
+                {
+                    skipDefaultTransforms = false;
+                }
+                else
+                {
+                    canUseOp = false;
+                }
             }
-            else if( proj_get_area_of_use(ctx, op,
+
+            if( canUseOp &&
+                proj_get_area_of_use(ctx, op,
                         &west_lon, &south_lat, &east_lon, &north_lat, nullptr) )
             {
                 if( west_lon <= east_lon )

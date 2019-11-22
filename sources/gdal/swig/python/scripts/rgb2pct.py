@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # ******************************************************************************
-#  $Id: rgb2pct.py 8e263710cb425c4a8b76b1f363b98be41ea0a983 2018-04-30 19:40:20 +1000 Ben Elliston $
+#  $Id: rgb2pct.py b26086d4ebbccb1ef862f2eebee8cf79ef17ca66 2019-07-12 07:47:26 -0700 ajnisbet $
 #
 #  Name:     rgb2pct
 #  Project:  GDAL Python Interface
@@ -78,14 +78,14 @@ def GetOutputDriversFor(filename):
 
 def GetOutputDriverFor(filename):
     drv_list = GetOutputDriversFor(filename)
+    ext = GetExtension(filename)
     if not drv_list:
-        ext = GetExtension(filename)
         if not ext:
             return 'GTiff'
         else:
             raise Exception("Cannot guess driver for %s" % filename)
     elif len(drv_list) > 1:
-        print("Several drivers matching %s extension. Using %s" % (ext, drv_list[0]))
+        print("Several drivers matching %s extension. Using %s" % (ext if ext else '', drv_list[0]))
     return drv_list[0]
 
 # =============================================================================

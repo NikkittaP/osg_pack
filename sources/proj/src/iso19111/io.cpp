@@ -3185,7 +3185,16 @@ ConversionNNPtr WKTParser::Private::buildProjectionFromESRI(
         }
     }
 
-    const auto *wkt2_mapping = getMapping(esriMapping->wkt2_name);
+    const char *projectionMethodWkt2Name = esriMapping->wkt2_name;
+    if (ci_equal(esriProjectionName, "Krovak")) {
+        const std::string projCRSName =
+            stripQuotes(projCRSNode->GP()->children()[0]);
+        if (projCRSName.find("_East_North") != std::string::npos) {
+            projectionMethodWkt2Name = EPSG_NAME_METHOD_KROVAK_NORTH_ORIENTED;
+        }
+    }
+
+    const auto *wkt2_mapping = getMapping(projectionMethodWkt2Name);
     if (ci_equal(esriProjectionName, "Stereographic")) {
         try {
             if (std::fabs(io::asDouble(
@@ -4444,12 +4453,12 @@ class JSONParser {
     }
 
     template <class TargetCRS, class DatumBuilderType,
-              class CS = CoordinateSystem>
+              class CSClass = CoordinateSystem>
     util::nn<std::shared_ptr<TargetCRS>> buildCRS(const json &j,
                                                   DatumBuilderType f) {
         auto datum = (this->*f)(getObject(j, "datum"));
         auto cs = buildCS(getObject(j, "coordinate_system"));
-        auto csCast = util::nn_dynamic_pointer_cast<CS>(cs);
+        auto csCast = util::nn_dynamic_pointer_cast<CSClass>(cs);
         if (!csCast) {
             throw ParsingException("coordinate_system not of expected type");
         }
@@ -4457,7 +4466,7 @@ class JSONParser {
                                  NN_NO_CHECK(csCast));
     }
 
-    template <class TargetCRS, class BaseCRS, class CS = CoordinateSystem>
+    template <class TargetCRS, class BaseCRS, class CSClass = CoordinateSystem>
     util::nn<std::shared_ptr<TargetCRS>> buildDerivedCRS(const json &j) {
         auto baseCRSObj = create(getObject(j, "base_crs"));
         auto baseCRS = util::nn_dynamic_pointer_cast<BaseCRS>(baseCRSObj);
@@ -4465,7 +4474,7 @@ class JSONParser {
             throw ParsingException("base_crs not of expected type");
         }
         auto cs = buildCS(getObject(j, "coordinate_system"));
-        auto csCast = util::nn_dynamic_pointer_cast<CS>(cs);
+        auto csCast = util::nn_dynamic_pointer_cast<CSClass>(cs);
         if (!csCast) {
             throw ParsingException("coordinate_system not of expected type");
         }
@@ -7482,7 +7491,7 @@ static const struct DatumDesc {
 } datumDescs[] = {
     {"GGRS87", "GGRS87", 4121, "Greek Geodetic Reference System 1987", 6121,
      "GRS 1980", 7019, 6378137, 298.257222101},
-    {"postdam", "DHDN", 4314, "Deutsches Hauptdreiecksnetz", 6314,
+    {"potsdam", "DHDN", 4314, "Deutsches Hauptdreiecksnetz", 6314,
      "Bessel 1841", 7004, 6377397.155, 299.1528128},
     {"carthage", "Carthage", 4223, "Carthage", 6223, "Clarke 1880 (IGN)", 7011,
      6378249.2, 293.4660213},
@@ -8235,6 +8244,21 @@ static double getAngularValue(const std::string &paramValue,
 
 // ---------------------------------------------------------------------------
 
+static bool is_in_stringlist(const std::string &str, const char *stringlist) {
+    const char *haystack = stringlist;
+    while (true) {
+        const char *res = strstr(haystack, str.c_str());
+        if (res == nullptr)
+            return false;
+        if ((res == stringlist || res[-1] == ',') &&
+            (res[str.size()] == ',' || res[str.size()] == '\0'))
+            return true;
+        haystack += str.size();
+    }
+}
+
+// ---------------------------------------------------------------------------
+
 CRSNNPtr PROJStringParser::Private::buildProjectedCRS(
     int iStep, GeographicCRSNNPtr geogCRS, int iUnitConvert, int iAxisSwap) {
     auto &step = steps_[iStep];
@@ -8313,10 +8337,13 @@ CRSNNPtr PROJStringParser::Private::buildProjectedCRS(
     } else if (step.name == "somerc") {
         mapping =
             getMapping(EPSG_CODE_METHOD_HOTINE_OBLIQUE_MERCATOR_VARIANT_B);
-        step.paramValues.emplace_back(Step::KeyValue("alpha", "90"));
-        step.paramValues.emplace_back(Step::KeyValue("gamma", "90"));
-        step.paramValues.emplace_back(
-            Step::KeyValue("lonc", getParamValue(step, "lon_0")));
+        if (!hasParamValue(step, "alpha") && !hasParamValue(step, "gamma") &&
+            !hasParamValue(step, "lonc")) {
+            step.paramValues.emplace_back(Step::KeyValue("alpha", "90"));
+            step.paramValues.emplace_back(Step::KeyValue("gamma", "90"));
+            step.paramValues.emplace_back(
+                Step::KeyValue("lonc", getParamValue(step, "lon_0")));
+        }
     } else if (step.name == "krovak" &&
                ((getParamValue(step, "axis") == "swu" && iAxisSwap < 0) ||
                 (iAxisSwap > 0 &&
@@ -8536,28 +8563,34 @@ CRSNNPtr PROJStringParser::Private::buildProjectedCRS(
         std::vector<ParameterValueNNPtr> values;
         std::string methodName = "PROJ " + step.name;
         for (const auto &param : step.paramValues) {
-            if (param.key == "wktext" || param.key == "no_defs" ||
-                param.key == "datum" || param.key == "ellps" ||
-                param.key == "a" || param.key == "b" || param.key == "R" ||
-                param.key == "towgs84" || param.key == "nadgrids" ||
-                param.key == "geoidgrids" || param.key == "units" ||
-                param.key == "to_meter" || param.key == "vunits" ||
-                param.key == "vto_meter" || param.key == "type") {
+            if (is_in_stringlist(param.key,
+                                 "wktext,no_defs,datum,ellps,a,b,R,towgs84,"
+                                 "nadgrids,geoidgrids,"
+                                 "units,to_meter,vunits,vto_meter,type")) {
                 continue;
             }
             if (param.value.empty()) {
                 methodName += " " + param.key;
-            } else if (param.key == "o_proj") {
+            } else if (isalpha(param.value[0])) {
                 methodName += " " + param.key + "=" + param.value;
             } else {
                 parameters.push_back(OperationParameter::create(
                     PropertyMap().set(IdentifiedObject::NAME_KEY, param.key)));
                 bool hasError = false;
-                if (param.key == "x_0" || param.key == "y_0") {
+                if (is_in_stringlist(param.key, "x_0,y_0,h,h_0")) {
                     double value = getNumericValue(param.value, &hasError);
                     values.push_back(ParameterValue::create(
                         Measure(value, UnitOfMeasure::METRE)));
-                } else if (param.key == "k" || param.key == "k_0") {
+                } else if (is_in_stringlist(
+                               param.key,
+                               "k,k_0,"
+                               "north_square,south_square," // rhealpix
+                               "n,m,"                       // sinu
+                               "q,"                         // urm5
+                               "path,lsat,"                 // lsat
+                               "W,M,"                       // hammer
+                               "aperture,resolution,"       // isea
+                               )) {
                     double value = getNumericValue(param.value, &hasError);
                     values.push_back(ParameterValue::create(
                         Measure(value, UnitOfMeasure::SCALE_UNITY)));
@@ -8577,7 +8610,10 @@ CRSNNPtr PROJStringParser::Private::buildProjectedCRS(
                    parameters, values)
                    .as_nullable();
 
-        if (methodName == "PROJ ob_tran o_proj=longlat") {
+        if (is_in_stringlist(methodName, "PROJ ob_tran o_proj=longlat,"
+                                         "PROJ ob_tran o_proj=lonlat,"
+                                         "PROJ ob_tran o_proj=latlon,"
+                                         "PROJ ob_tran o_proj=latlong")) {
             return DerivedGeographicCRS::create(
                 PropertyMap().set(IdentifiedObject::NAME_KEY, "unnamed"),
                 geogCRS, NN_NO_CHECK(conv),
@@ -8638,6 +8674,21 @@ static const metadata::ExtentPtr &getExtent(const crs::CRS *crs) {
 
 //! @endcond
 
+namespace {
+struct PJContextHolder {
+    PJ_CONTEXT *ctx_;
+    bool bFree_;
+
+    PJContextHolder(PJ_CONTEXT *ctx, bool bFree) : ctx_(ctx), bFree_(bFree) {}
+    ~PJContextHolder() {
+        if (bFree_)
+            proj_context_destroy(ctx_);
+    }
+    PJContextHolder(const PJContextHolder &) = delete;
+    PJContextHolder &operator=(const PJContextHolder &) = delete;
+};
+} // namespace
+
 // ---------------------------------------------------------------------------
 
 /** \brief Instantiate a sub-class of BaseObject from a PROJ string.
@@ -8652,8 +8703,10 @@ PROJStringParser::createFromPROJString(const std::string &projString) {
 
     // In some abnormal situations involving init=epsg:XXXX syntax, we could
     // have infinite loop
-    if (d->ctx_ && d->ctx_->curStringInCreateFromPROJString == projString) {
-        throw ParsingException("invalid PROJ string");
+    if (d->ctx_ &&
+        d->ctx_->projStringParserCreateFromPROJStringRecursionCounter == 2) {
+        throw ParsingException(
+            "Infinite recursion in PROJStringParser::createFromPROJString()");
     }
 
     d->steps_.clear();
@@ -8701,34 +8754,52 @@ PROJStringParser::createFromPROJString(const std::string &projString) {
         const std::string &stepName = d->steps_[0].name;
         if (ci_starts_with(stepName, "epsg:") ||
             ci_starts_with(stepName, "IGNF:")) {
+
+            /* We create a new context so as to avoid messing up with the */
+            /* errorno of the main context, when trying to find the likely */
+            /* missing epsg file */
+            auto ctx = proj_context_create();
+            if (!ctx) {
+                throw ParsingException("out of memory");
+            }
+            PJContextHolder contextHolder(ctx, true);
+            if (d->ctx_) {
+                ctx->set_search_paths(d->ctx_->search_paths);
+                ctx->file_finder = d->ctx_->file_finder;
+                ctx->file_finder_legacy = d->ctx_->file_finder_legacy;
+                ctx->file_finder_user_data = d->ctx_->file_finder_user_data;
+            }
+
             bool usePROJ4InitRules = d->usePROJ4InitRules_;
             if (!usePROJ4InitRules) {
-                PJ_CONTEXT *ctx = proj_context_create();
-                if (ctx) {
-                    usePROJ4InitRules = proj_context_get_use_proj4_init_rules(
-                                            ctx, FALSE) == TRUE;
-                    proj_context_destroy(ctx);
-                }
+                usePROJ4InitRules =
+                    proj_context_get_use_proj4_init_rules(ctx, FALSE) == TRUE;
             }
             if (!usePROJ4InitRules) {
                 throw ParsingException("init=epsg:/init=IGNF: syntax not "
                                        "supported in non-PROJ4 emulation mode");
             }
 
-            PJ_CONTEXT *ctx = proj_context_create();
             char unused[256];
             std::string initname(stepName);
             initname.resize(initname.find(':'));
             int file_found =
                 pj_find_file(ctx, initname.c_str(), unused, sizeof(unused));
-            proj_context_destroy(ctx);
+
             if (!file_found) {
                 auto obj = createFromUserInput(stepName, d->dbContext_, true);
                 auto crs = dynamic_cast<CRS *>(obj.get());
-                if (crs &&
-                    (d->steps_[0].paramValues.empty() ||
-                     (d->steps_[0].paramValues.size() == 1 &&
-                      d->getParamValue(d->steps_[0], "type") == "crs"))) {
+
+                bool hasSignificantParamValues = false;
+                for (const auto &kv : d->steps_[0].paramValues) {
+                    if (!((kv.key == "type" && kv.value == "crs") ||
+                          kv.key == "no_defs")) {
+                        hasSignificantParamValues = true;
+                        break;
+                    }
+                }
+
+                if (crs && !hasSignificantParamValues) {
                     PropertyMap properties;
                     properties.set(IdentifiedObject::NAME_KEY,
                                    d->title_.empty() ? crs->nameStr()
@@ -8790,19 +8861,19 @@ PROJStringParser::createFromPROJString(const std::string &projString) {
             }
         }
 
+        auto ctx = d->ctx_ ? d->ctx_ : proj_context_create();
+        if (!ctx) {
+            throw ParsingException("out of memory");
+        }
+        PJContextHolder contextHolder(ctx, ctx != d->ctx_);
+
         paralist *init = pj_mkparam(("init=" + d->steps_[0].name).c_str());
         if (!init) {
             throw ParsingException("out of memory");
         }
-        PJ_CONTEXT *ctx = d->ctx_ ? d->ctx_ : proj_context_create();
-        if (!ctx) {
-            pj_dealloc(init);
-            throw ParsingException("out of memory");
-        }
+        ctx->projStringParserCreateFromPROJStringRecursionCounter++;
         paralist *list = pj_expand_init(ctx, init);
-        if (ctx != d->ctx_) {
-            proj_context_destroy(ctx);
-        }
+        ctx->projStringParserCreateFromPROJStringRecursionCounter--;
         if (!list) {
             pj_dealloc(init);
             throw ParsingException("cannot expand " + projString);
@@ -8933,18 +9004,14 @@ PROJStringParser::createFromPROJString(const std::string &projString) {
         proj_log_func(pj_context, &logger, Logger::log);
         proj_context_use_proj4_init_rules(pj_context, d->usePROJ4InitRules_);
     }
-    if (d->ctx_) {
-        d->ctx_->curStringInCreateFromPROJString = projString;
-    }
+    pj_context->projStringParserCreateFromPROJStringRecursionCounter++;
     auto log_level = proj_log_level(pj_context, PJ_LOG_NONE);
     auto pj = pj_create_internal(
         pj_context, (projString.find("type=crs") != std::string::npos
                          ? projString + " +disable_grid_presence_check"
                          : projString)
                         .c_str());
-    if (d->ctx_) {
-        d->ctx_->curStringInCreateFromPROJString.clear();
-    }
+    pj_context->projStringParserCreateFromPROJStringRecursionCounter--;
     valid = pj != nullptr;
     proj_log_level(pj_context, log_level);
 

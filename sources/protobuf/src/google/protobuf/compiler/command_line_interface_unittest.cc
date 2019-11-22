@@ -45,22 +45,21 @@
 #include <google/protobuf/stubs/stringprintf.h>
 #include <google/protobuf/testing/file.h>
 #include <google/protobuf/testing/file.h>
+#include <google/protobuf/testing/file.h>
 #include <google/protobuf/compiler/mock_code_generator.h>
 #include <google/protobuf/compiler/subprocess.h>
 #include <google/protobuf/compiler/code_generator.h>
 #include <google/protobuf/compiler/command_line_interface.h>
 #include <google/protobuf/test_util2.h>
 #include <google/protobuf/unittest.pb.h>
-#include <google/protobuf/io/io_win32.h>
 #include <google/protobuf/io/printer.h>
 #include <google/protobuf/io/zero_copy_stream.h>
 #include <google/protobuf/descriptor.pb.h>
 #include <google/protobuf/descriptor.h>
-#include <google/protobuf/stubs/substitute.h>
-
-#include <google/protobuf/testing/file.h>
 #include <google/protobuf/testing/googletest.h>
 #include <gtest/gtest.h>
+#include <google/protobuf/stubs/substitute.h>
+#include <google/protobuf/io/io_win32.h>
 
 #include <google/protobuf/stubs/strutil.h>
 
@@ -142,6 +141,10 @@ class CommandLineInterfaceTest : public testing::Test {
   // Checks that Run() returned non-zero and the stderr contains the given
   // substring.
   void ExpectErrorSubstring(const std::string& expected_substring);
+
+  // Checks that Run() returned zero and the stderr contains the given
+  // substring.
+  void ExpectWarningSubstring(const std::string& expected_substring);
 
   // Checks that the captured stdout is the same as the expected_text.
   void ExpectCapturedStdout(const std::string& expected_text);
@@ -404,6 +407,12 @@ void CommandLineInterfaceTest::ExpectErrorText(
 void CommandLineInterfaceTest::ExpectErrorSubstring(
     const std::string& expected_substring) {
   EXPECT_NE(0, return_code_);
+  EXPECT_PRED_FORMAT2(testing::IsSubstring, expected_substring, error_text_);
+}
+
+void CommandLineInterfaceTest::ExpectWarningSubstring(
+    const std::string& expected_substring) {
+  EXPECT_EQ(0, return_code_);
   EXPECT_PRED_FORMAT2(testing::IsSubstring, expected_substring, error_text_);
 }
 
@@ -834,6 +843,69 @@ TEST_F(CommandLineInterfaceTest,
   ExpectErrorSubstring(
       "bar.proto: Import \"baz.proto\" was not found or had errors.");
   ExpectErrorSubstring("bar.proto: \"Baz\" is not defined.");
+}
+
+TEST_F(CommandLineInterfaceTest,
+       OnlyReportsUnusedImportsForFilesBeingGenerated) {
+  CreateTempFile("unused.proto",
+                 "syntax = \"proto2\";\n"
+                 "message Unused {}\n");
+  CreateTempFile("bar.proto",
+                 "syntax = \"proto2\";\n"
+                 "import \"unused.proto\";\n"
+                 "message Bar {}\n");
+  CreateTempFile("foo.proto",
+                 "syntax = \"proto2\";\n"
+                 "import \"bar.proto\";\n"
+                 "message Foo {\n"
+                 "  optional Bar bar = 1;\n"
+                 "}\n");
+
+  Run("protocol_compiler --test_out=$tmpdir "
+      "--proto_path=$tmpdir foo.proto");
+  ExpectNoErrors();
+}
+
+TEST_F(CommandLineInterfaceTest, ReportsTransitiveMisingImports_LeafFirst) {
+  CreateTempFile("unused.proto",
+                 "syntax = \"proto2\";\n"
+                 "message Unused {}\n");
+  CreateTempFile("bar.proto",
+                 "syntax = \"proto2\";\n"
+                 "import \"unused.proto\";\n"
+                 "message Bar {}\n");
+  CreateTempFile("foo.proto",
+                 "syntax = \"proto2\";\n"
+                 "import \"bar.proto\";\n"
+                 "message Foo {\n"
+                 "  optional Bar bar = 1;\n"
+                 "}\n");
+
+  Run("protocol_compiler --test_out=$tmpdir "
+      "--proto_path=$tmpdir bar.proto foo.proto");
+  ExpectWarningSubstring(
+      "bar.proto:2:1: warning: Import unused.proto but not used.");
+}
+
+TEST_F(CommandLineInterfaceTest, ReportsTransitiveMisingImports_LeafLast) {
+  CreateTempFile("unused.proto",
+                 "syntax = \"proto2\";\n"
+                 "message Unused {}\n");
+  CreateTempFile("bar.proto",
+                 "syntax = \"proto2\";\n"
+                 "import \"unused.proto\";\n"
+                 "message Bar {}\n");
+  CreateTempFile("foo.proto",
+                 "syntax = \"proto2\";\n"
+                 "import \"bar.proto\";\n"
+                 "message Foo {\n"
+                 "  optional Bar bar = 1;\n"
+                 "}\n");
+
+  Run("protocol_compiler --test_out=$tmpdir "
+      "--proto_path=$tmpdir foo.proto bar.proto");
+  ExpectWarningSubstring(
+      "bar.proto:2:1: warning: Import unused.proto but not used.");
 }
 
 TEST_F(CommandLineInterfaceTest, CreateDirectory) {

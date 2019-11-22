@@ -32,6 +32,8 @@
 //  Based on original Protocol Buffers design by
 //  Sanjay Ghemawat, Jeff Dean, and others.
 
+#include <google/protobuf/descriptor.h>
+
 #include <algorithm>
 #include <functional>
 #include <limits>
@@ -48,22 +50,18 @@
 #include <google/protobuf/stubs/stringprintf.h>
 #include <google/protobuf/stubs/strutil.h>
 #include <google/protobuf/descriptor.pb.h>
-#include <google/protobuf/io/strtod.h>
 #include <google/protobuf/io/coded_stream.h>
 #include <google/protobuf/io/tokenizer.h>
 #include <google/protobuf/io/zero_copy_stream_impl.h>
-#include <google/protobuf/descriptor.h>
 #include <google/protobuf/descriptor_database.h>
 #include <google/protobuf/dynamic_message.h>
 #include <google/protobuf/generated_message_util.h>
 #include <google/protobuf/text_format.h>
 #include <google/protobuf/unknown_field_set.h>
 #include <google/protobuf/wire_format.h>
-#include <google/protobuf/stubs/substitute.h>
 #include <google/protobuf/stubs/casts.h>
-
-
-
+#include <google/protobuf/stubs/substitute.h>
+#include <google/protobuf/io/strtod.h>
 #include <google/protobuf/stubs/map_util.h>
 #include <google/protobuf/stubs/stl_util.h>
 #include <google/protobuf/stubs/hash.h>
@@ -649,13 +647,13 @@ class DescriptorPool::Tables {
   FileDescriptorTables* AllocateFileTables();
 
  private:
-  std::vector<std::string*> strings_;  // All strings in the pool.
-  std::vector<Message*> messages_;     // All messages in the pool.
-  std::vector<internal::once_flag*>
-      once_dynamics_;  // All internal::call_onces in the pool.
-  std::vector<FileDescriptorTables*>
-      file_tables_;                 // All file tables in the pool.
-  std::vector<void*> allocations_;  // All other memory allocated in the pool.
+  // All other memory allocated in the pool.  Must be first as other objects can
+  // point into these.
+  std::vector<std::unique_ptr<char[]>> allocations_;
+  std::vector<std::unique_ptr<std::string>> strings_;
+  std::vector<std::unique_ptr<Message>> messages_;
+  std::vector<std::unique_ptr<internal::once_flag>> once_dynamics_;
+  std::vector<std::unique_ptr<FileDescriptorTables>> file_tables_;
 
   SymbolsByNameMap symbols_by_name_;
   FilesByNameMap files_by_name_;
@@ -806,15 +804,6 @@ DescriptorPool::Tables::Tables()
 
 DescriptorPool::Tables::~Tables() {
   GOOGLE_DCHECK(checkpoints_.empty());
-  // Note that the deletion order is important, since the destructors of some
-  // messages may refer to objects in allocations_.
-  STLDeleteElements(&messages_);
-  for (int i = 0; i < allocations_.size(); i++) {
-    operator delete(allocations_[i]);
-  }
-  STLDeleteElements(&strings_);
-  STLDeleteElements(&file_tables_);
-  STLDeleteElements(&once_dynamics_);
 }
 
 FileDescriptorTables::FileDescriptorTables()
@@ -876,22 +865,6 @@ void DescriptorPool::Tables::RollbackToLastCheckpoint() {
   extensions_after_checkpoint_.resize(
       checkpoint.pending_extensions_before_checkpoint);
 
-  STLDeleteContainerPointers(
-      strings_.begin() + checkpoint.strings_before_checkpoint, strings_.end());
-  STLDeleteContainerPointers(
-      messages_.begin() + checkpoint.messages_before_checkpoint,
-      messages_.end());
-  STLDeleteContainerPointers(
-      once_dynamics_.begin() + checkpoint.once_dynamics_before_checkpoint,
-      once_dynamics_.end());
-  STLDeleteContainerPointers(
-      file_tables_.begin() + checkpoint.file_tables_before_checkpoint,
-      file_tables_.end());
-  for (int i = checkpoint.allocations_before_checkpoint;
-       i < allocations_.size(); i++) {
-    operator delete(allocations_[i]);
-  }
-
   strings_.resize(checkpoint.strings_before_checkpoint);
   messages_.resize(checkpoint.messages_before_checkpoint);
   once_dynamics_.resize(checkpoint.once_dynamics_before_checkpoint);
@@ -932,6 +905,14 @@ inline Symbol FileDescriptorTables::FindNestedSymbolOfType(
 
 Symbol DescriptorPool::Tables::FindByNameHelper(const DescriptorPool* pool,
                                                 const std::string& name) {
+  if (pool->mutex_ != nullptr) {
+    // Fast path: the Symbol is already cached.  This is just a hash lookup.
+    ReaderMutexLock lock(pool->mutex_);
+    if (known_bad_symbols_.empty() && known_bad_files_.empty()) {
+      Symbol result = FindSymbol(name);
+      if (!result.IsNull()) return result;
+    }
+  }
   MutexLockMaybe lock(pool->mutex_);
   if (pool->fallback_database_ != nullptr) {
     known_bad_symbols_.clear();
@@ -1194,32 +1175,32 @@ Type* DescriptorPool::Tables::AllocateArray(int count) {
 
 std::string* DescriptorPool::Tables::AllocateString(const std::string& value) {
   std::string* result = new std::string(value);
-  strings_.push_back(result);
+  strings_.emplace_back(result);
   return result;
 }
 
 std::string* DescriptorPool::Tables::AllocateEmptyString() {
   std::string* result = new std::string();
-  strings_.push_back(result);
+  strings_.emplace_back(result);
   return result;
 }
 
 internal::once_flag* DescriptorPool::Tables::AllocateOnceDynamic() {
   internal::once_flag* result = new internal::once_flag();
-  once_dynamics_.push_back(result);
+  once_dynamics_.emplace_back(result);
   return result;
 }
 
 template <typename Type>
 Type* DescriptorPool::Tables::AllocateMessage(Type* /* dummy */) {
   Type* result = new Type;
-  messages_.push_back(result);
+  messages_.emplace_back(result);
   return result;
 }
 
 FileDescriptorTables* DescriptorPool::Tables::AllocateFileTables() {
   FileDescriptorTables* result = new FileDescriptorTables;
-  file_tables_.push_back(result);
+  file_tables_.emplace_back(result);
   return result;
 }
 
@@ -1230,9 +1211,8 @@ void* DescriptorPool::Tables::AllocateBytes(int size) {
   // allocators...
   if (size == 0) return nullptr;
 
-  void* result = operator new(size);
-  allocations_.push_back(result);
-  return result;
+  allocations_.emplace_back(new char[size]);
+  return allocations_.back().get();
 }
 
 void FileDescriptorTables::BuildLocationsByPath(
@@ -3709,7 +3689,14 @@ Symbol DescriptorBuilder::FindSymbolNotEnforcingDepsHelper(
 
 Symbol DescriptorBuilder::FindSymbolNotEnforcingDeps(const std::string& name,
                                                      bool build_it) {
-  return FindSymbolNotEnforcingDepsHelper(pool_, name, build_it);
+  Symbol result = FindSymbolNotEnforcingDepsHelper(pool_, name, build_it);
+  // Only find symbols which were defined in this file or one of its
+  // dependencies.
+  const FileDescriptor* file = result.GetFile();
+  if (file == file_ || dependencies_.count(file) > 0) {
+    unused_dependency_.erase(file);
+  }
+  return result;
 }
 
 Symbol DescriptorBuilder::FindSymbol(const std::string& name, bool build_it) {
@@ -3726,7 +3713,6 @@ Symbol DescriptorBuilder::FindSymbol(const std::string& name, bool build_it) {
   // dependencies.
   const FileDescriptor* file = result.GetFile();
   if (file == file_ || dependencies_.count(file) > 0) {
-    unused_dependency_.erase(file);
     return result;
   }
 
@@ -4722,7 +4708,7 @@ void DescriptorBuilder::BuildFieldOrExtension(const FieldDescriptorProto& proto,
              // `ErrorCollector` interface to extend them to handle the new
              // error location type properly.
              DescriptorPool::ErrorCollector::TYPE,
-             "Message extensions cannot have required fields.");
+             "The extension " + result->full_name() + " cannot be required.");
   }
 
   // Some of these may be filled in when cross-linking.
@@ -7132,35 +7118,13 @@ void DescriptorBuilder::LogUnusedDependency(const FileDescriptorProto& proto,
                                             const FileDescriptor* result) {
 
   if (!unused_dependency_.empty()) {
-    std::set<std::string> annotation_extensions;
-    annotation_extensions.insert("google.protobuf.MessageOptions");
-    annotation_extensions.insert("google.protobuf.FileOptions");
-    annotation_extensions.insert("google.protobuf.FieldOptions");
-    annotation_extensions.insert("google.protobuf.EnumOptions");
-    annotation_extensions.insert("google.protobuf.EnumValueOptions");
-    annotation_extensions.insert("google.protobuf.EnumValueOptions");
-    annotation_extensions.insert("google.protobuf.ServiceOptions");
-    annotation_extensions.insert("google.protobuf.MethodOptions");
-    annotation_extensions.insert("google.protobuf.StreamOptions");
     for (std::set<const FileDescriptor*>::const_iterator it =
              unused_dependency_.begin();
          it != unused_dependency_.end(); ++it) {
-      // Do not log warnings for proto files which extend annotations.
-      int i;
-      for (i = 0; i < (*it)->extension_count(); ++i) {
-        if (annotation_extensions.find(
-                (*it)->extension(i)->containing_type()->full_name()) !=
-            annotation_extensions.end()) {
-          break;
-        }
-      }
       // Log warnings for unused imported files.
-      if (i == (*it)->extension_count()) {
-        std::string error_message =
-            "Import " + (*it)->name() + " but not used.";
-        AddWarning((*it)->name(), proto, DescriptorPool::ErrorCollector::IMPORT,
-                   error_message);
-      }
+      std::string error_message = "Import " + (*it)->name() + " but not used.";
+      AddWarning((*it)->name(), proto, DescriptorPool::ErrorCollector::IMPORT,
+                 error_message);
     }
   }
 }

@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: typemaps_python.i f75774d688ed0de4605f4ac29b0a506ed1dc7332 2019-02-09 16:20:46 +0100 Even Rouault $
+ * $Id: typemaps_python.i 5ec508c7aced408147e898c945ffbe9075056d2a 2019-07-08 14:34:55 +0200 Even Rouault $
  *
  * Name:     typemaps_python.i
  * Project:  GDAL Python Interface
@@ -2066,7 +2066,14 @@ DecomposeSequenceOf4DCoordinates( PyObject *seq, int nCount, double *x, double *
 %#if PY_VERSION_HEX >= 0x02070000
   /* %typemap(argout) (void** pptr, size_t* pnsize, GDALDataType* pdatatype, int* preadonly)*/
   Py_buffer *buf=(Py_buffer*)malloc(sizeof(Py_buffer));
-  if (PyBuffer_FillInfo(buf,  obj0,  *($1), *($2), *($4), PyBUF_ND)) {
+
+  if (PyBuffer_FillInfo(buf,
+%#if SWIGVERSION >= 0x040000
+                        swig_obj[0],
+%#else
+                        obj0,
+%#endif
+                        *($1), *($2), *($4), PyBUF_ND)) {
     // error, handle
   }
   if( *($3) == GDT_Byte )

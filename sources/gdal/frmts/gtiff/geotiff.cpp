@@ -103,7 +103,7 @@
 #include "tifvsi.h"
 #include "xtiffio.h"
 
-CPL_CVSID("$Id: geotiff.cpp 1cde113e32e0072185c33a7d311d3c36c1a1b2a3 2019-06-18 17:02:14 +0200 Even Rouault $")
+CPL_CVSID("$Id: geotiff.cpp 2903daae5d5c04d581f5804d72e84691f2486bc1 2019-09-11 00:45:29 +0200 Even Rouault $")
 
 static bool bGlobalInExternalOvr = false;
 static std::mutex gMutexThreadPool;
@@ -15588,6 +15588,12 @@ TIFF *GTiffDataset::CreateLL( const char * pszFilename,
 
     if( bAppend )
     {
+        // This is a bit of a hack to cause (*tif->tif_cleanup)(tif); to be called.
+        // See https://trac.osgeo.org/gdal/ticket/2055
+        TIFFSetField( l_hTIFF, TIFFTAG_COMPRESSION, COMPRESSION_NONE );
+#if defined(TIFFLIB_VERSION) && TIFFLIB_VERSION >= 20051201  // 3.8.0
+        TIFFFreeDirectory( l_hTIFF );
+#endif
         TIFFCreateDirectory( l_hTIFF );
     }
 
@@ -18636,8 +18642,11 @@ void GTiffDataset::LoadEXIFMetadata()
                              nExifOffset, nInterOffset, nGPSOffset );
     }
 
-    oGTiffMDMD.SetMetadata( papszMetadata, "EXIF" );
-    CSLDestroy( papszMetadata );
+    if( papszMetadata )
+    {
+        oGTiffMDMD.SetMetadata( papszMetadata, "EXIF" );
+        CSLDestroy( papszMetadata );
+    }
 }
 
 /************************************************************************/

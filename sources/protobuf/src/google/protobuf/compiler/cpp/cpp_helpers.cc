@@ -44,7 +44,6 @@
 #include <google/protobuf/stubs/common.h>
 #include <google/protobuf/stubs/logging.h>
 #include <google/protobuf/descriptor.h>
-
 #include <google/protobuf/compiler/scc.h>
 #include <google/protobuf/io/printer.h>
 #include <google/protobuf/io/zero_copy_stream.h>
@@ -52,8 +51,6 @@
 #include <google/protobuf/wire_format_lite.h>
 #include <google/protobuf/stubs/strutil.h>
 #include <google/protobuf/stubs/substitute.h>
-
-
 #include <google/protobuf/stubs/hash.h>
 
 #include <google/protobuf/port_def.inc>
@@ -202,6 +199,10 @@ std::string IntTypeName(const Options& options, const std::string& type) {
 void SetIntVar(const Options& options, const std::string& type,
                std::map<std::string, std::string>* variables) {
   (*variables)[type] = IntTypeName(options, type);
+}
+
+bool HasInternalAccessors(const FieldOptions::CType ctype) {
+  return ctype == FieldOptions::STRING || ctype == FieldOptions::CORD;
 }
 
 }  // namespace
@@ -373,10 +374,20 @@ std::string DefaultInstanceName(const Descriptor* descriptor,
   return "_" + ClassName(descriptor, false) + "_default_instance_";
 }
 
+std::string DefaultInstancePtr(const Descriptor* descriptor,
+                               const Options& options) {
+  return DefaultInstanceName(descriptor, options) + "ptr_";
+}
+
 std::string QualifiedDefaultInstanceName(const Descriptor* descriptor,
                                          const Options& options) {
   return QualifiedFileLevelSymbol(
       descriptor->file(), DefaultInstanceName(descriptor, options), options);
+}
+
+std::string QualifiedDefaultInstancePtr(const Descriptor* descriptor,
+                                        const Options& options) {
+  return QualifiedDefaultInstanceName(descriptor, options) + "ptr_";
 }
 
 std::string DescriptorTableName(const FileDescriptor* file,
@@ -386,11 +397,6 @@ std::string DescriptorTableName(const FileDescriptor* file,
 
 std::string FileDllExport(const FileDescriptor* file, const Options& options) {
   return UniqueName("PROTOBUF_INTERNAL_EXPORT", file, options);
-}
-
-std::string ReferenceFunctionName(const Descriptor* descriptor,
-                                  const Options& options) {
-  return QualifiedClassName(descriptor, options) + "_ReferenceStrong";
 }
 
 std::string SuperClassName(const Descriptor* descriptor,
@@ -1125,7 +1131,7 @@ bool IsImplicitWeakField(const FieldDescriptor* field, const Options& options,
                          MessageSCCAnalyzer* scc_analyzer) {
   return UsingImplicitWeakFields(field->file(), options) &&
          field->type() == FieldDescriptor::TYPE_MESSAGE &&
-         !field->is_required() && !field->is_map() &&
+         !field->is_required() && !field->is_map() && !field->is_extension() &&
          field->containing_oneof() == nullptr &&
          !IsWellKnownMessage(field->message_type()->file()) &&
          field->message_type()->file()->name() !=
@@ -1479,7 +1485,8 @@ class ParseLoopGenerator {
         name = "StringPieceParser" + utf8;
         break;
     }
-    format_("ptr = $pi_ns$::Inline$1$($2$_$3$(), ptr, ctx$4$);\n", name,
+    format_("ptr = $pi_ns$::Inline$1$($2$$3$_$4$(), ptr, ctx$5$);\n", name,
+            HasInternalAccessors(ctype) ? "_internal_" : "",
             field->is_repeated() && !field->is_packable() ? "add" : "mutable",
             FieldName(field), field_name);
   }
@@ -1493,9 +1500,11 @@ class ParseLoopGenerator {
             StrCat(", ", QualifiedClassName(field->enum_type(), options_),
                          "_IsValid, &_internal_metadata_, ", field->number());
       }
-      format_("ptr = $pi_ns$::Packed$1$Parser(mutable_$2$(), ptr, ctx$3$);\n",
-              DeclaredTypeMethodName(field->type()), FieldName(field),
-              enum_validator);
+      format_(
+          "ptr = $pi_ns$::Packed$1$Parser(_internal_mutable_$2$(), ptr, "
+          "ctx$3$);\n",
+          DeclaredTypeMethodName(field->type()), FieldName(field),
+          enum_validator);
     } else {
       auto field_type = field->type();
       switch (field_type) {
@@ -1525,8 +1534,8 @@ class ParseLoopGenerator {
           } else if (IsLazy(field, options_)) {
             if (field->containing_oneof() != nullptr) {
               format_(
-                  "if (!has_$1$()) {\n"
-                  "  clear_$1$();\n"
+                  "if (!_internal_has_$1$()) {\n"
+                  "  clear_$2$();\n"
                   "  $2$_.$1$_ = ::$proto_ns$::Arena::CreateMessage<\n"
                   "      $pi_ns$::LazyField>("
                   "GetArenaNoVirtual());\n"
@@ -1551,10 +1560,9 @@ class ParseLoopGenerator {
                   FieldName(field));
             } else {
               format_(
-                  "ptr = ctx->ParseMessage("
-                  "CastToBase(&$1$_)->AddWeak(reinterpret_cast<const "
-                  "::$proto_ns$::MessageLite*>(&$2$::_$3$_default_instance_)), "
-                  "ptr);\n",
+                  "ptr = ctx->ParseMessage($1$_.AddWeak(reinterpret_cast<const "
+                  "::$proto_ns$::MessageLite*>($2$::_$3$_default_instance_ptr_)"
+                  "), ptr);\n",
                   FieldName(field), Namespace(field->message_type(), options_),
                   ClassName(field->message_type()));
             }
@@ -1564,7 +1572,7 @@ class ParseLoopGenerator {
                 " _$classname$_default_instance_.$2$_), ptr);\n",
                 field->number(), FieldName(field));
           } else {
-            format_("ptr = ctx->ParseMessage($1$_$2$(), ptr);\n",
+            format_("ptr = ctx->ParseMessage(_internal_$1$_$2$(), ptr);\n",
                     field->is_repeated() ? "add" : "mutable", FieldName(field));
           }
           break;
@@ -1608,7 +1616,8 @@ class ParseLoopGenerator {
                     QualifiedClassName(field->enum_type(), options_));
             format_.Indent();
           }
-          format_("$1$_$2$(static_cast<$3$>(val));\n", prefix, FieldName(field),
+          format_("_internal_$1$_$2$(static_cast<$3$>(val));\n", prefix,
+                  FieldName(field),
                   QualifiedClassName(field->enum_type(), options_));
           if (!HasPreservingUnknownEnumSemantics(field)) {
             format_.Outdent();
@@ -1628,7 +1637,7 @@ class ParseLoopGenerator {
           if (field->is_repeated() || field->containing_oneof()) {
             string prefix = field->is_repeated() ? "add" : "set";
             format_(
-                "$1$_$2$($pi_ns$::ReadVarint$3$(&ptr));\n"
+                "_internal_$1$_$2$($pi_ns$::ReadVarint$3$(&ptr));\n"
                 "CHK_(ptr);\n",
                 prefix, FieldName(field), zigzag);
           } else {
@@ -1650,7 +1659,7 @@ class ParseLoopGenerator {
         if (field->is_repeated() || field->containing_oneof()) {
           string prefix = field->is_repeated() ? "add" : "set";
           format_(
-              "$1$_$2$($pi_ns$::UnalignedLoad<$3$>(ptr));\n"
+              "_internal_$1$_$2$($pi_ns$::UnalignedLoad<$3$>(ptr));\n"
               "ptr += sizeof($3$);\n",
               prefix, FieldName(field), type);
         } else {
@@ -1671,7 +1680,7 @@ class ParseLoopGenerator {
       }
       case WireFormatLite::WIRETYPE_START_GROUP: {
         format_(
-            "ptr = ctx->ParseGroup($1$_$2$(), ptr, $3$);\n"
+            "ptr = ctx->ParseGroup(_internal_$1$_$2$(), ptr, $3$);\n"
             "CHK_(ptr);\n",
             field->is_repeated() ? "add" : "mutable", FieldName(field), tag);
         break;
@@ -1757,12 +1766,11 @@ class ParseLoopGenerator {
       }
       GenerateFieldBody(wiretype, field);
       if (is_repeat) {
-        string type = tag_size == 2 ? "uint16" : "uint8";
         format_.Outdent();
         format_(
             "  if (!ctx->DataAvailable(ptr)) break;\n"
-            "} while ($pi_ns$::UnalignedLoad<$1$>(ptr) == $2$);\n",
-            IntTypeName(options_, type), SmallVarintValue(tag));
+            "} while ($pi_ns$::ExpectTag<$1$>(ptr));\n",
+            tag);
       }
       format_.Outdent();
       if (fallback_tag) {

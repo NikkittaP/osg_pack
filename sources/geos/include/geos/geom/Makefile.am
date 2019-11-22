@@ -21,9 +21,11 @@ geos_HEADERS = \
     CoordinateSequenceFactory.h \
     CoordinateSequenceFilter.h \
     CoordinateSequence.h \
+    DefaultCoordinateSequenceFactory.h \
     Dimension.h \
     Envelope.h \
     Envelope.inl \
+    FixedSizeCoordinateSequence.h \
     GeometryCollection.h \
     GeometryCollection.inl \
     GeometryComponentFilter.h \
@@ -46,7 +48,4 @@ geos_HEADERS = \
     Polygon.h \
     PrecisionModel.h \
     PrecisionModel.inl \
-    Triangle.h \
-    Puntal.h \
-    Lineal.h \
-    Polygonal.h
+    Triangle.h

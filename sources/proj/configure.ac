@@ -1,7 +1,7 @@
 dnl Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.59)
-AC_INIT([PROJ], [6.2.0],
+AC_INIT([PROJ], [6.2.1],
         [https://github.com/OSGeo/PROJ/issues], proj, [https://proj.org])
 AC_CONFIG_MACRO_DIR([m4])
 AC_LANG(C)
@@ -307,7 +307,9 @@ dnl ---------------------------------------------------------------------------
 dnl Check for sqlite3 library and binary
 dnl ---------------------------------------------------------------------------
 
-PKG_CHECK_MODULES([SQLITE3], [sqlite3 >= 3.7])
+if test "x$SQLITE3_CFLAGS$SQLITE3_LIBS" = "x" ; then
+    PKG_CHECK_MODULES([SQLITE3], [sqlite3 >= 3.7])
+fi
 AC_SUBST(SQLITE3_CFLAGS,$SQLITE3_CFLAGS)
 AC_SUBST(SQLITE3_LIBS,$SQLITE3_LIBS)
 

@@ -10,23 +10,26 @@ AC_CANONICAL_SYSTEM
 
 AC_CONFIG_MACRO_DIR([macros])
 
-dnl -- JTS_PORT: the version of JTS this release is bound to
-JTS_PORT=1.13.0
-
-dnl -- Version info for the CAPI
-CAPI_INTERFACE_CURRENT=12
-CAPI_INTERFACE_REVISION=2
-CAPI_INTERFACE_AGE=11
-
 dnl
 dnl -- Release versions / C++ library SONAME will use these
 dnl -- encoding ABI break at every release
 dnl
-VERSION_MAJOR=3
-VERSION_MINOR=7
-VERSION_PATCH=2
+VERTXT=${srcdir}/Version.txt
+VERSION_MAJOR=`cat $VERTXT | awk -F= '/^GEOS_VERSION_MAJOR/ {print $2}'`
+VERSION_MINOR=`cat $VERTXT | awk -F= '/^GEOS_VERSION_MINOR/ {print $2}'`
+VERSION_PATCH=`cat $VERTXT | awk -F= '/^GEOS_VERSION_PATCH/ {print $2}'`
+PATCH_WORD=`cat $VERTXT    | awk -F= '/^GEOS_PATCH_WORD/ {print $2}'`
+
+VERSION_PATCH=${VERSION_PATCH}${PATCH_WORD}
 VERSION="$VERSION_MAJOR.$VERSION_MINOR.$VERSION_PATCH"
 VERSION_RELEASE=`echo "$VERSION" | sed -E 's/^([[0-9]+\.[0-9]+\.[0-9]+]).*$/\1/'`
+
+AC_MSG_CHECKING([for GEOS version])
+AC_MSG_RESULT(["$VERSION"])
+
+CAPI_INTERFACE_CURRENT=`cat $VERTXT  | awk -F= '/^CAPI_INTERFACE_CURRENT/ {print $2}'`
+CAPI_INTERFACE_REVISION=`cat $VERTXT | awk -F= '/^CAPI_INTERFACE_REVISION/ {print $2}'`
+CAPI_INTERFACE_AGE=`cat $VERTXT      | awk -F= '/^CAPI_INTERFACE_AGE/ {print $2}'`
 
 dnl CAPI_VERSION_MAJOR=$(($CAPI_INTERFACE_CURRENT-$CAPI_INTERFACE_AGE))
 dnl the following should be more portable
@@ -35,11 +38,23 @@ CAPI_VERSION_MINOR=$CAPI_INTERFACE_AGE
 CAPI_VERSION_PATCH=$CAPI_INTERFACE_REVISION
 CAPI_VERSION="$CAPI_VERSION_MAJOR.$CAPI_VERSION_MINOR.$CAPI_VERSION_PATCH"
 
+AC_MSG_CHECKING([for GEOS CAPI version])
+AC_MSG_RESULT(["$CAPI_VERSION"])
+
 AM_INIT_AUTOMAKE([geos], [$VERSION], [no-define])
 AM_MAINTAINER_MODE
-AC_CONFIG_HEADERS([include/config.h] [include/geos/platform.h])
+m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES])
+AC_CONFIG_HEADERS([include/config.h])
 AC_PROG_CC
 
+AC_CONFIG_LINKS([tools/astyle.sh:tools/astyle.sh])
+
+dnl -- JTS_PORT: the version of JTS this release is bound to
+dnl JTS_PORT=1.13.0
+JTS_PORT=`cat $VERTXT | awk -F= '/^JTS_PORT/ {print $2}'`
+
+DOXYGEN_LOGFILE=
+AC_SUBST(DOXYGEN_LOGFILE)
 
 dnl Hush warnings
 AC_DEFINE(USE_UNSTABLE_GEOS_CPP_API, [1], [We know])
@@ -374,9 +389,6 @@ AC_SUBST(VERSION_MAJOR)
 AC_SUBST(VERSION_MINOR)
 AC_SUBST(VERSION_PATCH)
 AC_SUBST(VERSION_RELEASE)
-AC_SUBST(INTERFACE_CURRENT)
-AC_SUBST(INTERFACE_REVISION)
-AC_SUBST(INTERFACE_AGE)
 AC_SUBST(JTS_PORT)
 AC_SUBST(CAPI_VERSION)
 AC_SUBST(CAPI_VERSION_MAJOR)
@@ -409,6 +421,7 @@ AC_OUTPUT([
 	include/geos/algorithm/Makefile
 	include/geos/algorithm/locate/Makefile
 	include/geos/algorithm/distance/Makefile
+	include/geos/algorithm/ttmath/Makefile
 	include/geos/geom/Makefile
 	include/geos/geom/prep/Makefile
 	include/geos/geom/util/Makefile
@@ -484,16 +497,18 @@ AC_OUTPUT([
 	tests/Makefile
 	tests/bigtest/Makefile
 	tests/unit/Makefile
-	tests/perf/Makefile
-	tests/perf/operation/Makefile
-	tests/perf/operation/buffer/Makefile
-	tests/perf/operation/predicate/Makefile
-	tests/perf/capi/Makefile
+	benchmarks/Makefile
+	benchmarks/algorithm/Makefile
+	benchmarks/operation/Makefile
+	benchmarks/operation/buffer/Makefile
+	benchmarks/operation/predicate/Makefile
+	benchmarks/capi/Makefile
 	tests/xmltester/Makefile
 	tests/geostest/Makefile
 	tests/thread/Makefile
 	tools/Makefile
 	tools/geos-config
+	tools/astyle/Makefile
 	])
 
 dnl -- echo "---------------------------------------"

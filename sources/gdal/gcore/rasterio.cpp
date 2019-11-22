@@ -55,7 +55,7 @@
 #include "memdataset.h"
 #include "vrtdataset.h"
 
-CPL_CVSID("$Id: rasterio.cpp 75fa98caf78b868d796556f7c378f7ec16aba697 2019-06-21 15:51:16 +0200 Even Rouault $")
+CPL_CVSID("$Id: rasterio.cpp 8401c49a4e8509353d01b3d832705fbc28313741 2019-10-18 19:36:34 +0200 battisti-engineer $")
 
 /************************************************************************/
 /*                             IRasterIO()                              */
@@ -1227,10 +1227,10 @@ CPLErr GDALRasterBand::RasterIOResampled(
                             {
                                 GDALCopyWords(
                                     &fNoDataValue, GDT_Float32, 0,
-                                    static_cast<GByte*>(pData) +
-                                    nLineSpace * (j + nDstYOff) +
-                                    nDstXOff * nPixelSpace,
-                                    eBufType, static_cast<int>(nPixelSpace),
+                                    static_cast<GByte*>(pDataMem) +
+                                    nLSMem * (j + nDstYOff) +
+                                    nDstXOff * nPSMem,
+                                    eDTMem, static_cast<int>(nPSMem),
                                     nDstXCount);
                             }
                             bSkipResample = true;

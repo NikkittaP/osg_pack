@@ -50,9 +50,9 @@ using type_info = ::type_info;
 #include <typeinfo>
 #endif
 
+#include <type_traits>
 #include <google/protobuf/arena_impl.h>
 #include <google/protobuf/port.h>
-#include <type_traits>
 
 #include <google/protobuf/port_def.inc>
 
@@ -75,6 +75,8 @@ namespace protobuf {
 class Arena;    // defined below
 class Message;  // defined in message.h
 class MessageLite;
+template <typename Key, typename T>
+class Map;
 
 namespace arena_metrics {
 
@@ -688,6 +690,7 @@ class PROTOBUF_EXPORT alignas(8) Arena final {
                                         !has_get_arena<T>::value,
                                     int>::type = 0>
   PROTOBUF_ALWAYS_INLINE static Arena* GetArenaInternal(const T* value) {
+    (void)value;
     return nullptr;
   }
 
